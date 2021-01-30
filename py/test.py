@@ -2,6 +2,9 @@ class TestClass:
     def __init__(self, list, name):
         self.list = list
         self.name = name
+
+    def addToList():
+        self.list.append(2)
     
 
 def func1():
@@ -27,4 +30,5 @@ def func5():
     listStrings = ["a","b","c","d","e"]
     return listStrings
 
+print("Hello World")
 # test = TestClass()
