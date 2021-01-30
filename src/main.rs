@@ -1,15 +1,21 @@
-#![allow(unused)]
-#![allow(dead_code)]
+#[actix_rt::main] 
+async fn main() {
 
-mod state_machine;
-use pyo3::{
-    prelude::*,
-    types::{
-        IntoPyDict,
-        PyModule
-    },
-};
-use std::fs;
+}
+
+
+// #![allow(unused)]
+// #![allow(dead_code)]
+
+// mod state_machine;
+// use pyo3::{
+//     prelude::*,
+//     types::{
+//         IntoPyDict,
+//         PyModule
+//     },
+// };
+// use std::fs;
 
 // mod python;
 
@@ -30,10 +36,6 @@ use std::fs;
 //     fn a() -> () {}
 //     fn b() -> () {}
 // }
-#[actix_rt::main] 
-async fn main() {
-
-}
 
 // fn main() -> PyResult<()> {
 //     // let mut machine_test = state_machine::Machine::new();
