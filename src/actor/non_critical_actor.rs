@@ -1,6 +1,6 @@
 use actix::prelude::*;
 
-struct NonCriticalActor {
+pub(crate) struct NonCriticalActor {
 }
 
 impl Actor for NonCriticalActor {

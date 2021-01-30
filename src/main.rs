@@ -9,22 +9,28 @@
 //     },
 // };
 use std::fs;
+use actix::prelude::*;
 
 mod state_machine;
 mod actor;
-use actor::monitoring_actor::*;
-use actix::prelude::*;
+
+use actor::{
+    monitoring_actor::MonitorActor,
+    non_critical_actor::NonCriticalActor,
+    ping::Ping,
+};
 
 #[actix_rt::main] 
 async fn main() {
 
     let monitor_actor = MonitorActor.start();
+    
+    let result = monitor_actor.send(Ping).await;
 
+    // let result = monitor_actor.send(Read).await;
 
-    let result = monitor_actor.send(Read).await;
-
-    assert!(result.unwrap() == true);
-    println!("{}", result.unwrap());
+    // assert!(result.unwrap() == true);
+    // println!("{}", result.unwrap());
 
 }
 
