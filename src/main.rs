@@ -1,13 +1,6 @@
-#[actix_rt::main] 
-async fn main() {
+#![allow(unused)]
+#![allow(dead_code)]
 
-}
-
-
-// #![allow(unused)]
-// #![allow(dead_code)]
-
-// mod state_machine;
 // use pyo3::{
 //     prelude::*,
 //     types::{
@@ -15,10 +8,17 @@ async fn main() {
 //         PyModule
 //     },
 // };
-// use std::fs;
+use std::fs;
+
+mod state_machine;
+mod actor;
+
+#[actix_rt::main] 
+async fn main() {
+
+}
 
 // mod python;
-
 
 // struct Safety;
 // struct Active;
