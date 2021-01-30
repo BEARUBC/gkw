@@ -1,7 +1,16 @@
-use actix::prelude::*;
+use actix::{
+    prelude::*,
+    dev::{
+        MessageResponse,
+        ResponseChannel
+    },
+};
 
-pub(crate) struct Ping;
+use super::ping_response::PingResponse;
 
-impl Message for Ping {
-    type Result = Result<bool, std::io::Error>;
+#[derive(Message)]
+#[rtype(result = "PingResponse")]
+pub(crate) enum Ping {
+    A,
+    B,
 }

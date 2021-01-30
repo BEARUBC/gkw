@@ -1,21 +1,34 @@
 use actix::prelude::*;
 
-use crate::actor::ping::Ping;
-
-// #[derive(Message)]
-// #[rtype(result = "bool")]
-// pub(crate) struct Read;
+use super::{
+    ping::Ping,
+    ping_response::PingResponse,
+};
 
 pub(crate) struct CriticalActor;
 
+impl CriticalActor {
+    pub fn new() -> Self {
+        return CriticalActor;
+    }
+}
+
 impl Actor for CriticalActor {
     type Context = Context<Self>;
+
+    fn started(&mut self, ctx: &mut Context<Self>) {
+        println!("NonCriticalActor is alive");
+    }
+ 
+    fn stopped(&mut self, ctx: &mut Context<Self>) {
+        println!("Actor is stopped");
+    }
 }
 
 impl Handler<Ping> for CriticalActor {
-    type Result = Result<bool, std::io::Error>;
+    type Result = PingResponse;
 
     fn handle(&mut self, msg: Ping, _ctx: &mut Context<Self>) -> Self::Result {
-        return Ok(true);
+        return PingResponse::RB;
     }
 }

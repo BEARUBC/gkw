@@ -28,8 +28,8 @@ async fn main() {
     let critical_actor = CriticalActor.start();
     let non_critical_actor = NonCriticalActor.start();
 
-    let result_non_crit = non_critical_actor.send(Ping).await;
-    let result = critical_actor.send(Ping).await;
+    let result_non_crit = non_critical_actor.send(Ping::A).await;
+    let result = critical_actor.send(Ping::B).await;
 
 
     // let result = monitor_actor.send(Read).await;
