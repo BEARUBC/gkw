@@ -2,6 +2,7 @@
 #![allow(dead_code)]
 
 mod state_machine;
+
 use pyo3::{
     prelude::*,
     types::{
@@ -38,15 +39,14 @@ fn main() -> PyResult<()> {
     // println!("{:?}", machine_test);
 
     return Python::with_gil(|py| {
-        let filename: &str = "py/test.py";
-        let contents: String = fs::read_to_string(filename).expect("error reading the python file");
+        //let filename: &str = "py/test.py";
+        //let contents: String = fs::read_to_string(filename).expect("error reading the python file");
 
-        let test = PyModule::from_code(py, &contents, "test.py", "test")?;
+        //let test = PyModule::from_code(py, &contents, "test.py", "test")?;
 
         // test.call0("my_function")?;
         // let test2: f64 = test.call0("my_function2")?.extract()?;
         // let test3: f64 = test.call1("my_function3", (3,))?.extract()?;
-
         // println!("{}, {}", test2, test3);
 
         // let relu_result: f64 = activators.call1("relu", (-1.0,))?.extract()?;
@@ -57,7 +57,15 @@ fn main() -> PyResult<()> {
         //     .call("leaky_relu", (-1.0,), Some(kwargs))?
         //     .extract()?;
         // assert_eq!(lrelu_result, -0.2);
-        println!("asdf");
+        //println!("asdf");
+        //return Ok(());
+
+        let filename: &str = "py/maestro.py";
+        let contents: String = fs::read_to_string(filename).expect("error reading maestro file");
+        let test = PyModule::from_code(py, &contents, "maestro.py", "maestro")?;
+
+        let test1: f64 = test.call1("getPositionFn", (5,))?.extract()?;
+        println!("{}", test1);
         return Ok(());
     });
 }
