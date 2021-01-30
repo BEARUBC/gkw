@@ -44,6 +44,10 @@ fn main() -> PyResult<()> {
 
         //let test = PyModule::from_code(py, &contents, "test.py", "test")?;
 
+        // test.call0("func1")?;
+
+        let ret_val: i32 = test.call0("func2")?.extract()?;
+
         // test.call0("my_function")?;
         // let test2: f64 = test.call0("my_function2")?.extract()?;
         // let test3: f64 = test.call1("my_function3", (3,))?.extract()?;
@@ -57,15 +61,7 @@ fn main() -> PyResult<()> {
         //     .call("leaky_relu", (-1.0,), Some(kwargs))?
         //     .extract()?;
         // assert_eq!(lrelu_result, -0.2);
-        //println!("asdf");
-        //return Ok(());
-
-        let filename: &str = "py/maestro.py";
-        let contents: String = fs::read_to_string(filename).expect("error reading maestro file");
-        let test = PyModule::from_code(py, &contents, "maestro.py", "maestro")?;
-
-        let test1: f64 = test.call1("getPositionFn", (5,))?.extract()?;
-        println!("{}", test1);
+        println!("{}", ret_val);
         return Ok(());
     });
 }
