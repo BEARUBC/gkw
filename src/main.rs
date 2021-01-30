@@ -12,9 +12,19 @@ use std::fs;
 
 mod state_machine;
 mod actor;
+use actor::monitoring_actor::*;
+use actix::prelude::*;
 
 #[actix_rt::main] 
 async fn main() {
+
+    let monitor_actor = MonitorActor.start();
+
+
+    let result = monitor_actor.send(Read).await;
+
+    assert!(result.unwrap() == true);
+    println!("{}", result.unwrap());
 
 }
 

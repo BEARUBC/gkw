@@ -2,23 +2,20 @@ use actix::prelude::*;
 
 
 #[derive(Message)]
-#[rtype(result = "usize")]
-struct Ping(usize);
+#[rtype(result = "bool")]
+pub(crate) struct Read;
 
-struct MonitorActor {
-    count: usize,
-}
+pub(crate) struct MonitorActor;
 
 impl Actor for MonitorActor {
     type Context = Context<Self>;
 }
 
-impl Handler<Ping> for MonitorActor {
-    type Result = usize;
+impl Handler<Read> for MonitorActor {
+    type Result = bool;
 
-    fn handle(&mut self, msg: Ping, _ctx: &mut Context<Self>) -> Self::Result {
-        self.count += msg.0;
+    fn handle(&mut self, msg: Read, _ctx: &mut Context<Self>) -> Self::Result {
 
-        self.count
+        true
     }
 }
