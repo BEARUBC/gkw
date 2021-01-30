@@ -1,13 +1,6 @@
-#[actix_rt::main] 
-async fn main() {
+#![allow(unused)]
+#![allow(dead_code)]
 
-}
-
-
-// #![allow(unused)]
-// #![allow(dead_code)]
-
-// mod state_machine;
 // use pyo3::{
 //     prelude::*,
 //     types::{
@@ -15,10 +8,27 @@ async fn main() {
 //         PyModule
 //     },
 // };
-// use std::fs;
+use std::fs;
+
+mod state_machine;
+mod actor;
+use actor::monitoring_actor::*;
+use actix::prelude::*;
+
+#[actix_rt::main] 
+async fn main() {
+
+    let monitor_actor = MonitorActor.start();
+
+
+    let result = monitor_actor.send(Read).await;
+
+    assert!(result.unwrap() == true);
+    println!("{}", result.unwrap());
+
+}
 
 // mod python;
-
 
 // struct Safety;
 // struct Active;

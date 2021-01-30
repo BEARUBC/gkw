@@ -11,6 +11,6 @@ tokio = { version = "1.0.2", features = ["full"] }
 actix = "0.10.0"
 actix-rt = "1.1"
 
-[dependencies.pyo3]
-version = "0.13.1"
-features = ["auto-initialize"]
+# [dependencies.pyo3]
+# version = "0.13.1"
+# features = ["auto-initialize"]
