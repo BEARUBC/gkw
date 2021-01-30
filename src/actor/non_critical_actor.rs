@@ -1,7 +1,6 @@
 use actix::prelude::*;
 
 struct NonCriticalActor {
-    count: usize,
 }
 
 impl Actor for NonCriticalActor {
