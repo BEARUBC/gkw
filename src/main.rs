@@ -2,6 +2,9 @@
 #![allow(dead_code)]
 
 mod state_machine;
+mod actor {
+    pub mod monitoring_actor;
+}
 
 use pyo3::{
     prelude::*,
@@ -46,7 +49,7 @@ fn main() -> PyResult<()> {
 
         // test.call0("func1")?;
 
-        let ret_val: i32 = test.call0("func2")?.extract()?;
+        //let ret_val: i32 = test.call0("func2")?.extract()?;
 
         // test.call0("my_function")?;
         // let test2: f64 = test.call0("my_function2")?.extract()?;
@@ -61,7 +64,7 @@ fn main() -> PyResult<()> {
         //     .call("leaky_relu", (-1.0,), Some(kwargs))?
         //     .extract()?;
         // assert_eq!(lrelu_result, -0.2);
-        println!("{}", ret_val);
+        //println!("{}", ret_val);
         return Ok(());
     });
 }
