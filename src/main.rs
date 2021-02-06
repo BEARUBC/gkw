@@ -10,21 +10,20 @@
 // };
 use std::fs;
 use actix::prelude::*;
-
-mod state_machine;
-mod actor;
-mod stepper;
-
 use actor::{
     critical_actor::CriticalActor,
     non_critical_actor::NonCriticalActor,
     ping::Ping,
 };
+use rppal::i2c::I2c;
+
+mod state_machine;
+mod actor;
+mod stepper;
 /*use stepper::{
     i2c_interface::I2C,
 };*/
-use crate::stepper::i2c_interface::create_i2c;
-use rppal::i2c::I2c;
+use stepper::i2c_interface::I2C;
 
 //use crate::actor::critical_actor::CriticalActor;
 
@@ -38,11 +37,14 @@ async fn main() {
     let result = critical_actor.send(Ping::B).await;
 
     // this block of code will likely give errors. Need to test by building first.
-    let mut i2c:I2c = create_i2c().I2c;
-    let mut read_buffer:Vec<u8> = vec![];
-    i2c::read(&mut read_buffer);
-    println!(read_buffer);
-    let mut write_buffer:Vec<u8> = vec![];
+    // let mut i2c: I2c = create_i2c().i2c;
+    let mut i2c: I2c = I2C::new().i2c;
+    // let mut read_buffer: Vec<u8> = vec![];
+    let mut buffer: &mut[u8; 1usize] = &mut[0x0u8];
+
+    i2c.read(buffer);
+    // println!(read_buffer);
+    // let mut write_buffer:Vec<u8> = vec![];
     //i2c::write(&mut write_buffer);
 
 
