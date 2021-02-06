@@ -13,12 +13,18 @@ use actix::prelude::*;
 
 mod state_machine;
 mod actor;
+mod stepper;
 
 use actor::{
     critical_actor::CriticalActor,
     non_critical_actor::NonCriticalActor,
     ping::Ping,
 };
+/*use stepper::{
+    i2c_interface::I2C,
+};*/
+use crate::stepper::i2c_interface::create_i2c;
+use rppal::i2c::I2c;
 
 //use crate::actor::critical_actor::CriticalActor;
 
@@ -30,6 +36,14 @@ async fn main() {
 
     let result_non_crit = non_critical_actor.send(Ping::A).await;
     let result = critical_actor.send(Ping::B).await;
+
+    // this block of code will likely give errors. Need to test by building first.
+    let mut i2c:I2c = create_i2c().I2c;
+    let mut read_buffer:Vec<u8> = vec![];
+    i2c::read(&mut read_buffer);
+    println!(read_buffer);
+    let mut write_buffer:Vec<u8> = vec![];
+    //i2c::write(&mut write_buffer);
 
 
     // let result = monitor_actor.send(Read).await;
