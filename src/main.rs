@@ -40,9 +40,10 @@ async fn main() {
     // let mut i2c: I2c = create_i2c().i2c;
     let mut i2c: I2c = I2C::new().i2c;
     // let mut read_buffer: Vec<u8> = vec![];
-    let mut buffer: &mut[u8; 1usize] = &mut[0x0u8];
+    let mut buffer: [u8; 1024] = [0x0u8; 1024];
 
-    i2c.read(buffer);
+    i2c.read(&mut buffer);
+
     // println!(read_buffer);
     // let mut write_buffer:Vec<u8> = vec![];
     //i2c::write(&mut write_buffer);
