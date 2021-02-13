@@ -13,13 +13,14 @@ use actix::prelude::*;
 
 mod state_machine;
 mod actor;
-mod json;
+mod json_io;
 
 use actor::{
     critical_actor::CriticalActor,
     non_critical_actor::NonCriticalActor,
     ping::Ping,
 };
+use json_io::json_interpretor::instance;
 
 //use crate::actor::critical_actor::CriticalActor;
 
@@ -32,6 +33,7 @@ async fn main() {
     let result_non_crit = non_critical_actor.send(Ping::A).await;
     let result = critical_actor.send(Ping::B).await;
 
+    instance();
 
     // let result = monitor_actor.send(Read).await;
 
