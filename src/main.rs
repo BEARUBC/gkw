@@ -42,7 +42,7 @@ async fn main() {
     // let mut read_buffer: Vec<u8> = vec![];
     let mut buffer: [u8; 1024] = [0x0u8; 1024];
 
-    i2c.read(&mut buffer);
+    let read_bits = i2c.read(&mut buffer);
 
     // println!(read_buffer);
     // let mut write_buffer:Vec<u8> = vec![];

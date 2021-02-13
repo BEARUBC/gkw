@@ -3,7 +3,7 @@ class TestClass:
         self.list = list
         self.name = name
 
-    def addToList():
+    def addToList(self):
         self.list.append(2)
     
 

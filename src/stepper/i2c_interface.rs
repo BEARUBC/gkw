@@ -19,6 +19,8 @@ impl I2C {
         }
     }
     pub(crate) fn read_from_device(self: &mut Self) {
+        self.read_buffer[0] = 1; // START bit
+
         self.i2c.read(&mut self.read_buffer);
     }
 
