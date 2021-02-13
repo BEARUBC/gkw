@@ -22,6 +22,7 @@ use actor::{
 };
 use json_io::json_interpretor::instance;
 use crate::json_io::file_io::read_from_file;
+use crate::json_io::json_interpretor::write_json;
 
 //use crate::actor::critical_actor::CriticalActor;
 
@@ -36,7 +37,9 @@ async fn main() {
 
     read_from_file("input.json");
 
-    instance();
+    //instance();
+    write_json("input.json");
+    //instance();
 
     // let result = monitor_actor.send(Read).await;
 

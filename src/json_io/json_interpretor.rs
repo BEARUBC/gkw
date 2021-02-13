@@ -1,6 +1,8 @@
 use serde_json::json;
 use crate::read_from_file;
 
+use super::file_io::write_to_file;
+
 pub fn instance() {
     let ex = json!({
         "x": 3,
@@ -9,8 +11,18 @@ pub fn instance() {
     });
 
     let test = json!(read_from_file("input.json"));
-
     println!("{}", test.to_string());
+    //println!("{}", ex.to_string());
+}
+
+pub fn write_json(filename: &str){
+    let ex = json!({
+        "x": 3,
+        "y": "a string",
+        "z": [3,4,5],
+    });
+
+    write_to_file(&ex.to_string(), filename)
 }
 
 // use serde_json::{Result,Value};
