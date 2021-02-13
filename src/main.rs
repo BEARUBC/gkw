@@ -21,6 +21,7 @@ use actor::{
     ping::Ping,
 };
 use json_io::json_interpretor::instance;
+use crate::json_io::file_io::read_from_file;
 
 //use crate::actor::critical_actor::CriticalActor;
 
@@ -32,6 +33,8 @@ async fn main() {
 
     let result_non_crit = non_critical_actor.send(Ping::A).await;
     let result = critical_actor.send(Ping::B).await;
+
+    read_from_file("input.json");
 
     instance();
 

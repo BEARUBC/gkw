@@ -1,4 +1,5 @@
 use serde_json::json;
+use crate::read_from_file;
 
 pub fn instance() {
     let ex = json!({
@@ -7,7 +8,9 @@ pub fn instance() {
         "z": [3,4,5],
     });
 
-    println!("{}", ex.to_string());
+    let test = json!(read_from_file("input.json"));
+
+    println!("{}", test.to_string());
 }
 
 // use serde_json::{Result,Value};
