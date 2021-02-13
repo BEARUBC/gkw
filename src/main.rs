@@ -13,6 +13,7 @@ use actix::prelude::*;
 
 mod state_machine;
 mod actor;
+mod json;
 
 use actor::{
     critical_actor::CriticalActor,
