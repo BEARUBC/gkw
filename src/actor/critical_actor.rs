@@ -17,11 +17,11 @@ impl Actor for CriticalActor {
     type Context = Context<Self>;
 
     fn started(&mut self, ctx: &mut Context<Self>) {
-        println!("NonCriticalActor is alive");
+        println!("critical actor has started");
     }
  
     fn stopped(&mut self, ctx: &mut Context<Self>) {
-        println!("Actor is stopped");
+        println!("critical actor has stopped");
     }
 }
 

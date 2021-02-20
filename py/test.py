@@ -3,10 +3,6 @@ class TestClass:
         self.list = list
         self.name = name
 
-    def addToList():
-        self.list.append(2)
-    
-
 def func1():
     print("func1 print something")
 

@@ -14,7 +14,7 @@ impl<A, M> MessageResponse<A, M> for PingResponse where
     A: Actor,
     M: Message<Result = PingResponse>,
 {
-    fn handle<R: ResponseChannel<M>>(self, _: &mut A::Context, tx: Option<R>) {
+    fn handle<R: ResponseChannel<M>>(self: Self, _: &mut A::Context, tx: Option<R>) -> () {
         if let Some(tx) = tx {
             tx.send(self);
         }

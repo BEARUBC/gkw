@@ -1,6 +1,5 @@
 use actix::prelude::*;
 
-// use crate::actor::ping::Ping;
 use super::{
     ping::Ping,
     ping_response::PingResponse,
@@ -18,11 +17,11 @@ impl Actor for NonCriticalActor {
     type Context = Context<Self>;
 
     fn started(&mut self, ctx: &mut Context<Self>) {
-        println!("NonCriticalActor is alive");
+        println!("non-critical actor has started");
     }
  
     fn stopped(&mut self, ctx: &mut Context<Self>) {
-        println!("Actor is stopped");
+        println!("non-critical actor has stopped");
     }
 }
 
