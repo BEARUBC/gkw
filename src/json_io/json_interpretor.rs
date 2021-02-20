@@ -1,21 +1,21 @@
-use serde_json::json;
-// use crate::read_from_file;
-use crate::json_io_0::file_io::*;
+// use serde_json::json;
+// // use crate::read_from_file;
+// use crate::json_io_0::file_io::*;
 
-use super::file_io::write_to_file;
-use serde_json::{Result, Value};
+// use super::file_io::write_to_file;
+// use serde_json::{Result, Value};
 
 
 
-pub fn write_json(filename: &str){
-    let ex = json!({
-        "x": 34,
-        "y": "a string",
-        "z": [3,4,5],
-    });
+// pub fn write_json(filename: &str){
+//     let ex = json!({
+//         "x": 34,
+//         "y": "a string",
+//         "z": [3,4,5],
+//     });
 
-    write_to_file(&ex.to_string(), filename)
-}
+//     write_to_file(&ex.to_string(), filename)
+// }
 
 // use serde_json::{Result,Value};
 
