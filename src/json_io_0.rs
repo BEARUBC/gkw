@@ -19,11 +19,11 @@ pub fn read_from_output() -> std::io::Result<String> {
 }
 
 pub fn write_to_input(content: &[u8]) -> std::io::Result<()> {
-    match File::open("./py_io/input.json") {
+    match File::create("./py_io/input.json") {
         Ok(mut file) => {
-            match file.write(content) {
-                Ok(_) => { return Ok(()); },
-                Err(err) => { return Err(err); },
+            match file.write_all(content) {
+                Ok(()) => { return Ok(()); },
+                Err(err) => { return Err(err); }
             }
         },
         Err(err) => { return Err(err); },
@@ -44,14 +44,12 @@ mod json_io_test {
         });
 
         let j = ex.to_string();
-
         let x = j.as_bytes();
-
         let result = write_to_input(x);
 
         match result{
-            Ok(()) => {},
-            Err(e) => {panic!();},
+            Ok(()) => (),
+            Err(e) => { panic!(); },
         }
     }
 
