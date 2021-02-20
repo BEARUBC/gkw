@@ -22,7 +22,7 @@ pub fn deserial_json() -> Result<()>{
 
 pub fn instance() {
     let ex = json!({
-        "x": 3,
+        "x": 34,
         "y": "a string",
         "z": [3,4,5],
     });
@@ -37,7 +37,7 @@ pub fn instance() {
 
 pub fn write_json(filename: &str){
     let ex = json!({
-        "x": 3,
+        "x": 34,
         "y": "a string",
         "z": [3,4,5],
     });

@@ -41,6 +41,11 @@ async fn main() {
     //instance();
     //write_json("input.json");
     //instance();
+    //read_from_file("input.json");
+
+    instance();
+    write_json("input.json");
+    instance();
 
     // let result = monitor_actor.send(Read).await;
 
