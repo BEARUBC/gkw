@@ -10,20 +10,19 @@
 // };
 use std::fs;
 use actix::prelude::*;
-
-mod state_machine;
-mod actor;
-mod json_io;
-
 use actor::{
     critical_actor::CriticalActor,
     non_critical_actor::NonCriticalActor,
     ping::Ping,
 };
-use json_io::json_interpretor::instance;
-use crate::json_io::file_io::read_from_file;
-use crate::json_io::json_interpretor::write_json;
 
+mod actor;
+mod state_machine;
+mod json_io_0;
+
+// use crate::json_io_0::json_interpretor::instance;
+// use crate::json_io_0::file_io::read_from_output;
+// use crate::json_io_0::json_interpretor::write_json;
 //use crate::actor::critical_actor::CriticalActor;
 
 #[actix_rt::main] 
@@ -37,9 +36,9 @@ async fn main() {
 
     //read_from_file("input.json");
 
-    instance();
-    write_json("input.json");
-    instance();
+    // instance();
+    // write_json("input.json");
+    // instance();
 
     // let result = monitor_actor.send(Read).await;
 
