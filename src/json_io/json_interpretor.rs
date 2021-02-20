@@ -2,6 +2,23 @@ use serde_json::json;
 use crate::read_from_file;
 
 use super::file_io::write_to_file;
+use serde_json::{Result, Value};
+
+pub fn deserial_json() -> Result<()>{
+    let json_object = read_from_file("input.json");
+    
+    let j: Value = serde_json::from_str(&json_object)?;
+
+    write_to_file(&j.to_string(), "output.json");
+
+    Ok(())
+}
+
+// pub fn testJson() {
+//     let x = deserial_json();
+    
+//     write_to_file(&x.to_string(), "output.json")
+// }
 
 pub fn instance() {
     let ex = json!({
@@ -10,8 +27,11 @@ pub fn instance() {
         "z": [3,4,5],
     });
 
-    let test = json!(read_from_file("input.json"));
-    println!("{}", test.to_string());
+    let json_object = json!(read_from_file("input.json"));
+
+    let j = serde_json::to_string(&json_object);
+
+    //println!("{}", test.to_string());
     //println!("{}", ex.to_string());
 }
 
