@@ -3,7 +3,7 @@ name = "rust-systems"
 version = "0.1.0"
 authors = ["nathan-n-poon <nathannpoon@gmail.com>", "raunakab <rabhagat31@gmail.com>", "KelvinKCLee <leekachunkelvin@gmail.com>", "bzhou64 <billzhou64@gmail.com>", "panchalmaharshi8 <panchalmaharshi8@gmail.com>"]
 edition = "2018"
-license = "MIT"
+license = "Apache License 2.0"
 description = "The main, asynchronous, non-blocking IO, event-loop for the systems software for GRASP, owned by UBC Bionics"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
