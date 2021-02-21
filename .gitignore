@@ -1,2 +1,6 @@
+# Cargo dependencies
 /target
 Cargo.lock
+
+# Python I/O
+/py_io
