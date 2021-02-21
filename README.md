@@ -3,10 +3,9 @@ This is the main asynchronous, non-blocking event loop running the system proces
 
 ## Project Directory
     root
-        |-> py
-            |-> (Python analytics software)
-        |-> py_io
-            |-> (intermediary buffers for communications/data-passing with the Python analytics software)
+        |-> hooks (git hooks, sym-linked from .git/hooks/)
+        |-> py (Python analytics software)
+        |-> py_io (intermediary buffers for communications/data-passing with the Python analytics software)
         |-> src
             |-> actor
                 |-> critical actor
