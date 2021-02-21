@@ -8,12 +8,15 @@
 //         PyModule
 //     },
 // };
-use std::fs;
 use actix::prelude::*;
 use actor::{
     critical_actor::CriticalActor,
     non_critical_actor::NonCriticalActor,
     ping::Ping,
+};
+use std::{
+    fs,
+    fs::File,
 };
 
 mod actor;
@@ -23,16 +26,25 @@ mod json_io;
 // use crate::json_io_0::json_interpretor::instance;
 // use crate::json_io_0::file_io::read_from_output;
 // use crate::json_io_0::json_interpretor::write_json;
-//use crate::actor::critical_actor::CriticalActor;
+// use crate::actor::critical_actor::CriticalActor;
+
+fn create_file(file_name: &str) -> () {
+    match File::create(format!("./py_io/{}", file_name)) {
+        Ok(_) => (),
+        Err(err) => panic!(),
+    };
+}
 
 #[actix_rt::main] 
 async fn main() {
+    create_file("input.json");
+    create_file("output.json");
 
-    let critical_actor = CriticalActor.start();
-    let non_critical_actor = NonCriticalActor.start();
+    // let critical_actor = CriticalActor.start();
+    // let non_critical_actor = NonCriticalActor.start();
 
-    let result_non_crit = non_critical_actor.send(Ping::A).await;
-    let result = critical_actor.send(Ping::B).await;
+    // let result_non_crit = non_critical_actor.send(Ping::A).await;
+    // let result = critical_actor.send(Ping::B).await;
 
     // deserial_json();
     //read_from_file("input.json");
