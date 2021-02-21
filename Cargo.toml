@@ -1,18 +1,27 @@
 [package]
 name = "rust-systems"
 version = "0.1.0"
-authors = ["rbhagat"]
+authors = ["nathan-n-poon <nathannpoon@gmail.com>", "raunakab <rabhagat31@gmail.com>", "KelvinKCLee <leekachunkelvin@gmail.com>", "bzhou64 <billzhou64@gmail.com>", "panchalmaharshi8 <panchalmaharshi8@gmail.com>"]
 edition = "2018"
+license = "MIT"
+description = "The main, asynchronous, non-blocking IO, event-loop for the systems software for GRASP, owned by UBC Bionics"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+
+# ASYNC RUNTIME:
 # tokio = { version = "1.0.2", features = ["full"] }
 actix = "0.10.0"
 actix-rt = "2.0.2"
+
+# MICRO-MAESTRO INTERFACE:
 #raestro = "0.1.0"
+
+# JSON SER. AND DESER.:
 serde_json = "1.0"
 
+# PYTHON INTERPRETER BINDINGS:
 # [dependencies.pyo3]
 # version = "0.13.1"
 # features = ["auto-initialize"]
