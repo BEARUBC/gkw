@@ -4,3 +4,4 @@ This directory contains:
 * output.json
 
 These files are used in communications with the Python analytics.
+They should not be tracked with VC because they should be used as buffers only.
