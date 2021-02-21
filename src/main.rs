@@ -36,8 +36,8 @@ fn create_file(file_name: &str) -> () {
 }
 
 #[actix_rt::main] 
-async fn main() {
-    create_file("input.json");
+async fn main() -> () {
+    create_file('input.json');
     create_file("output.json");
 
     // let critical_actor = CriticalActor.start();
