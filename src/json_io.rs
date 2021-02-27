@@ -9,8 +9,9 @@ use std::{
 use serde_json::{
     Result,
     Value,
-    json
+    json,
 };
+
 
 pub fn read_from_output() -> std::io::Result<Value> {
     let mut string_buffer = String::new();
@@ -48,8 +49,9 @@ pub fn write_to_input(json: Value) -> std::io::Result<()> {
 
 #[cfg(test)]
 mod json_io_test {
-    use serde_json::{Result, Value, json};
+    use serde_json::{Result, Value, json,};
     use super::*;
+    use serde::{Deserialize, Serialize};
 
     #[test]
     fn simple_write() -> () {
@@ -90,5 +92,41 @@ mod json_io_test {
             Ok(json) => (),
             Err(err) => { panic!(); }
         };
+    }
+
+    #[derive(Serialize, Deserialize)]
+    struct Emg{
+        strength: String,
+        other_fields: String
+    }
+    #[derive(Serialize, Deserialize)]
+    struct Test {
+        x: Emg,
+        other_projects: String,
+    }
+
+    #[test]
+    fn test_struct() -> () {
+        let data= r#"
+        {
+            "x": "{
+                "strength": "strong",
+                "other_fields": "other"
+            }",
+            "other_projects": "projects"
+        }"#;
+       
+        let test: Test = serde_json::from_str(data).expect("Json error");
+        
+        let e= Emg{
+            strength: "strong".to_string(),
+            other_fields: "other".to_string()
+        }; 
+
+        let oth_proj = "projects".to_string();
+
+        assert_eq!(test.x.strength, e.strength);
+        assert_eq!(test.x.other_fields, e.other_fields);
+        assert_eq!(test.other_projects, oth_proj);        
     }
 }
