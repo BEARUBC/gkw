@@ -18,6 +18,8 @@ if [ $RESULT -ne 0 ]
 then
   echo "${WARNING}cargo build failed! Will not push to branch${NC}"
   exit 1
+else
+  echo "${SUCCESS}cargo build passed!${NC}"
 fi
 
 echo "${CHECKS}Running tests${NC}"
