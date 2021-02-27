@@ -40,6 +40,7 @@ async fn main() -> () {
     create_file("input.json");
     create_file("output.json");
 
+    println!("macro");
     // let critical_actor = CriticalActor.start();
     // let non_critical_actor = NonCriticalActor.start();
 
