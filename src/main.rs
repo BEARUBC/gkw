@@ -65,6 +65,22 @@ async fn main() -> () {
 
 }
 
+#[cfg(test)]
+mod main_test {
+    use serde_json::{
+        Result,
+        Value,
+        json
+    };
+    use super::*;
+
+    #[test]
+    fn init() -> () {
+        create_file("input.json");
+        create_file("output.json");
+    }
+}
+
 // mod python;
 
 // struct Safety;
