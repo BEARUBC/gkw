@@ -12,10 +12,27 @@ echo "${WARNING}Note: if any of these checks fail, this commit will not be pushe
 
 echo "${CHECKS}Building rust binary${NC}"
 cargo build
-exit $?
+RESULT=$?
+
+if [ ${RESULT} -ne 0 ]
+then
+  echo "${WARNING}cargo build failed! Will not push to branch${NC}"
+  exit ${RESULT}
+else
+  echo "${SUCCESS}cargo build passed!${NC}"
+fi
 
 echo "${CHECKS}Running tests${NC}"
 cargo test
-exit $?
+RESULT=$?
+
+if [ ${RESULT} -ne 0 ]
+then
+  echo "${WARNING}cargo build failed! Will not push to branch${NC}"
+  exit ${RESULT}
+else
+  echo "${SUCCESS}cargo build passed!${NC}"
+fi
+
 echo "${SUCCESS}Building and testing has successfully finished; pushing to central repo${NC}"
 exit 0
