@@ -29,24 +29,28 @@ impl Machine {
         };
     }
 
-    pub(crate) fn transition(self: &mut Self, driver_id: DriverIDType, next_state: State) -> bool {
-        return match &(*self).current_state {
-            State::Safety => match next_state {
-                State::Safety => todo!(),
+    pub(crate) fn transition(self: &mut Self, driver_id: DriverIDType) {
+        match &(*self).current_state {
+            State::Safety => {
+                /*State::Safety => todo!(),
                 State::Active => todo!(),
-                State::Failure => todo!(),
+                State::Failure => todo!(),*/
+                todo!()
             },
-            State::Active => match next_state {
-                State::Safety => todo!(),
+            State::Active => {
+                /*State::Safety => todo!(),
                 State::Active => true,
-                State::Failure => todo!(),
+                State::Failure => todo!(),*/
+                self.current_state = State::Safety;
             },
-            State::Failure => match next_state {
-                State::Safety => todo!(),
+            State::Failure => {
+                /*State::Safety => todo!(),
                 State::Active => todo!(),
-                State::Failure => panic!(),
+                State::Failure => panic!(),*/
+                todo!()
             },
-        };
+        }
+
     }
 }
 impl Interface for Machine {
