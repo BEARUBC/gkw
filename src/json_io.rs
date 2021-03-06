@@ -37,8 +37,8 @@ pub fn write_to_input(json: Value) -> std::io::Result<()> {
 
     match File::create("./py_io/input.json") {
         Ok(mut file) => {
-            match file.write_all(json_bytes) {
-                Ok(()) => { return Ok(()); },
+            match file.write(json_bytes) {
+                Ok(_) => { return Ok(()); },
                 Err(err) => { return Err(err); }
             }
         },
