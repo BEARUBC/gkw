@@ -1,6 +1,6 @@
-#![allow(unused)]
-#![allow(dead_code)]
+/* external crates */
 
+/* external uses */
 // use pyo3::{
 //     prelude::*,
 //     types::{
@@ -8,30 +8,26 @@
 //         PyModule
 //     },
 // };
-use actix::prelude::*;
-use actor::{
-    critical_actor::CriticalActor,
-    non_critical_actor::NonCriticalActor,
-    ping::Ping,
-};
-use std::{
-    fs,
-    fs::File,
-};
+// use actix::prelude::*;
+// use actor::{
+//     status_actor::CriticalActor,
+//     user_actor::NonCriticalActor,
+//     // ping::Ping,
+// };
+use std::fs::File;
 
+/* internal crates */
 mod actor;
 mod state_machine;
 mod json_io;
+mod messages;
 
-// use crate::json_io_0::json_interpretor::instance;
-// use crate::json_io_0::file_io::read_from_output;
-// use crate::json_io_0::json_interpretor::write_json;
-// use crate::actor::critical_actor::CriticalActor;
+/* internal uses */
 
 fn create_file(file_name: &str) -> () {
     match File::create(format!("./py_io/{}", file_name)) {
         Ok(_) => (),
-        Err(err) => panic!(),
+        Err(_) => panic!(),
     };
 }
 
@@ -67,11 +63,6 @@ async fn main() -> () {
 
 #[cfg(test)]
 mod main_test {
-    use serde_json::{
-        Result,
-        Value,
-        json
-    };
     use super::*;
 
     #[test]

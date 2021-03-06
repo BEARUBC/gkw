@@ -1,3 +1,6 @@
+/* external crates */
+
+/* external uses */
 use actix::{
     prelude::*,
     dev::{
@@ -5,6 +8,10 @@ use actix::{
         ResponseChannel
     },
 };
+
+/* internal mods */
+
+/* internal uses */
 
 use super::ping_response::PingResponse;
 

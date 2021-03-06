@@ -1,7 +1,17 @@
+/* external crates */
+
+/* external uses */
 use actix::{
     prelude::*,
-    dev::{MessageResponse, ResponseChannel},
+    dev::{
+        MessageResponse,
+        ResponseChannel
+    },
 };
+
+/* internal mods */
+
+/* internal uses */
 
 #[derive(Message)]
 #[rtype(result = "Result<bool, std::io::Error>")]

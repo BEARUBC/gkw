@@ -1,17 +1,21 @@
+/* external crates */
+
+/* external uses */
+
+/* internal mods */
+
+/* internal uses */
+
 use std::{
-    fs,
     fs::File,
     io::{
         prelude::*,
         ErrorKind
     },
 };
-use serde_json::{
-    Result,
-    Value,
-    json
-};
+use serde_json::Value;
 
+#[allow(unused)]
 pub fn read_from_output() -> std::io::Result<Value> {
     let mut string_buffer = String::new();
 
@@ -31,6 +35,7 @@ pub fn read_from_output() -> std::io::Result<Value> {
     };
 }
 
+#[allow(unused)]
 pub fn write_to_input(json: Value) -> std::io::Result<()> {
     let json_string = json.to_string();
     let json_bytes = json_string.as_bytes();
@@ -48,7 +53,7 @@ pub fn write_to_input(json: Value) -> std::io::Result<()> {
 
 #[cfg(test)]
 mod json_io_test {
-    use serde_json::{Result, Value, json};
+    use serde_json::json;
     use super::*;
 
     #[test]
@@ -63,7 +68,7 @@ mod json_io_test {
 
         match result {
             Ok(()) => (),
-            Err(e) => { panic!(); },
+            Err(_) => { panic!(); },
         }
     }
 
@@ -80,15 +85,15 @@ mod json_io_test {
 
         match result {
             Ok(()) => (),
-            Err(e) => { panic!(); },
+            Err(_) => { panic!(); },
         }
     }
 
     #[test]
     fn simple_read() -> () {
         match read_from_output() {
-            Ok(json) => (),
-            Err(err) => { panic!(); }
+            Ok(_) => (),
+            Err(_) => { panic!(); }
         };
     }
 }
