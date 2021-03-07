@@ -1,35 +1,29 @@
+/* external crates */
+
+/* external uses */
 use actix::prelude::*;
 
-// use super::{
-//     ping::Ping,
-//     ping_response::PingResponse,
-// };
+/* internal mods */
 
-pub(crate) struct NonCriticalActor;
+/* internal uses */
 
-impl NonCriticalActor {
+pub(crate) struct UserActor;
+
+impl UserActor {
     #[allow(unused)]
     pub fn new() -> Self {
-        return NonCriticalActor;
+        return UserActor;
     }
 }
 
-impl Actor for NonCriticalActor {
+impl Actor for UserActor {
     type Context = Context<Self>;
 
     fn started(&mut self, _: &mut Context<Self>) {
-        println!("non-critical actor has started");
+        println!("user actor has started");
     }
  
     fn stopped(&mut self, _: &mut Context<Self>) {
-        println!("non-critical actor has stopped");
+        println!("user actor has stopped");
     }
 }
-
-// impl Handler<Ping> for NonCriticalActor {
-//     type Result = PingResponse;
-
-//     fn handle(&mut self, msg:Ping, _ctx: &mut Context<Self>) -> Self::Result {
-//         return PingResponse::RA;
-//     }
-// }

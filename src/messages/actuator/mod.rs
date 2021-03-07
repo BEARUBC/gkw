@@ -3,12 +3,8 @@
 /* external uses */
 
 /* internal mods */
+pub mod contract;
+pub mod stop;
+pub mod send_home;
 
 /* internal uses */
-
-#[allow(unused)]
-pub(in super) enum States {
-    Safety,
-    Active,
-    Failure,
-}

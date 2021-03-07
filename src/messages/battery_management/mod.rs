@@ -3,12 +3,6 @@
 /* external uses */
 
 /* internal mods */
+pub mod retrieve_percentage;
 
 /* internal uses */
-
-#[allow(unused)]
-pub(in super) enum States {
-    Safety,
-    Active,
-    Failure,
-}

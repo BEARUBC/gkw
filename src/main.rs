@@ -18,7 +18,6 @@ use std::fs::File;
 
 /* internal crates */
 mod actor;
-mod state_machine;
 mod json_io;
 mod messages;
 

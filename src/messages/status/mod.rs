@@ -3,12 +3,6 @@
 /* external uses */
 
 /* internal mods */
+pub mod check;
 
 /* internal uses */
-
-#[allow(unused)]
-pub(in super) enum States {
-    Safety,
-    Active,
-    Failure,
-}

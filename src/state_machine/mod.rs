@@ -3,8 +3,8 @@
 /* external uses */
 
 /* internal mods */
-pub mod machine;
-pub mod states;
-pub mod interface;
+pub(in super) mod machine;
+pub(in super) mod states;
+pub(in super) mod interface;
 
 /* internal uses */
