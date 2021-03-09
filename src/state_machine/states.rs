@@ -7,7 +7,7 @@
 /* internal uses */
 
 #[allow(unused)]
-pub(in super) enum States {
+pub(in super::super) enum States {
     Safety,
     Active,
     Failure,

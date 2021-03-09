@@ -2,27 +2,40 @@
 
 /* external uses */
 use actix::prelude::*;
+use std::io::Error;
 
 /* internal mods */
 #[path = "../state_machine/mod.rs"]
-pub mod state_machine;
+mod state_machine;
 
 /* internal uses */
 use crate::messages::{
     actuator::{
         contract::Contract,
         stop::Stop,
+        send_home::SendHome,
     },
     battery_management::retrieve_percentage::RetrievePercentage,
+    diagnostics::{
+        check::{
+            Check,
+            CheckResponse,
+        },
+        ping::Ping,
+    },
     response::Response,
 };
+use self::state_machine::machine::Machine;
 
-pub(crate) struct StatusActor;
+pub(crate) struct StatusActor {
+    #[allow(unused)]
+    machine: Machine,
+}
 
 impl StatusActor {
     #[allow(unused)]
     pub fn new() -> Self {
-        return StatusActor;
+        return StatusActor { machine: Machine::new(), };
     }
 }
 
@@ -39,7 +52,7 @@ impl Actor for StatusActor {
 }
 
 impl Handler<Contract> for StatusActor {
-    type Result = Result<Response<f64>, std::io::Error>;
+    type Result = Result<Response<f64>, Error>;
 
     #[allow(unused)]
     fn handle(&mut self, msg: Contract, ctx: &mut Context<Self>) -> Self::Result {
@@ -48,7 +61,7 @@ impl Handler<Contract> for StatusActor {
 }
 
 impl Handler<Stop> for StatusActor {
-    type Result = Result<Response<()>, std::io::Error>;
+    type Result = Result<Response<()>, Error>;
 
     #[allow(unused)]
     fn handle(&mut self, msg: Stop, ctx: &mut Context<Self>) -> Self::Result {
@@ -56,11 +69,38 @@ impl Handler<Stop> for StatusActor {
     }
 }
 
+impl Handler<SendHome> for StatusActor {
+    type Result = Result<Response<()>, Error>;
+
+    #[allow(unused)]
+    fn handle(&mut self, msg: SendHome, ctx: &mut Context<Self>) -> Self::Result {
+        todo!();
+    }
+}
+
+impl Handler<Check> for StatusActor {
+    type Result = Result<Response<CheckResponse>, Error>;
+
+    #[allow(unused)]
+    fn handle(&mut self, msg: Check, ctx: &mut Context<Self>) -> Self::Result {
+        todo!();
+    }
+}
+
 impl Handler<RetrievePercentage> for StatusActor {
-    type Result = Result<Response<f32>, std::io::Error>;
+    type Result = Result<Response<f32>, Error>;
 
     #[allow(unused)]
     fn handle(&mut self, msg: RetrievePercentage, ctx: &mut Context<Self>) -> Self::Result {
+        todo!();
+    }
+}
+
+impl Handler<Ping> for StatusActor {
+    type Result = Result<(), Error>;
+
+    #[allow(unused)]
+    fn handle(&mut self, msg: Ping, ctx: &mut Context<Self>) -> Self::Result {
         todo!();
     }
 }

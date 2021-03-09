@@ -1,6 +1,7 @@
 /* external crates */
 
 /* external uses */
+use std::io::Error;
 
 /* internal mods */
 
@@ -10,8 +11,19 @@ use super::{
     states::States,
 };
 
-pub(in super) struct Machine {
-    pub(in super) current_state: States,
+pub(in super::super) struct Machine {
+    current_state: States,
+}
+
+impl Machine {
+    pub(in super::super) fn new() -> Self {
+        todo!();
+    }
+
+    #[allow(unused)]
+    pub(in super::super) fn transition(self: &mut Self, next: States) -> Result<(), Error> {
+        todo!();
+    }
 }
 
 impl Interface for Machine {

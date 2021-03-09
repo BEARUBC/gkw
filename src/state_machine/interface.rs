@@ -6,7 +6,7 @@
 
 /* internal uses */
 
-pub(in super) trait Interface {
+pub(in super::super) trait Interface {
     fn a(self: &mut Self) -> ();
     fn b(self: &mut Self) -> ();
 }
