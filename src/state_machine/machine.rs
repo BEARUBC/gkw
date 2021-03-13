@@ -17,7 +17,7 @@ pub(in super::super) struct Machine {
 
 impl Machine {
     pub(in super::super) fn new() -> Self {
-        todo!();
+        Machine{ current_state: States::Active}
     }
 
     #[allow(unused)]

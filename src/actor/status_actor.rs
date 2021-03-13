@@ -26,6 +26,7 @@ use crate::messages::{
     response::Response,
 };
 use self::state_machine::machine::Machine;
+use crate::messages::response::Response::Accepted;
 
 pub(crate) struct StatusActor {
     #[allow(unused)]
@@ -83,7 +84,9 @@ impl Handler<Check> for StatusActor {
 
     #[allow(unused)]
     fn handle(&mut self, msg: Check, ctx: &mut Context<Self>) -> Self::Result {
-        todo!();
+        Ok(Accepted(CheckResponse {
+            battery_percentage: 90.0
+        }))
     }
 }
 

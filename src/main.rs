@@ -15,6 +15,30 @@
 //     // ping::Ping,
 // };
 use std::fs::File;
+use actix::prelude::*;
+use crate::messages::{
+    actuator::{
+        contract,
+        send_home,
+        stop
+    },
+    diagnostics::check:: {
+        CheckResponse,
+        Check
+
+    }
+};
+use crate::messages::response::{
+    Response:: {
+        Accepted,
+        Rejected
+    },
+    Rejected:: {
+        EventLoopTooFull,
+        InvalidState,
+        Other
+    }
+};
 
 /* internal crates */
 mod actor;
@@ -34,6 +58,42 @@ fn create_file(file_name: &str) -> () {
 async fn main() -> () {
     create_file("input.json");
     create_file("output.json");
+
+    let system = System::new("Test");
+
+    let arbiter_1 = Arbiter::new();
+    let arbiter_2 = Arbiter::new();
+    let status_actor = actor::status_actor::StatusActor::start_in_arbiter(&arbiter_1, move |_ctx: &mut Context<actor::status_actor::StatusActor>| actor::status_actor::StatusActor::new());
+    let userActor = actor::user_actor::UserActor::start_in_arbiter(&arbiter_2, move |_ctx: &mut Context<actor::user_actor::UserActor>| actor::user_actor::UserActor::new());
+
+
+    let diagnostics_send = status_actor.send(Check).await;
+
+    match diagnostics_send {
+        Ok(res) => {
+            match res.unwrap() {
+                Accepted(result) => {
+                    println!("{}", result.battery_percentage);
+                }
+                Rejected(rejected) => {
+                    match rejected {
+                        EventLoopTooFull => {
+                            println!("Event loop too full");
+                        }
+                        InvalidState => {
+                            println!("Arm's current state does not support request");
+                        }
+                        Other => {
+                            println!("bla");
+                        }
+                    }
+                }
+            }
+        }
+        Err(e) => {
+            println!("Event loop is too full");
+        }
+    }
 
     // let critical_actor = CriticalActor.start();
     // let non_critical_actor = NonCriticalActor.start();

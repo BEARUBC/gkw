@@ -23,4 +23,5 @@ pub struct CheckResponse {
         etc.
     in here!
      */
+    pub(crate) battery_percentage: f64
 }
