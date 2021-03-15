@@ -13,7 +13,7 @@ description = "The main, asynchronous, non-blocking IO, event-loop for the syste
 # ASYNC RUNTIME:
 # tokio = { version = "1.0.2", features = ["full"] }
 actix = "0.10.0"
-actix-rt = "2.0.2"
+actix-rt = "2.1.0"
 
 # MICRO-MAESTRO INTERFACE:
 #raestro = "0.1.0"

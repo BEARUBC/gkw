@@ -1,11 +1,6 @@
 /* external crates */
 
 /* external uses */
-
-/* internal mods */
-
-/* internal uses */
-
 use std::{
     fs::File,
     io::{
@@ -14,6 +9,10 @@ use std::{
     },
 };
 use serde_json::Value;
+
+/* internal mods */
+
+/* internal uses */
 
 #[allow(unused)]
 pub fn read_from_output() -> std::io::Result<Value> {

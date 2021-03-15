@@ -2,7 +2,6 @@
 
 /* external uses */
 use actix::prelude::*;
-use std::io::Error;
 
 /* internal mods */
 
@@ -10,7 +9,7 @@ use std::io::Error;
 use crate::messages::response::Response;
 
 #[derive(Message)]
-#[rtype(result = "Result<Response<f64>, Error>")]
+#[rtype(result = "Response<f64>")]
 pub struct Contract (
-    f64,
+    pub f64,
 );

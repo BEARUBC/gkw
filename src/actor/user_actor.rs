@@ -11,8 +11,8 @@ pub(crate) struct UserActor;
 
 impl UserActor {
     #[allow(unused)]
-    pub fn new() -> Self {
-        return UserActor;
+    pub fn start() -> Addr<Self> {
+        return UserActor.start();
     }
 }
 

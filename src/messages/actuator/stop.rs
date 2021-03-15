@@ -2,7 +2,6 @@
 
 /* external uses */
 use actix::prelude::*;
-use std::io::Error;
 
 /* internal mods */
 
@@ -10,5 +9,5 @@ use std::io::Error;
 use crate::messages::response::Response;
 
 #[derive(Message)]
-#[rtype(result = "Result<Response<()>, Error>")]
+#[rtype(result = "Response<()>")]
 pub struct Stop;

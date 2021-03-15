@@ -8,13 +8,8 @@
 //         PyModule
 //     },
 // };
-// use actix::prelude::*;
-// use actor::{
-//     status_actor::CriticalActor,
-//     user_actor::NonCriticalActor,
-//     // ping::Ping,
-// };
 use std::fs::File;
+use actix::prelude::*;
 
 /* internal crates */
 mod actor;
@@ -22,7 +17,13 @@ mod json_io;
 mod messages;
 
 /* internal uses */
+#[allow(unused_imports)]
+use crate::actor::{
+    status_actor::StatusActor,
+    user_actor::UserActor,
+};
 
+#[allow(unused)]
 fn create_file(file_name: &str) -> () {
     match File::create(format!("./py_io/{}", file_name)) {
         Ok(_) => (),
@@ -30,10 +31,23 @@ fn create_file(file_name: &str) -> () {
     };
 }
 
-#[actix_rt::main] 
-async fn main() -> () {
-    create_file("input.json");
-    create_file("output.json");
+fn main() -> () {
+    let system = System::new("Grasp -- main_binary: v0.0.1");
+    Arbiter::spawn(async {
+    });
+    System::current().stop();
+    
+    match system.run() {
+        Ok(()) => (),
+        Err(_) => (),
+    }
+
+    // let _ = System::run(|| {
+
+    // });
+
+    // create_file("input.json");
+    // create_file("output.json");
 
     // let critical_actor = CriticalActor.start();
     // let non_critical_actor = NonCriticalActor.start();
