@@ -7,5 +7,6 @@ pub mod actuator;
 pub mod battery_management;
 pub mod response;
 pub mod diagnostics;
+pub mod address;
 
 /* internal uses */

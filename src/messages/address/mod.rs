@@ -3,7 +3,7 @@
 /* external uses */
 
 /* internal mods */
-pub mod status_actor;
-pub mod user_actor;
+pub mod status_address;
+pub mod user_address;
 
 /* internal uses */

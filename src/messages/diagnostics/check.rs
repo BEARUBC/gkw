@@ -22,4 +22,5 @@ pub struct CheckResponse {
         etc.
     in here!
      */
+    pub battery_percentage: f64,
 }

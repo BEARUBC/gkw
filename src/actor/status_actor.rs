@@ -8,29 +8,41 @@ use actix::prelude::*;
 mod state_machine;
 
 /* internal uses */
-use crate::messages::{
-    actuator::{
-        contract::Contract,
-        stop::Stop,
-        send_home::SendHome,
+use crate::{
+    messages::{
+        actuator::{
+            contract::Contract,
+            stop::Stop,
+            send_home::SendHome,
+        },
+        battery_management::retrieve_percentage::RetrievePercentage,
+        diagnostics::{
+            check::{
+                Check,
+                CheckResponse,
+            },
+            ping::Ping,
+        },
+        address::user_address::UserAddress,
+        response::Response,
     },
-    battery_management::retrieve_percentage::RetrievePercentage,
-    diagnostics::{
-        check::Check,
-        ping::Ping,
-    },
+    actor::user_actor::UserActor,
 };
 use self::state_machine::machine::Machine;
 
-pub(crate) struct StatusActor {
+pub struct StatusActor {
     #[allow(unused)]
-    machine: Machine,
+    // machine: Machine,
+    user_addr: Option<Addr<UserActor>>,
 }
 
 impl StatusActor {
     #[allow(unused)]
-    pub fn start() -> Addr<Self> {
-        return StatusActor { machine: Machine::new(), }.start();
+    pub fn new() -> Self {
+        return StatusActor {
+            // machine: Machine::new(),
+            user_addr: None,
+        };
     }
 }
 
@@ -78,7 +90,9 @@ impl Handler<Check> for StatusActor {
 
     #[allow(unused)]
     fn handle(&mut self, msg: Check, ctx: &mut Context<Self>) -> Self::Result {
-        todo!();
+        return MessageResult(Response::Accepted(CheckResponse {
+            battery_percentage: 90.0f64
+        }));
     }
 }
 
@@ -92,11 +106,27 @@ impl Handler<RetrievePercentage> for StatusActor {
 }
 
 impl Handler<Ping> for StatusActor {
-    type Result = ();
+    type Result = MessageResult<Ping>;
 
     #[allow(unused)]
     fn handle(&mut self, msg: Ping, ctx: &mut Context<Self>) -> Self::Result {
-        todo!();
+        return MessageResult(());
+    }
+}
+
+impl Handler<UserAddress> for StatusActor {
+    type Result = MessageResult<UserAddress>;
+
+    #[allow(unused)]
+    fn handle(&mut self, msg: UserAddress, ctx: &mut Context<Self>) -> Self::Result {
+        // return match self.user_addr {
+        //     Some(_) => MessageResult(Response::Accepted(false)),
+        //     None => {
+        //         self.user_addr = Some(msg.0);
+        //         MessageResult(Response::Accepted(true))
+        //     },
+        // };
+        return MessageResult(Response::Accepted(true));
     }
 }
 
@@ -107,61 +137,5 @@ impl Handler<Ping> for StatusActor {
 //         todo!();
 //         // example of how to return a Response<f64>
 //         // MessageResult(Response::Accepted(0f64))
-//     }
-// }
-
-
-
-// impl Handler<MessagesFromUser> for CriticalActor {
-//     type Result = StatusResponses;
-
-//     fn handle(&mut self, msg: MessagesFromUser, _ctx: &mut Context<Self>) -> Self::Result {
-//         match msg { // I want to find a way to return the values rather than just a response enum.
-//                     // Don't want to delegate sending ml side response values to the USER actor
-//             MessagesFromUser::Contraction {contraction, file } => {
-//                 if contraction >= 0 && contraction <= 1 {
-//                     todo!();
-//                     StatusResponses::ContractionRes
-//                 }
-//                 else if !file.is_empty() {
-//                     // read from file if needed
-//                     todo!();
-//                     StatusResponses::ContractionRes
-//                 }
-//                 StatusResponses::BadRequestRes {
-//                     err_msg: String("hello")
-//                 }
-//             },
-//             MessagesFromUser::Stop => StatusResponses::StopRes,
-//             MessagesFromUser::SendHome => StatusResponses::SendHomeRes
-//         }
-//     }
-// }
-
-// impl Handler<Ping> for CriticalActor {
-//     type Result = PingResponse;
-
-//     fn handle(&mut self, msg: Ping, _ctx: &mut Context<Self>) -> Self::Result {
-//         return PingResponse::RB;
-//     }
-// }
-
-// #[derive(Message)]
-// #[rtype(result = "Response2")]
-// struct Msg;
-
-// struct Response2;
-
-// struct MyActor;
-
-// impl Actor for MyActor {
-//     type Context = Context<Self>;
-// }
-
-// impl Handler<Msg> for MyActor {
-//     type Result = MessageResult<Msg>;
-
-//     fn handle(&mut self, _: Msg, _: &mut Context<Self>) -> Self::Result {
-//         MessageResult(Response2 {})
 //     }
 // }

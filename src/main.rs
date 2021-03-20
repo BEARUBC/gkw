@@ -8,7 +8,6 @@
 //         PyModule
 //     },
 // };
-use std::fs::File;
 use actix::prelude::*;
 
 /* internal crates */
@@ -18,65 +17,136 @@ mod messages;
 
 /* internal uses */
 #[allow(unused_imports)]
-use crate::actor::{
-    status_actor::StatusActor,
-    user_actor::UserActor,
+use crate::{
+    actor::{
+        status_actor::StatusActor,
+        user_actor::UserActor,
+    },
+    messages::{
+        actuator::{
+            contract,
+            send_home,
+            stop,
+        },
+        diagnostics::{
+            check::{
+                CheckResponse,
+                Check,
+            },
+            ping::Ping,
+        },
+        response::{
+            Response,
+            Rejected,
+        },
+        address::{
+            status_address::StatusAddress,
+            user_address::UserAddress,
+        },
+    },
 };
 
-#[allow(unused)]
-fn create_file(file_name: &str) -> () {
-    match File::create(format!("./py_io/{}", file_name)) {
-        Ok(_) => (),
-        Err(_) => panic!(),
-    };
-}
-
 fn main() -> () {
-    let system = System::new("Grasp -- main_binary: v0.0.1");
-    Arbiter::spawn(async {
+    let system_runner = System::new("Grasp -- main_binary: v0.0.1");
+    let arbiter_1 = Arbiter::new();
+    let arbiter_2 = Arbiter::new();
+
+    let status_addr = StatusActor::start_in_arbiter(
+        &arbiter_1,
+        |_: &mut Context<StatusActor>| StatusActor::new()
+    );
+    let user_addr = UserActor::start_in_arbiter(
+        &arbiter_2,
+        |_: &mut Context<UserActor>| UserActor::new()
+    );
+
+    Arbiter::spawn(async move {
+        status_addr.send(UserAddress(user_addr.clone())).await;
+
+        // match status_addr.send(UserAddress(user_addr.clone())).await {
+        //     Ok(response) => match response {
+        //         Response::Accepted(is_addr_set) => match is_addr_set {
+        //             false => panic!(),
+        //             _ => (),
+        //         },
+        //         Response::Rejected(_) => panic!(),
+        //     },
+        //     Err(_) => panic!(),
+        // };
+        // match user_addr.send(StatusAddress(status_addr)).await {
+        //     Ok(response) => match response {
+        //         Response::Accepted(is_addr_set) => match is_addr_set {
+        //             false => panic!(),
+        //             _ => (),
+        //         },
+                // Response::Rejected(_) => panic!(),
+        //     },
+        //     Err(_) => panic!(),
+        // };
+
+        for _ in 0i32..100i32 {
+            println!("asdf");
+        }
+
+        println!("DONE!");
     });
+
     System::current().stop();
     
-    match system.run() {
-        Ok(()) => (),
-        Err(_) => (),
+    match system_runner.run() {
+        Ok(_) => println!("we good?"),
+        Err(_) => println!("error caught :("),
     }
-
-    // let _ = System::run(|| {
-
-    // });
 
     // create_file("input.json");
     // create_file("output.json");
 
-    // let critical_actor = CriticalActor.start();
-    // let non_critical_actor = NonCriticalActor.start();
+    // let system = System::new("Test");
 
-    // let result_non_crit = non_critical_actor.send(Ping::A).await;
-    // let result = critical_actor.send(Ping::B).await;
+    // let arbiter_1 = Arbiter::new();
+    // let arbiter_2 = Arbiter::new();
+    // let status_actor = actor::status_actor::StatusActor::start_in_arbiter(&arbiter_1, move |_ctx: &mut Context<actor::status_actor::StatusActor>| StatusActor::new());
+    // let user_actor = actor::user_actor::UserActor::start_in_arbiter(&arbiter_2, move |_ctx: &mut Context<actor::user_actor::UserActor>| UserActor::start());
 
-    // deserial_json();
-    //read_from_file("input.json");
+    // let diagnostics_send = status_actor.send(Check).await;
 
-    //instance();
-    //write_json("input.json");
-    //instance();
-    //read_from_file("input.json");
-
-    // instance();
-    // write_json("input.json");
-    // instance();
-
-    // let result = monitor_actor.send(Read).await;
-
-    // assert!(result.unwrap() == true);
-    // println!("{}", result.unwrap());
-
+    // match diagnostics_send {
+    //     Ok(res) => {
+    //         match res.unwrap() {
+    //             Accepted(result) => {
+    //                 println!("{}", result.battery_percentage);
+    //             }
+    //             Rejected(rejected) => {
+    //                 match rejected {
+    //                     EventLoopTooFull => {
+    //                         println!("Event loop too full");
+    //                     }
+    //                     InvalidState => {
+    //                         println!("Arm's current state does not support request");
+    //                     }
+    //                     Other => {
+    //                         println!("bla");
+    //                     }
+    //                 }
+    //             }
+    //         }
+    //     }
+    //     Err(e) => {
+    //         println!("Event loop is too full");
+    //     }
+    // }
 }
 
 #[cfg(test)]
 mod main_test {
-    use super::*;
+    use std::fs::File;
+    #[allow(unused)]
+    fn create_file(file_name: &str) -> () {
+        match File::create(format!("./py_io/{}", file_name)) {
+            Ok(_) => (),
+            Err(_) => panic!(),
+        };
+    }
 
     #[test]
     fn init() -> () {
@@ -86,23 +156,6 @@ mod main_test {
 }
 
 // mod python;
-
-// struct Safety;
-// struct Active;
-// struct Failure;
-
-// impl Interface for Safety {
-//     fn a() -> () {}
-//     fn b() -> () {}
-// }
-// impl Interface for Active {
-//     fn a() -> () {}
-//     fn b() -> () {}
-// }
-// impl Interface for Failure {
-//     fn a() -> () {}
-//     fn b() -> () {}
-// }
 
 // fn main() -> PyResult<()> {
 //     // let mut machine_test = state_machine::Machine::new();
