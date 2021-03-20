@@ -1,6 +1,7 @@
 use std::{
     fs,
     fs::File,
+    fs::OpenOptions,
     io::{
         prelude::*,
         ErrorKind
@@ -36,15 +37,22 @@ pub fn write_to_input(json: Value) -> std::io::Result<()> {
     let json_string = json.to_string();
     let json_bytes = json_string.as_bytes();
 
-    match File::create("./py_io/input.json") {
-        Ok(mut file) => {
-            match file.write_all(json_bytes) {
-                Ok(()) => { return Ok(()); },
-                Err(err) => { return Err(err); }
-            }
-        },
-        Err(err) => { return Err(err); },
-    };
+    let mut file = OpenOptions::new().read(true).write(true).create(true).truncate(true).open("./py_io/input.json").unwrap();
+        
+    match file.write_all(json_bytes){
+        Ok(()) => { return Ok(()); },
+        Err(err) => { return Err(err); }
+    }
+
+    // match File::create("./py_io/input.json").unwrap() {
+    //     Ok(mut file) => {
+    //         match file.write_all(json_bytes) {
+    //             Ok(()) => { return Ok(()); },
+    //             Err(err) => { return Err(err); }
+    //         }
+    //     },
+    //     Err(err) => { return Err(err); },
+    // };
 }
 
 #[cfg(test)]
@@ -56,9 +64,7 @@ mod json_io_test {
     #[test]
     fn simple_write() -> () {
         let json = json!({
-            "x": 34,
-            "y": "a string",
-            "z": [3,4,5],
+            "x": 34
         });
 
         let result = write_to_input(json);
@@ -109,10 +115,10 @@ mod json_io_test {
     fn test_struct() -> () {
         let data= r#"
         {
-            "x": "{
+            "x": {
                 "strength": "strong",
                 "other_fields": "other"
-            }",
+            },
             "other_projects": "projects"
         }"#;
        
