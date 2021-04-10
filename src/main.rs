@@ -8,20 +8,54 @@
 //         PyModule
 //     },
 // };
-use actix::prelude::*;
+use mio::{Events, Interest, Poll, Token};
+
+use tokio::runtime::Builder;
+use std::{
+    thread,
+    time::Duration,
+};
+use component::prelude::*;
+
+/* internal mods */
+mod asynchronous {
+    use std::{
+        future::Future,
+        task::{
+            Poll,
+            Context,
+        },
+        pin::Pin,
+    };
+
+    #[derive(Debug)]
+    pub enum Asynchronous {
+        Variant1,
+        Variant2,
+    }
+
+    impl Future for Asynchronous {
+        type Output = ();
+
+        fn poll(self: Pin<&mut Self>, _: &mut Context<'_>) -> Poll<Self::Output> {
+            println!("Async poll");
+
+            match self.into_ref().get_ref() {
+                Self::Variant1 => (),
+                Self::Variant2 => (),
+            }
+            return Poll::Pending;
+        }
+    }
+}
 
 /* internal crates */
-mod actor;
 mod json_io;
 mod messages;
 
 /* internal uses */
 #[allow(unused_imports)]
 use crate::{
-    actor::{
-        status_actor::StatusActor,
-        user_actor::UserActor,
-    },
     messages::{
         actuator::{
             contract,
@@ -36,31 +70,148 @@ use crate::{
             ping::Ping,
         },
         response::{
-            Response,
-            Rejected,
-        },
-        address::{
-            status_address::StatusAddress,
-            user_address::UserAddress,
-        },
+            Response:: {
+                Accepted,
+                Rejected,
+            },
+            Rejected:: {
+                EventLoopTooFull,
+                InvalidState,
+                Other,
+            },
+        }
     },
 };
 
 fn main() -> () {
-    let system_runner = System::new("Grasp -- main_binary: v0.0.1");
-    let arbiter_1 = Arbiter::new();
-    let arbiter_2 = Arbiter::new();
 
+
+
+
+
+
+
+    /*let system_runner = System::new("Grasp -- main_binary: v0.0.1");
+
+
+    let poll = Poll::new();
+    let events = Events::with_capacity(128);
+    //let (tx, rx) = mpsc::channel();
+    let arbiter_1 = Arbiter::new();
     let status_addr = StatusActor::start_in_arbiter(
         &arbiter_1,
         |_: &mut Context<StatusActor>| StatusActor::new()
     );
+    let arbiter_2 = Arbiter::new();
     let user_addr = UserActor::start_in_arbiter(
         &arbiter_2,
         |_: &mut Context<UserActor>| UserActor::new()
     );
 
-    Arbiter::spawn(async move {
+    let addr_clone = status_addr.clone();
+    let diagnostics = async move {
+        let diagnostics_send = addr_clone.send(Check).await;
+
+        match diagnostics_send {
+            Ok(res) => {
+                match res {
+                    Accepted(result) => {
+                        println!("{}", result.battery_percentage);
+                    }
+                    Rejected(rejected) => {
+                        match rejected {
+                            EventLoopTooFull => {
+                                println!("Event loop too full");
+                            }
+                            InvalidState => {
+                                println!("Arm's current state does not support request");
+                            }
+                            Other => {
+                                println!("bla");
+                            }
+                        }
+                    }
+                }
+            }
+            Err(e) => {
+                println!("event loop too full");
+            }
+        }
+    };
+
+    let diagnostics2 = async move {
+        let diagnostics_send = status_addr.send(Check).await;
+
+        match diagnostics_send {
+            Ok(res) => {
+                match res {
+                    Accepted(result) => {
+                        println!("{}", result.battery_percentage + 100.0);
+                    }
+                    Rejected(rejected) => {
+                        match rejected {
+                            EventLoopTooFull => {
+                                println!("Event loop too full");
+                            }
+                            InvalidState => {
+                                println!("Arm's current state does not support request");
+                            }
+                            Other => {
+                                println!("bla");
+                            }
+                        }
+                    }
+                }
+            }
+            Err(e) => {
+                println!("event loop too full");
+            }
+        }
+    };
+    Arbiter::spawn(diagnostics2);
+    Arbiter::spawn(diagnostics);
+    */
+
+
+    /*let temp = thread::spawn(|| { // thread for status actor
+        let diagnostics = async move {
+            let diagnostics_send = status_addr.send(Check).await;
+
+            match diagnostics_send {
+                Ok(res) => {
+                    match res {
+                        Accepted(result) => {
+                            println!("{}", result.battery_percentage);
+                        }
+                        Rejected(rejected) => {
+                            match rejected {
+                                EventLoopTooFull => {
+                                    println!("Event loop too full");
+                                }
+                                InvalidState => {
+                                    println!("Arm's current state does not support request");
+                                }
+                                Other => {
+                                    println!("bla");
+                                }
+                            }
+                        }
+                    }
+                }
+                Err(e) => {
+                    println!("event loop too full");
+                }
+            }
+        };
+        Arbiter::spawn(diagnostics);
+
+    });*/
+    /*let temp_2 = thread::spawn(|| { // thread for user actor
+    });*/
+    //temp.join().unwrap();
+
+
+    /*Arbiter::spawn(async move {
         status_addr.send(UserAddress(user_addr.clone())).await;
 
         // match status_addr.send(UserAddress(user_addr.clone())).await {
@@ -91,12 +242,43 @@ fn main() -> () {
         println!("DONE!");
     });
 
-    System::current().stop();
+    Arbiter::spawn(async move {
+        let diagnostics_send = status_addr.send(Check).await;
+
+        match diagnostics_send {
+            Ok(res) => {
+                match res {
+                    Accepted(result) => {
+                        println!("{}", result.battery_percentage);
+                    }
+                    Rejected(rejected) => {
+                        match rejected {
+                            EventLoopTooFull => {
+                                println!("Event loop too full");
+                            }
+                            InvalidState => {
+                                println!("Arm's current state does not support request");
+                            }
+                            Other => {
+                                println!("bla");
+                            }
+                        }
+                    }
+                }
+            }
+            Err(e) => {
+                println!("Event loop is too full");
+            }
+        }
+    });*/
+
     
     match system_runner.run() {
         Ok(_) => println!("we good?"),
         Err(_) => println!("error caught :("),
     }
+
+    //System::current().stop();
 
     // create_file("input.json");
     // create_file("output.json");

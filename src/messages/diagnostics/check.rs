@@ -6,7 +6,10 @@ use actix::prelude::*;
 /* internal mods */
 
 /* internal uses */
-use crate::messages::response::Response;
+use crate::messages::{
+    response::Response,
+    message_handler::Handler
+};
 
 #[derive(Message)]
 #[rtype(result = "Response<CheckResponse>")]
@@ -23,4 +26,12 @@ pub struct CheckResponse {
     in here!
      */
     pub battery_percentage: f64,
+}
+
+impl Handler for Check {
+    fn handler(self: &Self) -> CheckResponse {
+        return CheckResponse {
+            battery_percentage: 69 as f64,
+        }
+    }
 }
