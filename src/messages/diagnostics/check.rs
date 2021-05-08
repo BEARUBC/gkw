@@ -29,9 +29,9 @@ pub struct CheckResponse {
 }
 
 impl Handler for Check {
-    fn handler(self: &Self) -> CheckResponse {
-        return CheckResponse {
+    fn handler(self: &Self) -> () {
+        CheckResponse {
             battery_percentage: 69 as f64,
-        }
+        };
     }
 }
