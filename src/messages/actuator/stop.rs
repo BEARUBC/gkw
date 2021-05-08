@@ -10,8 +10,7 @@ use crate::messages::{
     message_handler::Handler
 };
 
-#[derive(Message)]
-#[rtype(result = "Response<()>")]
+
 pub struct Stop;
 
 impl Handler for Stop {

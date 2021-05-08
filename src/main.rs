@@ -8,46 +8,6 @@
 //         PyModule
 //     },
 // };
-use mio::{Events, Interest, Poll, Token};
-
-use tokio::runtime::Builder;
-use std::{
-    thread,
-    time::Duration,
-};
-use component::prelude::*;
-
-/* internal mods */
-mod asynchronous {
-    use std::{
-        future::Future,
-        task::{
-            Poll,
-            Context,
-        },
-        pin::Pin,
-    };
-
-    #[derive(Debug)]
-    pub enum Asynchronous {
-        Variant1,
-        Variant2,
-    }
-
-    impl Future for Asynchronous {
-        type Output = ();
-
-        fn poll(self: Pin<&mut Self>, _: &mut Context<'_>) -> Poll<Self::Output> {
-            println!("Async poll");
-
-            match self.into_ref().get_ref() {
-                Self::Variant1 => (),
-                Self::Variant2 => (),
-            }
-            return Poll::Pending;
-        }
-    }
-}
 
 /* internal crates */
 mod json_io;
@@ -83,14 +43,8 @@ use crate::{
     },
 };
 
+/* internal mods */
 fn main() -> () {
-
-
-
-
-
-
-
     /*let system_runner = System::new("Grasp -- main_binary: v0.0.1");
 
 
@@ -273,10 +227,10 @@ fn main() -> () {
     });*/
 
     
-    match system_runner.run() {
+    /*match system_runner.run() {
         Ok(_) => println!("we good?"),
         Err(_) => println!("error caught :("),
-    }
+    }*/
 
     //System::current().stop();
 

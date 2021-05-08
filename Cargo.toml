@@ -15,6 +15,7 @@ description = "The main, asynchronous, non-blocking IO, event-loop for the syste
 actix = "0.10.0"
 actix-rt = "2.1.0"
 mio = "0.7"
+tokio = { version = "1.4.0", features = ["rt", "net", "io-util", "rt-multi-thread", "sync"] }
 
 # MICRO-MAESTRO INTERFACE:
 #raestro = "0.1.0"

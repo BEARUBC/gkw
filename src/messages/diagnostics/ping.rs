@@ -10,6 +10,4 @@ use crate::messages::{
 
 /* internal uses */
 
-#[derive(Message)]
-#[rtype(result = "()")]
 pub struct Ping;

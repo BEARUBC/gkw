@@ -10,13 +10,11 @@ use crate::messages::{
     message_handler::Handler
 };
 
-#[derive(Message)]
-#[rtype(result = "Response<f32>")]
 pub struct RetrievePercentage;
 
 impl Handler for RetrievePercentage {
     fn handler(self: &Self) -> () {
-        println!({}, 69);
+        println!("{}", 69);
     }
 }
 
