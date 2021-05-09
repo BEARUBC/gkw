@@ -1,3 +1,5 @@
+[workspace]
+
 members = [
 	"kernel",
 	"async_framework",
