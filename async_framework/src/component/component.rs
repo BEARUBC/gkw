@@ -24,13 +24,17 @@ use std::{
     boxed::Box,
 };
 
-use crate::job::{
-    Routine,
-    Job,
+use crate::{
+    component::component_error::ComponentError,
+    job::{
+        Routine,
+        Job,
+    },
 };
 
 type Identifier = usize;
-type MutexError<'a> = PoisonError<MutexGuard<'a, Identifier>>;
+pub type MutexError<'a> = PoisonError<MutexGuard<'a, Identifier>>;
+pub type ComponentResult<T> = Result<T, ComponentError>;
 
 lazy_static! {
     static ref ID_STORE: Mutex<usize> = Mutex::new(0usize);
@@ -74,17 +78,19 @@ where
 T: 'static + Sized,
 M: 'static + Send,
 M: Future, {
-    pub fn new<'a, A, N>(name: N, routine: Routine<T>) -> Self
+    pub fn new<'a, A, N>(name: N, routine: Routine<T>) -> ComponentResult<Self>
     where
     A: 'static + Send + Future,
     N: Into<Cow<'a, str>>, {
-        Self {
-            id: get_new_id().unwrap(),
-            name: name.into().into_owned(),
-            send: None,
-            routine,
-            components: BTreeMap::new(),
-        }
+        get_new_id()
+            .map(|id| Self {
+                id,
+                name: name.into().into_owned(),
+                send: None,
+                routine,
+                components: BTreeMap::new(),
+            })
+            .map_err(ComponentError::from)
     }
 
     pub fn start<'a, A, N>(&'static mut self, handler: fn(M) -> A) -> ()
