@@ -1,11 +1,37 @@
 [package]
 name = "async_framework"
 version = "0.1.0"
-authors = ["raunakab <rabhagat31@gmail.com>"]
+authors = ["nathan-n-poon <nathannpoon@gmail.com>", "raunakab <rabhagat31@gmail.com>", "KelvinKCLee <leekachunkelvin@gmail.com>", "bzhou64 <billzhou64@gmail.com>", "panchalmaharshi8 <panchalmaharshi8@gmail.com>"]
 edition = "2018"
+license = "MIT"
+description = "Asynchronous execution framework for enqueueing async lambdas onto an execution loop"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
 tokio = { version = "1.4.0", features = ["rt", "net", "io-util", "rt-multi-thread", "sync"] }
 lazy_static = "1.4.0"
+
+[[example]]
+name = "basic"         # The name of the target.
+test = true            # Is tested by default.
+doctest = false        # Documentation examples are tested by default.
+bench = true           # Is benchmarked by default.
+doc = false            # Is documented by default.
+proc-macro = false     # Set to `true` for a proc-macro library.
+harness = true         # Use libtest harness.
+edition = "2018"       # The edition of the target.
+crate-type = ["bin"]   # The crate types to generate.
+required-features = [] # Features required to build this target (N/A for lib).
+
+[[example]]
+name = "custom"        # The name of the target.
+test = true            # Is tested by default.
+doctest = false        # Documentation examples are tested by default.
+bench = true           # Is benchmarked by default.
+doc = false            # Is documented by default.
+proc-macro = false     # Set to `true` for a proc-macro library.
+harness = true         # Use libtest harness.
+edition = "2018"       # The edition of the target.
+crate-type = ["bin"]   # The crate types to generate.
+required-features = [] # Features required to build this target (N/A for lib).

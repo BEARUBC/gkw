@@ -7,5 +7,6 @@ extern crate lazy_static;
 /* internal mods */
 mod component;
 pub mod prelude;
+mod job;
 
 /* internal uses */

@@ -1,0 +1,11 @@
+[package]
+name = "state-machine"
+version = "0.1.0"
+authors = ["nathan-n-poon <nathannpoon@gmail.com>", "raunakab <rabhagat31@gmail.com>", "KelvinKCLee <leekachunkelvin@gmail.com>", "bzhou64 <billzhou64@gmail.com>", "panchalmaharshi8 <panchalmaharshi8@gmail.com>"]
+edition = "2018"
+license = "MIT"
+description = "State machine interface"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]

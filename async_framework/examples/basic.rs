@@ -21,7 +21,8 @@ F: Send + 'static, {
 }
 
 fn main() -> () {
-    let basic = Component::new(String::from("basic"), handler);
+    // panic!();
+    let basic = Component::new("basic", handler);
 
     Builder::new_current_thread()
         .enable_all()

@@ -1,10 +1,11 @@
 /* external crates */
+#[macro_use]
+extern crate lazy_static;
 
 /* external uses */
 
 /* internal mods */
-pub(in super) mod machine;
-pub(in super) mod states;
-pub(in super) mod interface;
+mod component;
+pub mod prelude;
 
 /* internal uses */

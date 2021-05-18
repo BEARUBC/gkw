@@ -1,6 +1,3 @@
-/* external crates */
-
-/* external uses */
 use tokio::runtime::Builder;
 use std::{
     thread,
@@ -8,7 +5,6 @@ use std::{
 };
 use async_framework::prelude::*;
 
-/* internal mods */
 mod asynchronous {
     use std::{
         future::Future,
@@ -40,14 +36,14 @@ mod asynchronous {
         }
     }
 }
+
 mod embedded_data {
     #[derive(Debug)]
     pub struct EmbeddedData;
 }
 
-/* internal uses */
-use asynchronous::Asynchronous;
-use embedded_data::EmbeddedData;
+use crate::asynchronous::Asynchronous;
+use crate::embedded_data::EmbeddedData;
 
 async fn handler(message: Asynchronous) -> () {
     match message {
@@ -60,7 +56,7 @@ async fn handler(message: Asynchronous) -> () {
 }
 
 fn main() -> () {
-    let custom = Component::<Asynchronous>::new(String::from("custom"), handler);
+    let custom = Component::<Asynchronous>::new("custom", handler);
 
     Builder::new_current_thread()
         .enable_all()
