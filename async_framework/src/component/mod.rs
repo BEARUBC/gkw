@@ -1,2 +1,3 @@
 pub mod component;
-pub mod component_error;
+pub mod error;
+pub(crate) mod wrapper;

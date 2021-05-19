@@ -8,5 +8,6 @@ extern crate lazy_static;
 mod component;
 pub mod prelude;
 pub mod job;
+pub mod routine;
 
 /* internal uses */

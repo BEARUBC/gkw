@@ -10,10 +10,6 @@ use std::{
     borrow::Cow,
     collections::BTreeMap,
     future::Future,
-    io::{
-        Error,
-        ErrorKind,
-    },
     sync::{
         Arc,
         Mutex,
@@ -25,14 +21,15 @@ use std::{
 };
 
 use crate::{
-    component::component_error::ComponentError,
-    job::{
-        Routine,
-        Job,
+    component::{
+        error::ComponentError,
+        wrapper::Wrapper,
     },
+    job::Job,
+    routine::routine::Routine,
 };
 
-type Identifier = usize;
+pub(crate) type Identifier = usize;
 pub type MutexError<'a> = PoisonError<MutexGuard<'a, Identifier>>;
 pub type ComponentResult<T> = Result<T, ComponentError>;
 
@@ -51,23 +48,15 @@ fn get_new_id<'a>() -> Result<usize, MutexError<'a>> {
         })
 }
 
-enum Wrapper<M>
-where
-M: 'static + Send,
-M: Future, {
-    MessageWrapper(M),
-
-    #[allow(unused)]
-    RunRequest,
-}
-
-#[allow(unused)]
 pub struct Component<M, T>
 where
 T: 'static + ?Sized,
 M: 'static + Send + Future, {
     id: Identifier,
+
+    #[allow(unused)]
     name: String,
+
     send: Option<UnboundedSender<Wrapper<M>>>,
     routine: Routine<T>,
     components: BTreeMap<Identifier, Arc<Component<M, T>>>,
@@ -76,8 +65,7 @@ M: 'static + Send + Future, {
 impl<M, T> Component<M, T>
 where
 T: 'static + Sized,
-M: 'static + Send,
-M: Future, {
+M: 'static + Send + Future, {
     pub fn new<'a, A, N>(name: N, routine: Routine<T>) -> ComponentResult<Self>
     where
     A: 'static + Send + Future,
@@ -137,33 +125,26 @@ M: Future, {
         });
     }
 
-    pub fn send(&self, message: M) -> Result<(), Error> {
-        self.send.as_ref().unwrap().send(Wrapper::MessageWrapper(message))
-            .map_err(|_ /*: T*/| {
-                // # TODO
-                // create custom error type, X, that has `impl From<T> for X { ... }`
-                // and rewrite .map_err to `.map_err(T::from)
-                let err_type = ErrorKind::ConnectionAborted;
-                let err_msg = "unable to send message to component";
-
-                Error::new(err_type, err_msg)
-            })
+    pub fn send(&self, message: M) -> ComponentResult<()> {
+        self.send
+            .as_ref()
+            .unwrap()
+            .send(Wrapper::MessageWrapper(message))
+            .map_err(ComponentError::from)
     }
 
     pub fn id(&self) -> Identifier { self.id }
 
-    pub fn send_to(self: &Self, id: Identifier, message: M) -> Result<(), Error> {
+    pub fn send_to(self: &Self, id: Identifier, message: M) -> ComponentResult<()> {
         self.components
             .get(&id)
-            .ok_or(Error::new(ErrorKind::NotFound, "component not found"))
-            .and_then(move |component| component.send(message))
+            .ok_or(ComponentError::InvalidComponentId(id))
+            .and_then(|component| component.send(message))
     }
 
     pub fn add_component(&mut self, component: Arc<Component<M, T>>) -> () {
-        let id = component.id();
-
         self.components
-            .entry(id)
+            .entry(component.id())
             .or_insert(component);
     }
 
