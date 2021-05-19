@@ -7,20 +7,14 @@ pub enum Job<T>
 where
 T: 'static + ?Sized, {
     Spacer(u64),
-    Lambda(Box<dyn Future<Output = T> +  Unpin>),
+    Lambda(Box<dyn Future<Output = T> + 'static>),
 }
 
-impl<T> Clone for Job<T> {
+impl<T> Clone for Job<T>
+where
+T: 'static + ?Sized, {
     fn clone(&self) -> Self { todo!() }
 }
-
-// impl Clone for MyStruct {
-//     fn clone(&self) -> Self {
-//         MyStruct {
-//             field: self.field,
-//         }
-//     }
-// }
 
 unsafe impl<T> Send for Job<T>
 where
@@ -35,10 +29,4 @@ where
 T: 'static + ?Sized,
 A: 'static + Future<Output = T> + Unpin, {
     fn from(lambda: A) -> Self { Self::Lambda(Box::new(lambda)) }
-}
-
-impl<T> Job<T>
-where
-T: 'static + ?Sized, {
-    pub fn nothing(&self) {}
 }

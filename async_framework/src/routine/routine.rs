@@ -18,30 +18,6 @@ T: 'static + ?Sized, {
     max_capacity: usize,
 }
 
-// impl<T> Routine<T>
-// where
-// T: 'static + ?Sized, {
-//     pub fn push_spacer(&mut self, spacer: u64) -> RoutineResult<()> {
-//         if self.jobs.len() == self.max_capacity {
-//             Err(RoutineError::MaxCapacityReached)
-//         } else {
-//             Ok(spacer)
-//         }
-//         .map(|spacer| self.jobs.push(Arc::new(Job::Spacer(spacer))))
-//     }
-
-//     pub fn push_lambda(&mut self, lambda: Box<dyn Future<Output = T> + Unpin + 'static>) -> RoutineResult<()> {
-//         if self.jobs.len() == self.max_capacity {
-//             Err(RoutineError::MaxCapacityReached)
-//         } else {
-//             Ok(lambda)
-//         }
-//         .map(|lambda| self.jobs.push(Arc::new(Job::Lambda(lambda))))
-//     }
-
-//     pub fn remove_job(&mut self, _: usize) -> RoutineResult<()> { todo!() }
-// }
-
 impl<T> Iterator for Routine<T>
 where
 T: 'static + ?Sized, {
