@@ -2,10 +2,8 @@ use std::sync::Arc;
 
 use crate::{
     job::Job,
-    routine::{
-        error::RoutineError,
-        routine_builder::RoutineBuilder,
-    },
+    routine::error::RoutineError,
+    routine_builder::builder::RoutineBuilder,
 };
 
 pub type RoutineResult<T> = Result<T, RoutineError>;
