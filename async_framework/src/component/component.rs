@@ -41,26 +41,21 @@ M: 'static + Send + Future, {
 impl<M> Component<M>
 where
 M: 'static + Send + Future, {
-    // pub fn new<'a, N>(name: N) -> ComponentResult<Self>
-    // where
-    // N: Into<Cow<'a, str>>, {
-    //     get_new_id()
-    //         .map(|id| Self {
-    //             id,
-    //             name: name
-    //                 .into()
-    //                 .into_owned(),
-    //             send: None,
-    //             components: BTreeMap::new(),
-    //         })
-    //         .map_err(ComponentError::from)
-    // }
+    pub(crate) fn new<'a, N>(id: Identifier, name: N) -> Self
+    where
+    N: Into<Cow<'a, str>>, {
+        Self {
+            id,
+            name: name.into().into_owned(),
+            send: None,
+            components: BTreeMap::new(),
+        }
+    }
 
     pub fn start<T, A>(&mut self, mut routine: Routine<T>, handler: fn(M) -> A) -> ComponentResult<JoinHandle<()>>
     where
     T: 'static + Sized,
-    A: 'static + Send,
-    A: Future, {
+    A: 'static + Send + Future, {
         if self.send.is_none() {
             let (send, recv) = mpsc::unbounded_channel::<Wrapper<M>>();
             self.send = Some(send);
@@ -127,31 +122,5 @@ M: 'static + Send + Future, {
             .and_then(|component| component.send(message))
     }
 
-    pub fn add_component(&mut self, component: Arc<Component<M>>) -> () {
-        self.components
-            .entry(component.id())
-            .or_insert(component);
-        
-        todo!();
-    }
-
-    pub fn remove_component(&mut self, id: Identifier) -> Option<Arc<Component<M>>> {
-        self.components.remove(&id);
-
-        todo!();
-    }
-}
-
-impl<M, T, A> From<ComponentBuilder<M, T, A>> for Component<M>
-where
-M: 'static + Send + Future,
-T: 'static + ?Sized,
-A: 'static + Send + Future, {
-    fn from(component_builder: ComponentBuilder<M, T, A>) -> Self {
-        Self {
-            id: component_builder.id,
-            name: component_builder.name.take().unwrap(),
-            
-        }
-    }
+    pub fn components(&mut self) -> &mut BTreeMap<Identifier, Arc<Component<M>>> { &mut self.components }
 }

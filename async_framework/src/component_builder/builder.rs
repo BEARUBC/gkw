@@ -1,33 +1,41 @@
-use std::{borrow::Cow, future::Future};
+use std::{borrow::Cow, collections::BTreeMap, future::Future, marker::PhantomData};
 
 use crate::{
     component::component::{
         Identifier,
         Component,
     },
-    component_builder::error::ComponentBuilderError,
+    component_builder::error::{
+        ComponentBuilderError,
+        UC,
+    },
     routine::routine::Routine,
     utils::get_new_id,
 };
 
 pub type ComponentBuilderResult<T> = Result<T, ComponentBuilderError>;
 
-pub struct ComponentBuilder<M, T, A>
+/// # Note
+/// Right now, the ComponentBuilder is pretty useless
+/// especially since no real logic needs to be done in order to convert from a ComponentBuilder to Component
+/// Regardless, this class is preserved for future scalability purposes
+pub struct ComponentBuilder<M, T, A, N>
 where
 M: 'static + Send + Future,
 T: 'static + ?Sized,
 A: 'static + Send + Future, {
-    pub(crate) id: Identifier,
-    pub(crate) name: Option<String>,
-    pub(crate) routine: Option<Routine<T>>,
-    pub(crate) handler: Option<fn(M) -> A>,
+    id: Identifier,
+    name: Option<N>,
+    routine: Option<Routine<T>>,
+    handler: Option<fn(M) -> A>,
 }
 
-impl<M, T, A> ComponentBuilder<M, T, A>
+impl<'a, M, T, A, N> ComponentBuilder<M, T, A, N>
 where
 M: 'static + Send + Future,
-T: 'static + ?Sized,
-A: 'static + Send + Future, {
+T: 'static + Sized,
+A: 'static + Send + Future,
+N: Into<Cow<'a, str>>, {
     pub fn new() -> ComponentBuilderResult<Self> {
         get_new_id()
             .map(|id| Self {
@@ -39,11 +47,27 @@ A: 'static + Send + Future, {
             .map_err(ComponentBuilderError::from)
     }
 
-    pub fn set_name<'a, N>(&mut self, name: N)
-    where
-    N: Into<Cow<'a, str>>, { self.name = Some(name.into().into_owned()); }
+    pub fn set_name(&mut self, name: N) { self.name = Some(name); }
 
     pub fn set_routine(&mut self, routine: Routine<T>) { self.routine = Some(routine) }
 
     pub fn set_handler(&mut self, handler: fn(M) -> A) { self.handler = Some(handler) }
+
+    pub fn build(mut self) -> ComponentBuilderResult<Component<M>> {
+        if self.name.is_none() {
+            Err(ComponentBuilderError::UninitializedComponent(UC::Name))
+        } else if self.routine.is_none() {
+            Err(ComponentBuilderError::UninitializedComponent(UC::Routine))
+        } else if self.handler.is_none() {
+            Err(ComponentBuilderError::UninitializedComponent(UC::Handler))
+        } else {
+            Ok(())
+        }
+        .map(|()| Component::new(
+            self.id,
+            self.name
+                .take()
+                .unwrap()
+        ))
+    }
 }

@@ -7,10 +7,28 @@ use std::fmt::{
 use crate::utils::MutexError;
 
 #[derive(Debug, Clone)]
+pub enum UC {
+    Name,
+    Routine,
+    Handler,
+}
+
+impl Display for UC {
+    fn fmt(&self, f: &mut Formatter) -> Result {
+        use UC::*;
+
+        match self {
+            Name => write!(f, "Name"),
+            Routine => write!(f, "Routine"),
+            Handler => write!(f, "Handler"),
+        }
+    }
+}
+
+#[derive(Debug, Clone)]
 pub enum ComponentBuilderError {
     IdError,
-    AlreadyInitializedComponent,
-    UninitializedComponent,
+    UninitializedComponent(UC),
 }
 
 impl Display for ComponentBuilderError {
@@ -19,8 +37,7 @@ impl Display for ComponentBuilderError {
 
         match self {
             IdError => write!(f, "unable to get id for this component"),
-            AlreadyInitializedComponent => write!(f, "this component has already been initialized"),
-            UninitializedComponent => write!(f, "this component has not been initialized; consider calling Component::start"),
+            UninitializedComponent(uc) => write!(f, "field <{}> component has not been fully initialized", uc),
         }
     }
 }
