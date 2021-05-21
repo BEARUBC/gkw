@@ -1,5 +1,5 @@
 use tokio::{
-    runtime::Builder,
+    runtime::Builder as TokioBuilder,
     sync::mpsc::{
         self,
         UnboundedSender,
@@ -18,10 +18,16 @@ use std::{
     boxed::Box,
 };
 
-use crate::{component::{
+use crate::{
+    component::{
         error::ComponentError,
-        wrapper::Wrapper,
-    }, component_builder::builder::ComponentBuilder, job::Job, routine::routine::Routine, utils::get_new_id};
+        job_type::JobType,
+    },
+    component_builder::builder::ComponentBuilder,
+    job::Job,
+    routine::routine::Routine,
+    builder::Builder,
+};
 
 pub(crate) type Identifier = usize;
 pub type ComponentResult<T> = Result<T, ComponentError>;
@@ -34,7 +40,7 @@ M: 'static + Send + Future, {
     #[allow(unused)]
     name: String,
 
-    send: Option<UnboundedSender<Wrapper<M>>>,
+    send: Option<UnboundedSender<JobType<M>>>,
     components: BTreeMap<Identifier, Arc<Component<M>>>,
 }
 
@@ -57,7 +63,7 @@ M: 'static + Send + Future, {
     T: 'static + Sized,
     A: 'static + Send + Future, {
         if self.send.is_none() {
-            let (send, recv) = mpsc::unbounded_channel::<Wrapper<M>>();
+            let (send, recv) = mpsc::unbounded_channel::<JobType<M>>();
             self.send = Some(send);
 
             Ok(recv)
@@ -69,9 +75,9 @@ M: 'static + Send + Future, {
 
                 local.spawn_local(async move {
                     while let Some(new_task) = recv.recv().await {
-                        use Wrapper::*;
+                        use JobType::*;
                         match new_task {
-                            MessageWrapper(msg) => { tokio::task::spawn_local(handler(msg)); },
+                            Message(msg) => { tokio::task::spawn_local(handler(msg)); },
                             RunRequest => {
                                 use Job::*;
                                 match routine.next().unwrap().as_ref() {
@@ -94,7 +100,7 @@ M: 'static + Send + Future, {
                     };
                 });
 
-                Builder::new_current_thread()
+                TokioBuilder::new_current_thread()
                     .enable_all()
                     .build()
                     .expect("unable to construct runtime")
@@ -108,7 +114,7 @@ M: 'static + Send + Future, {
             .as_ref()
             .ok_or(ComponentError::UninitializedComponent)
             .and_then(|send| send
-                .send(Wrapper::MessageWrapper(message))
+                .send(JobType::Message(message))
                 .map_err(ComponentError::from)
             )
     }
@@ -123,4 +129,23 @@ M: 'static + Send + Future, {
     }
 
     pub fn components(&mut self) -> &mut BTreeMap<Identifier, Arc<Component<M>>> { &mut self.components }
+
+    pub fn remove_component(&mut self, id: Identifier) -> ComponentResult<Arc<Component<M>>> {
+        self.components
+            .remove(&id)
+            .ok_or(ComponentError::InvalidComponentId(id))
+    }
+}
+
+impl<'a, M, T, A, N> From<ComponentBuilder<M, T, A, N>> for Component<M>
+where
+M: 'static + Send + Future,
+T: 'static + ?Sized,
+A: 'static + Send + Future,
+N: Into<Cow<'a, str>>, {
+    fn from(component_builder: ComponentBuilder<M, T, A, N>) -> Self {
+        component_builder
+            .build()
+            .expect("unable to build")
+    }
 }

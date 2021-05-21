@@ -1,4 +1,7 @@
-use std::{borrow::Cow, collections::BTreeMap, future::Future, marker::PhantomData};
+use std::{
+    borrow::Cow,
+    future::Future,
+};
 
 use crate::{
     component::component::{
@@ -11,6 +14,7 @@ use crate::{
     },
     routine::routine::Routine,
     utils::get_new_id,
+    builder::Builder,
 };
 
 pub type ComponentBuilderResult<T> = Result<T, ComponentBuilderError>;
@@ -52,8 +56,15 @@ N: Into<Cow<'a, str>>, {
     pub fn set_routine(&mut self, routine: Routine<T>) { self.routine = Some(routine) }
 
     pub fn set_handler(&mut self, handler: fn(M) -> A) { self.handler = Some(handler) }
+}
 
-    pub fn build(mut self) -> ComponentBuilderResult<Component<M>> {
+impl<'a, M, T, A, N> Builder<Component<M>, ComponentBuilderError> for ComponentBuilder<M, T, A, N>
+where
+M: 'static + Send + Future,
+T: 'static + ?Sized,
+A: 'static + Send + Future,
+N: Into<Cow<'a, str>>, {
+    fn build(mut self) -> ComponentBuilderResult<Component<M>> {
         if self.name.is_none() {
             Err(ComponentBuilderError::UninitializedComponent(UC::Name))
         } else if self.routine.is_none() {

@@ -4,6 +4,7 @@ use crate::{
     job::Job,
     routine::error::RoutineError,
     routine_builder::builder::RoutineBuilder,
+    builder::Builder,
 };
 
 pub type RoutineResult<T> = Result<T, RoutineError>;
@@ -14,6 +15,21 @@ T: 'static + ?Sized, {
     jobs: Box<[Arc<Job<T>>]>,
     current_index: usize,
     max_capacity: usize,
+}
+
+impl<T> Routine<T>
+where
+T: 'static + ?Sized, {
+    pub(crate) fn new(v: Vec<Arc<Job<T>>>) -> Self {
+        let length = v.len();
+
+        Self {
+            jobs: v
+                .into_boxed_slice(),
+            current_index: 0usize,
+            max_capacity: length,
+        }
+    }
 }
 
 impl<T> Iterator for Routine<T>
@@ -39,18 +55,10 @@ T: 'static + ?Sized, {
 
 impl<T> From<RoutineBuilder<T>> for Routine<T>
 where
-T: 'static + ?Sized, {
+T: 'static + Sized, {
     fn from(routine_builder: RoutineBuilder<T>) -> Self {
-        let jobs_vec = routine_builder
-            .into_inner()
-            .into_boxed_slice();
-        
-        let length = jobs_vec.len();
-
-        Self {
-            jobs: jobs_vec,
-            current_index: 0usize,
-            max_capacity: length,
-        }
+        routine_builder
+            .build()
+            .expect("unable to build")
     }
 }

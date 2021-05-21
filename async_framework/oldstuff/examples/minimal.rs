@@ -6,7 +6,7 @@ use std::{
     sync::Arc,
 };
 
-use async_framework::{component::component::Component, job::Job, routine::builder::RoutineBuilder};
+use async_framework::{component::component::Component, job::Job, routine_builder::builder::RoutineBuilder};
 
 async fn handler<F>(message: F) -> ()
 where

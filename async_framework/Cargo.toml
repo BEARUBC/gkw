@@ -37,7 +37,7 @@ lazy_static = "1.4.0"
 # required-features = [] # Features required to build this target (N/A for lib).
 
 [[example]]
-name = "minimal"        # The name of the target.
+name = "building_a_component"        # The name of the target.
 test = true            # Is tested by default.
 doctest = false        # Documentation examples are tested by default.
 bench = true           # Is benchmarked by default.
