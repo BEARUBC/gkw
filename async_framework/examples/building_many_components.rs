@@ -1,12 +1,7 @@
-use std::{
-    future::Future,
-    pin::Pin,
-    sync::Arc,
-    task::{
+use std::{future::Future, pin::Pin, rc::Rc, sync::Arc, task::{
         Context,
         Poll
-    }
-};
+    }};
 
 use async_framework::{
     component_builder::builder::ComponentBuilder,
@@ -34,9 +29,7 @@ fn main() -> () {
     // COMPONENT 0
     // creating jobs
     let j0 = Arc::new(Job::Spacer(1u64));
-    let j1 = Arc::new(Job::Lambda(Box::new(async {
-        println!("hello, world!")
-    })));
+    let j1 = Arc::new(Job::Lambda(Box::new(async { println!("hello, world, from custom0!") })));
 
     // creating a routine_builder
     let mut routine_builder0 = RoutineBuilder::new_with_capacity(2usize);
@@ -53,7 +46,7 @@ fn main() -> () {
 
     // building a component
     let mut component_builder0 = ComponentBuilder::new().unwrap();
-    component_builder0.set_name("custom");
+    component_builder0.set_name("custom0");
     component_builder0.set_routine(routine0);
     component_builder0.set_handler(handler);
 
@@ -65,9 +58,7 @@ fn main() -> () {
     // COMPONENT 1
     // creating jobs
     let j2 = Arc::new(Job::Spacer(1u64));
-    let j3 = Arc::new(Job::Lambda(Box::new(async {
-        println!("hello, world!")
-    })));
+    let j3 = Arc::new(Job::Lambda(Box::new(async { println!("hello, world, from custom1") })));
 
     // creating a routine_builder
     let mut routine_builder1 = RoutineBuilder::new_with_capacity(2usize);
@@ -84,7 +75,7 @@ fn main() -> () {
 
     // building a component
     let mut component_builder1 = ComponentBuilder::new().unwrap();
-    component_builder1.set_name("custom");
+    component_builder1.set_name("custom1");
     component_builder1.set_routine(routine);
     component_builder1.set_handler(handler);
 
@@ -92,4 +83,10 @@ fn main() -> () {
     let component1 = component_builder1
         .build()
         .unwrap();
+    
+    #[allow(unused)]
+    let ac0 = Rc::new(component0);
+
+    #[allow(unused)]
+    let ac1 = Arc::new(component1);
 }

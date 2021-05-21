@@ -58,13 +58,13 @@ N: Into<Cow<'a, str>>, {
     pub fn set_handler(&mut self, handler: fn(M) -> A) { self.handler = Some(handler) }
 }
 
-impl<'a, M, T, A, N> Builder<Component<M>, ComponentBuilderError> for ComponentBuilder<M, T, A, N>
+impl<'a, M, T, A, N> Builder<Component<M, T, A>, ComponentBuilderError> for ComponentBuilder<M, T, A, N>
 where
 M: 'static + Send + Future,
-T: 'static + ?Sized,
+T: 'static + Sized,
 A: 'static + Send + Future,
 N: Into<Cow<'a, str>>, {
-    fn build(mut self) -> ComponentBuilderResult<Component<M>> {
+    fn build(mut self) -> ComponentBuilderResult<Component<M, T, A>> {
         if self.name.is_none() {
             Err(ComponentBuilderError::UninitializedComponent(UC::Name))
         } else if self.routine.is_none() {
@@ -78,7 +78,9 @@ N: Into<Cow<'a, str>>, {
             self.id,
             self.name
                 .take()
-                .unwrap()
+                .unwrap(),
+                self.routine,
+                self.handler,
         ))
     }
 }

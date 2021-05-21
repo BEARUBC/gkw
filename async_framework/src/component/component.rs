@@ -14,7 +14,9 @@ use std::{
     thread::{
         self,
         JoinHandle,
+        sleep,
     },
+    time::Duration,
     boxed::Box,
 };
 
@@ -32,22 +34,28 @@ use crate::{
 pub(crate) type Identifier = usize;
 pub type ComponentResult<T> = Result<T, ComponentError>;
 
-pub struct Component<M>
+pub struct Component<M, T, A>
 where
-M: 'static + Send + Future, {
+M: 'static + Send + Future,
+T: 'static + ?Sized,
+A: 'static + Send + Future, {
     id: Identifier,
 
     #[allow(unused)]
     name: String,
 
     send: Option<UnboundedSender<JobType<M>>>,
-    components: BTreeMap<Identifier, Arc<Component<M>>>,
+    components: BTreeMap<Identifier, Arc<Component<M, T, A>>>,
+    routine: Option<Routine<T>>,
+    handler: Option<fn(M) -> A>,
 }
 
-impl<M> Component<M>
+impl<M, T, A> Component<M, T, A>
 where
-M: 'static + Send + Future, {
-    pub(crate) fn new<'a, N>(id: Identifier, name: N) -> Self
+M: 'static + Send + Future,
+T: 'static + Sized,
+A: 'static + Send + Future, {
+    pub(crate) fn new<'a, N>(id: Identifier, name: N, routine: Option<Routine<T>>, handler: Option<fn(M) -> A>) -> Self
     where
     N: Into<Cow<'a, str>>, {
         Self {
@@ -55,22 +63,21 @@ M: 'static + Send + Future, {
             name: name.into().into_owned(),
             send: None,
             components: BTreeMap::new(),
+            routine,
+            handler,
         }
     }
 
-    pub fn start<T, A>(&mut self, mut routine: Routine<T>, handler: fn(M) -> A) -> ComponentResult<JoinHandle<()>>
-    where
-    T: 'static + Sized,
-    A: 'static + Send + Future, {
-        if self.send.is_none() {
+    pub fn start(&mut self) -> ComponentResult<JoinHandle<()>> {
+        if self.send.is_none() && self.routine.is_some() && self.handler.is_some() {
             let (send, recv) = mpsc::unbounded_channel::<JobType<M>>();
             self.send = Some(send);
 
-            Ok(recv)
+            Ok((recv, self.routine.take().unwrap(), self.handler.take().unwrap()))
         } else {
             Err(ComponentError::AlreadyInitializedComponent)
         }
-        .map(|mut recv| thread::spawn(move || {
+        .map(|(mut recv, mut routine, handler)| thread::spawn(move || {
                 let local = LocalSet::new();
 
                 local.spawn_local(async move {
@@ -80,8 +87,11 @@ M: 'static + Send + Future, {
                             Message(msg) => { tokio::task::spawn_local(handler(msg)); },
                             RunRequest => {
                                 use Job::*;
-                                match routine.next().unwrap().as_ref() {
-                                    Spacer(spacer) => std::thread::sleep(std::time::Duration::from_secs(*spacer)),
+                                match routine
+                                    .next()
+                                    .unwrap()
+                                    .as_ref() {
+                                    Spacer(spacer) => sleep(Duration::from_secs(*spacer)),
                                     Lambda(lambda) => {
                                         // SERIOUS UNSAFE CODE GOING ON HERE
                                         // 1. Turning &Box<X> to &mut Box<Y>
@@ -91,7 +101,10 @@ M: 'static + Send + Future, {
                                         // (2.) may be especially unsafe... idk though...
                                         #[allow(mutable_transmutes)]
                                         tokio::task::spawn_local(unsafe {
-                                            std::mem::transmute::<&Box<dyn Future<Output = T> + 'static>, &mut Box<dyn Future<Output = T> + Unpin + 'static>>(lambda)
+                                            std::mem::transmute::<
+                                                &Box<dyn Future<Output = T> + 'static>,
+                                                &mut Box<dyn Future<Output = T> + Unpin + 'static>
+                                                >(lambda)
                                         });
                                     },
                                 };
@@ -119,6 +132,16 @@ M: 'static + Send + Future, {
             )
     }
 
+    pub fn send_run_request(&self) -> ComponentResult<()> {
+        self.send
+            .as_ref()
+            .ok_or(ComponentError::UninitializedComponent)
+            .and_then(|send| send
+                .send(JobType::RunRequest)
+                .map_err(ComponentError::from)
+            )
+    }
+
     pub fn id(&self) -> Identifier { self.id }
 
     pub fn send_to(&self, id: Identifier, message: M) -> ComponentResult<()> {
@@ -128,19 +151,25 @@ M: 'static + Send + Future, {
             .and_then(|component| component.send(message))
     }
 
-    pub fn components(&mut self) -> &mut BTreeMap<Identifier, Arc<Component<M>>> { &mut self.components }
+    pub fn components(&mut self) -> &mut BTreeMap<Identifier, Arc<Component<M, T, A>>> { &mut self.components }
 
-    pub fn remove_component(&mut self, id: Identifier) -> ComponentResult<Arc<Component<M>>> {
+    pub fn add_component(&mut self, component: Arc<Component<M, T, A>>) -> () {
+        self.components
+            .entry(component.id())
+            .or_insert(component);
+    }
+
+    pub fn remove_component(&mut self, id: Identifier) -> ComponentResult<Arc<Component<M, T, A>>> {
         self.components
             .remove(&id)
             .ok_or(ComponentError::InvalidComponentId(id))
     }
 }
 
-impl<'a, M, T, A, N> From<ComponentBuilder<M, T, A, N>> for Component<M>
+impl<'a, M, T, A, N> From<ComponentBuilder<M, T, A, N>> for Component<M, T, A>
 where
 M: 'static + Send + Future,
-T: 'static + ?Sized,
+T: 'static + Sized,
 A: 'static + Send + Future,
 N: Into<Cow<'a, str>>, {
     fn from(component_builder: ComponentBuilder<M, T, A, N>) -> Self {

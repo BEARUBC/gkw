@@ -8,6 +8,8 @@ use std::{
     }
 };
 
+use tokio::runtime::Builder as TokioBuilder;
+
 use async_framework::{
     component_builder::builder::ComponentBuilder,
     job::Job,
@@ -33,9 +35,8 @@ async fn handler(message: MS) -> () {
 fn main() -> () {
     // creating jobs
     let j1 = Arc::new(Job::Spacer(1u64));
-    let j2 = Arc::new(Job::Lambda(Box::new(async {
-        println!("hello, world!")
-    })));
+    // let j2 = Arc::new(Job::Spacer(1u64));
+    let j2 = Arc::new(Job::Lambda(Box::new(async {})));
 
     // creating a routine_builder
     let mut routine_builder = RoutineBuilder::new_with_capacity(2usize);
@@ -55,7 +56,22 @@ fn main() -> () {
     component_builder.set_handler(handler);
 
     #[allow(unused)]
-    let component = component_builder
+    let mut component = component_builder
         .build()
         .unwrap();
+    
+    component.start().unwrap();
+
+    TokioBuilder::new_current_thread()
+        .enable_all()
+        .build()
+        .unwrap()
+        .block_on(async move {
+            loop {
+                std::thread::sleep(std::time::Duration::from_secs(3u64));
+                component.send(MS).unwrap();
+                // component.send(MS).unwrap();
+                component.send_run_request().unwrap();
+            }
+        });
 }
