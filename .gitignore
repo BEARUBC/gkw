@@ -3,5 +3,4 @@
 Cargo.lock
 
 # Python I/O
-/py_io/input.json
-/py_io/output.json
+/py/io/

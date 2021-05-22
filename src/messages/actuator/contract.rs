@@ -20,7 +20,7 @@ pub fn build_contract(contraction_amount: f64) -> Contract {
     }
 }
 
-impl Handler for Contract {
+impl Handler<f64> for Contract {
     fn handler(self: &Self) -> f64 {
         println!("{}", self.contract_amount);
         self.contract_amount - 0.1
