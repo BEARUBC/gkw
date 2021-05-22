@@ -52,7 +52,7 @@ use crate::{
 /* internal mods */
 fn main() -> () {
 
-    let custom = Component::<Asynchronous>::new(String::from("custom"), handler);
+    /*let custom = Component::<Asynchronous>::new(String::from("custom"), handler);
 
     Builder::new_current_thread()
         .enable_all()
@@ -70,7 +70,7 @@ fn main() -> () {
                     .unwrap();
             };
         });
-
+    */
 
     // create_file("input.json");
     // create_file("output.json");
