@@ -1,4 +1,5 @@
 use std::sync::Arc;
+use std::future::Future;
 
 use crate::{
     job::Job,
@@ -11,7 +12,7 @@ pub type RoutineResult<T> = Result<T, RoutineError>;
 
 pub struct Routine<T>
 where
-T: 'static + ?Sized, {
+T: 'static + Future + Sized, {
     jobs: Box<[Arc<Job<T>>]>,
     current_index: usize,
     max_capacity: usize,
@@ -19,7 +20,7 @@ T: 'static + ?Sized, {
 
 impl<T> Routine<T>
 where
-T: 'static + ?Sized, {
+T: 'static + Future + Sized, {
     pub(crate) fn new(v: Vec<Arc<Job<T>>>) -> Self {
         let length = v.len();
 
@@ -34,7 +35,7 @@ T: 'static + ?Sized, {
 
 impl<T> Iterator for Routine<T>
 where
-T: 'static + ?Sized, {
+T: 'static + Future + Sized, {
     type Item = Arc<Job<T>>;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -55,7 +56,7 @@ T: 'static + ?Sized, {
 
 impl<T> From<RoutineBuilder<T>> for Routine<T>
 where
-T: 'static + Sized, {
+T: 'static + Future + Sized, {
     fn from(routine_builder: RoutineBuilder<T>) -> Self {
         routine_builder
             .build()

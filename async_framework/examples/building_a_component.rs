@@ -28,15 +28,30 @@ impl Future for MS {
     }
 }
 
-async fn handler(message: MS) -> () {
+async fn handler(message: MS) -> u32 {
     message.await;
+    0u32
 }
 
+async fn lambda_1() -> u32 { println!("Hello, world, from lambda!"); 0u32 }
+
+/* above is equivalent to:
+fn lambda_1() -> F
+where
+F: 
+ */
+
 fn main() -> () {
+    use std::env;
+
+    let key = "RUST_BACKTRACE";
+    env::set_var(key, "1");
+    // assert_eq!(env::var(key), Ok("VALUE".to_string()));s
+
     // creating jobs
     let j1 = Arc::new(Job::Spacer(1u64));
     // let j2 = Arc::new(Job::Spacer(1u64));
-    let j2 = Arc::new(Job::Lambda(Box::new(async {})));
+    let j2 = Arc::new(Job::Lambda(Box::new(lambda_1)));
 
     // creating a routine_builder
     let mut routine_builder = RoutineBuilder::new_with_capacity(2usize);
@@ -70,7 +85,6 @@ fn main() -> () {
             loop {
                 std::thread::sleep(std::time::Duration::from_secs(3u64));
                 component.send(MS).unwrap();
-                // component.send(MS).unwrap();
                 component.send_run_request().unwrap();
             }
         });

@@ -26,7 +26,7 @@ pub type ComponentBuilderResult<T> = Result<T, ComponentBuilderError>;
 pub struct ComponentBuilder<M, T, A, N>
 where
 M: 'static + Send + Future,
-T: 'static + ?Sized,
+T: 'static + Future + Sized,
 A: 'static + Send + Future, {
     id: Identifier,
     name: Option<N>,
@@ -37,7 +37,7 @@ A: 'static + Send + Future, {
 impl<'a, M, T, A, N> ComponentBuilder<M, T, A, N>
 where
 M: 'static + Send + Future,
-T: 'static + Sized,
+T: 'static + Future + Sized,
 A: 'static + Send + Future,
 N: Into<Cow<'a, str>>, {
     pub fn new() -> ComponentBuilderResult<Self> {
@@ -61,7 +61,7 @@ N: Into<Cow<'a, str>>, {
 impl<'a, M, T, A, N> Builder<Component<M, T, A>, ComponentBuilderError> for ComponentBuilder<M, T, A, N>
 where
 M: 'static + Send + Future,
-T: 'static + Sized,
+T: 'static + Future + Sized,
 A: 'static + Send + Future,
 N: Into<Cow<'a, str>>, {
     fn build(mut self) -> ComponentBuilderResult<Component<M, T, A>> {

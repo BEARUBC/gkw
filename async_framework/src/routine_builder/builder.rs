@@ -4,6 +4,7 @@ use std::{
         Deref,
     },
     sync::Arc,
+    future::Future,
 };
 
 use crate::{
@@ -16,13 +17,13 @@ pub type RoutineBuilderResult<T> = Result<T, ()>;
 
 pub struct RoutineBuilder<T>
 where
-T: 'static + ?Sized, {
+T: 'static + Future + Sized, {
     jobs: Vec<Arc<Job<T>>>,
 }
 
 impl<T> RoutineBuilder<T>
 where
-T: 'static + ?Sized, {
+T: 'static + Future + Sized, {
     #[allow(unused)]
     pub fn new() -> Self { Self { jobs: vec![], } }
 
@@ -32,19 +33,19 @@ T: 'static + ?Sized, {
 
 impl<T> AsMut<Vec<Arc<Job<T>>>> for RoutineBuilder<T>
 where
-T: 'static + ?Sized, {
+T: 'static + Future + Sized, {
     fn as_mut(&mut self) -> &mut Vec<Arc<Job<T>>> { &mut self.jobs }
 }
 
 impl<T> AsRef<Vec<Arc<Job<T>>>> for RoutineBuilder<T>
 where
-T: 'static + ?Sized, {
+T: 'static + Future + Sized, {
     fn as_ref(&self) -> &Vec<Arc<Job<T>>> { &self.jobs }
 }
 
 impl<T> Deref for RoutineBuilder<T>
 where
-T: 'static + ?Sized, {
+T: 'static + Future + Sized, {
     type Target = Vec<Arc<Job<T>>>;
 
     fn deref(&self) -> &Self::Target { &self.jobs }
@@ -52,11 +53,13 @@ T: 'static + ?Sized, {
 
 impl<T> DerefMut for RoutineBuilder<T>
 where
-T: 'static + ?Sized, {
+T: 'static + Future + Sized, {
     fn deref_mut(&mut self) -> &mut Self::Target { &mut self.jobs }
 }
 
-impl<T> Builder<Routine<T>, ()> for RoutineBuilder<T> {
+impl<T> Builder<Routine<T>, ()> for RoutineBuilder<T>
+where
+T: 'static + Future + Sized, {
     fn build(self) -> RoutineBuilderResult<Routine<T>> {
         Ok(Routine::new(self.jobs))
     }

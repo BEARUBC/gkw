@@ -5,28 +5,27 @@ use std::future::Future;
 
 pub enum Job<T>
 where
-T: 'static + ?Sized, {
+T: 'static + Future + Sized, {
     Spacer(u64),
-    Lambda(Box<dyn Future<Output = T> + 'static>),
+    Lambda(Box<fn() -> T>),
 }
 
 impl<T> Clone for Job<T>
 where
-T: 'static + ?Sized, {
+T: 'static + Future + Sized, {
     fn clone(&self) -> Self { todo!() }
 }
 
 unsafe impl<T> Send for Job<T>
 where
-T: 'static + ?Sized, {}
+T: 'static + Future + Sized, {}
 
 unsafe impl<T> Sync for Job<T>
 where
-T: 'static + ?Sized, {}
+T: 'static + Future + Sized, {}
 
-impl<A, T> From<A> for Job<T>
+impl<T> From<fn() -> T> for Job<T>
 where
-T: 'static + ?Sized,
-A: 'static + Future<Output = T> + Unpin, {
-    fn from(lambda: A) -> Self { Self::Lambda(Box::new(lambda)) }
+T: 'static + Future + Sized, {
+    fn from(lambda: fn() -> T) -> Self { Self::Lambda(Box::new(lambda)) }
 }

@@ -17,7 +17,6 @@ use std::{
         sleep,
     },
     time::Duration,
-    boxed::Box,
 };
 
 use crate::{
@@ -37,7 +36,7 @@ pub type ComponentResult<T> = Result<T, ComponentError>;
 pub struct Component<M, T, A>
 where
 M: 'static + Send + Future,
-T: 'static + ?Sized,
+T: 'static + Future + Sized,
 A: 'static + Send + Future, {
     id: Identifier,
 
@@ -53,7 +52,7 @@ A: 'static + Send + Future, {
 impl<M, T, A> Component<M, T, A>
 where
 M: 'static + Send + Future,
-T: 'static + Sized,
+T: 'static + Future + Sized,
 A: 'static + Send + Future, {
     pub(crate) fn new<'a, N>(id: Identifier, name: N, routine: Option<Routine<T>>, handler: Option<fn(M) -> A>) -> Self
     where
@@ -92,21 +91,7 @@ A: 'static + Send + Future, {
                                     .unwrap()
                                     .as_ref() {
                                     Spacer(spacer) => sleep(Duration::from_secs(*spacer)),
-                                    Lambda(lambda) => {
-                                        // SERIOUS UNSAFE CODE GOING ON HERE
-                                        // 1. Turning &Box<X> to &mut Box<Y>
-                                        // 2. Where X + Unpin == Y
-                                        //
-                                        // # Note
-                                        // (2.) may be especially unsafe... idk though...
-                                        #[allow(mutable_transmutes)]
-                                        tokio::task::spawn_local(unsafe {
-                                            std::mem::transmute::<
-                                                &Box<dyn Future<Output = T> + 'static>,
-                                                &mut Box<dyn Future<Output = T> + Unpin + 'static>
-                                                >(lambda)
-                                        });
-                                    },
+                                    Lambda(lambda) => { tokio::task::spawn_local(lambda()); },
                                 };
                             },
                         };
@@ -169,7 +154,7 @@ A: 'static + Send + Future, {
 impl<'a, M, T, A, N> From<ComponentBuilder<M, T, A, N>> for Component<M, T, A>
 where
 M: 'static + Send + Future,
-T: 'static + Sized,
+T: 'static + Future + Sized,
 A: 'static + Send + Future,
 N: Into<Cow<'a, str>>, {
     fn from(component_builder: ComponentBuilder<M, T, A, N>) -> Self {
