@@ -12,6 +12,7 @@ pub enum ComponentError {
     AlreadyInitializedComponent,
     UninitializedComponent,
     InvalidComponentId(Identifier),
+    ComponentAlreadyAdded(Identifier),
     SendError,
 }
 
@@ -22,7 +23,8 @@ impl Display for ComponentError {
         match self {
             AlreadyInitializedComponent => write!(f, "component has already been initialized"),
             UninitializedComponent => write!(f, "component has not been initialized; consider calling Component::start"),
-            InvalidComponentId(id) => write!(f, "{}", id),
+            InvalidComponentId(_) => todo!(),
+            ComponentAlreadyAdded(_) => todo!(),
             SendError => write!(f, "unable to send message"),
         }
     }

@@ -1,31 +1,32 @@
-#![allow(unused)]
+use std::{
+    future::Future,
+    rc::Rc,
+};
 
-use std::sync::Arc;
-use std::future::Future;
+use crate::contacts::contacts::Contacts;
 
-pub enum Job<T>
+#[derive(Clone)]
+pub enum Job<T, M>
 where
-T: 'static + Future + Sized, {
+T: 'static + Future + Sized,
+M: 'static + Future + Send, {
     Spacer(u64),
-    Lambda(Box<fn() -> T>),
+    Lambda(Box<fn(Rc<Contacts<M>>) -> T>),
 }
 
-impl<T> Clone for Job<T>
+unsafe impl<T, M> Send for Job<T, M>
 where
-T: 'static + Future + Sized, {
-    fn clone(&self) -> Self { todo!() }
-}
+T: 'static + Future + Sized,
+M: 'static + Future + Send, {}
 
-unsafe impl<T> Send for Job<T>
+unsafe impl<T, M> Sync for Job<T, M>
 where
-T: 'static + Future + Sized, {}
+T: 'static + Future + Sized,
+M: 'static + Future + Send, {}
 
-unsafe impl<T> Sync for Job<T>
+impl<T, M> From<fn(Rc<Contacts<M>>) -> T> for Job<T, M>
 where
-T: 'static + Future + Sized, {}
-
-impl<T> From<fn() -> T> for Job<T>
-where
-T: 'static + Future + Sized, {
-    fn from(lambda: fn() -> T) -> Self { Self::Lambda(Box::new(lambda)) }
+T: 'static + Future + Sized,
+M: 'static + Future + Send, {
+    fn from(lambda: fn(Rc<Contacts<M>>) -> T) -> Self { Self::Lambda(Box::new(lambda)) }
 }

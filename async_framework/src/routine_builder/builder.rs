@@ -15,15 +15,17 @@ use crate::{
 
 pub type RoutineBuilderResult<T> = Result<T, ()>;
 
-pub struct RoutineBuilder<T>
+pub struct RoutineBuilder<T, M>
 where
-T: 'static + Future + Sized, {
-    jobs: Vec<Arc<Job<T>>>,
+T: 'static + Future + Sized,
+M: 'static + Future + Send, {
+    jobs: Vec<Arc<Job<T, M>>>,
 }
 
-impl<T> RoutineBuilder<T>
+impl<T, M> RoutineBuilder<T, M>
 where
-T: 'static + Future + Sized, {
+T: 'static + Future + Sized,
+M: 'static + Future + Send, {
     #[allow(unused)]
     pub fn new() -> Self { Self { jobs: vec![], } }
 
@@ -31,36 +33,41 @@ T: 'static + Future + Sized, {
     pub fn new_with_capacity(capacity: usize) -> Self { Self { jobs: Vec::with_capacity(capacity) } }
 }
 
-impl<T> AsMut<Vec<Arc<Job<T>>>> for RoutineBuilder<T>
+impl<T, M> AsMut<Vec<Arc<Job<T, M>>>> for RoutineBuilder<T, M>
 where
-T: 'static + Future + Sized, {
-    fn as_mut(&mut self) -> &mut Vec<Arc<Job<T>>> { &mut self.jobs }
+T: 'static + Future + Sized,
+M: 'static + Future + Send, {
+    fn as_mut(&mut self) -> &mut Vec<Arc<Job<T, M>>> { &mut self.jobs }
 }
 
-impl<T> AsRef<Vec<Arc<Job<T>>>> for RoutineBuilder<T>
+impl<T, M> AsRef<Vec<Arc<Job<T, M>>>> for RoutineBuilder<T, M>
 where
-T: 'static + Future + Sized, {
-    fn as_ref(&self) -> &Vec<Arc<Job<T>>> { &self.jobs }
+T: 'static + Future + Sized,
+M: 'static + Future + Send, {
+    fn as_ref(&self) -> &Vec<Arc<Job<T, M>>> { &self.jobs }
 }
 
-impl<T> Deref for RoutineBuilder<T>
+impl<T, M> Deref for RoutineBuilder<T, M>
 where
-T: 'static + Future + Sized, {
-    type Target = Vec<Arc<Job<T>>>;
+T: 'static + Future + Sized,
+M: 'static + Future + Send, {
+    type Target = Vec<Arc<Job<T, M>>>;
 
     fn deref(&self) -> &Self::Target { &self.jobs }
 }
 
-impl<T> DerefMut for RoutineBuilder<T>
+impl<T, M> DerefMut for RoutineBuilder<T, M>
 where
-T: 'static + Future + Sized, {
+T: 'static + Future + Sized,
+M: 'static + Future + Send, {
     fn deref_mut(&mut self) -> &mut Self::Target { &mut self.jobs }
 }
 
-impl<T> Builder<Routine<T>, ()> for RoutineBuilder<T>
+impl<T, M> Builder<Routine<T, M>, ()> for RoutineBuilder<T, M>
 where
-T: 'static + Future + Sized, {
-    fn build(self) -> RoutineBuilderResult<Routine<T>> {
+T: 'static + Future + Sized,
+M: 'static + Future + Send, {
+    fn build(self) -> RoutineBuilderResult<Routine<T, M>> {
         Ok(Routine::new(self.jobs))
     }
 }

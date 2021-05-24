@@ -4,7 +4,9 @@ use std::fmt::{
     Result,
 };
 
-use crate::utils::MutexError;
+use crate::{component::component::Identifier, utils::MutexError};
+
+use crate::contacts::error::ContactsError;
 
 #[derive(Debug, Clone)]
 pub enum UC {
@@ -28,6 +30,7 @@ impl Display for UC {
 #[derive(Debug, Clone)]
 pub enum ComponentBuilderError {
     IdError,
+    ContactDoesNotExist(Identifier),
     UninitializedComponent(UC),
 }
 
@@ -37,6 +40,7 @@ impl Display for ComponentBuilderError {
 
         match self {
             IdError => write!(f, "unable to get id for this component"),
+            ContactDoesNotExist(_) => todo!(),
             UninitializedComponent(uc) => write!(f, "field <{}> component has not been fully initialized", uc),
         }
     }
@@ -44,4 +48,14 @@ impl Display for ComponentBuilderError {
 
 impl<'a> From<MutexError<'a>> for ComponentBuilderError {
     fn from(_: MutexError) -> Self { Self::IdError }
+}
+
+impl From<ContactsError> for ComponentBuilderError {
+    fn from(contacts_error: ContactsError) -> Self {
+        use ContactsError::*;
+
+        match contacts_error {
+            SenderDoesNotExist(id) => Self::ContactDoesNotExist(id),
+        }
+    }
 }

@@ -1,16 +1,18 @@
 use tokio::{
     runtime::Builder as TokioBuilder,
     sync::mpsc::{
-        self,
-        UnboundedSender,
+        UnboundedReceiver,
+        UnboundedSender
     },
-    task::LocalSet,
+    task::{
+        LocalSet,
+        spawn_local,
+    },
 };
 use std::{
     borrow::Cow,
-    collections::BTreeMap,
     future::Future,
-    sync::Arc,
+    rc::Rc,
     thread::{
         self,
         JoinHandle,
@@ -20,6 +22,7 @@ use std::{
 };
 
 use crate::{
+    builder::Builder,
     component::{
         error::ComponentError,
         job_type::JobType,
@@ -27,7 +30,7 @@ use crate::{
     component_builder::builder::ComponentBuilder,
     job::Job,
     routine::routine::Routine,
-    builder::Builder,
+    contacts::contacts::Contacts,
 };
 
 pub(crate) type Identifier = usize;
@@ -35,7 +38,7 @@ pub type ComponentResult<T> = Result<T, ComponentError>;
 
 pub struct Component<M, T, A>
 where
-M: 'static + Send + Future,
+M: 'static + Future + Send,
 T: 'static + Future + Sized,
 A: 'static + Send + Future, {
     id: Identifier,
@@ -43,10 +46,11 @@ A: 'static + Send + Future, {
     #[allow(unused)]
     name: String,
 
-    send: Option<UnboundedSender<JobType<M>>>,
-    components: BTreeMap<Identifier, Arc<Component<M, T, A>>>,
-    routine: Option<Routine<T>>,
-    handler: Option<fn(M) -> A>,
+    send: UnboundedSender<JobType<M>>,
+    recv: Option<UnboundedReceiver<JobType<M>>>,
+    contacts: Option<Contacts<M>>,
+    routine: Option<Routine<T, M>>,
+    handler: Option<fn(Rc<Contacts<M>>, M) -> A>,
 }
 
 impl<M, T, A> Component<M, T, A>
@@ -54,44 +58,82 @@ where
 M: 'static + Send + Future,
 T: 'static + Future + Sized,
 A: 'static + Send + Future, {
-    pub(crate) fn new<'a, N>(id: Identifier, name: N, routine: Option<Routine<T>>, handler: Option<fn(M) -> A>) -> Self
+    #[allow(unused)]
+    pub(crate) fn new<'a, N>(
+        id: Identifier,
+        name: N,
+        send: UnboundedSender<JobType<M>>,
+        recv: UnboundedReceiver<JobType<M>>,
+        contacts: Contacts<M>,
+        routine: Routine<T, M>,
+        handler: fn(Rc<Contacts<M>>, M) -> A,
+    ) -> Self
     where
     N: Into<Cow<'a, str>>, {
         Self {
             id,
             name: name.into().into_owned(),
-            send: None,
-            components: BTreeMap::new(),
-            routine,
-            handler,
+            send,
+            recv: Some(recv),
+            contacts: Some(contacts),
+            routine: Some(routine),
+            handler: Some(handler),
         }
     }
 
     pub fn start(&mut self) -> ComponentResult<JoinHandle<()>> {
-        if self.send.is_none() && self.routine.is_some() && self.handler.is_some() {
-            let (send, recv) = mpsc::unbounded_channel::<JobType<M>>();
-            self.send = Some(send);
-
-            Ok((recv, self.routine.take().unwrap(), self.handler.take().unwrap()))
+        if
+        self.recv
+            .is_some()
+        && self.contacts
+            .is_some()
+        && self.routine
+            .is_some()
+        && self.handler
+            .is_some() {
+            Ok((
+                self.recv
+                    .take()
+                    .unwrap(),
+                self.contacts
+                    .take()
+                    .unwrap(),
+                self.routine
+                    .take()
+                    .unwrap(),
+                self.handler
+                    .take()
+                    .unwrap(),
+            ))
         } else {
             Err(ComponentError::AlreadyInitializedComponent)
         }
-        .map(|(mut recv, mut routine, handler)| thread::spawn(move || {
+        .map(|(mut recv, contacts, mut routine, handler)| thread::spawn(move || {
                 let local = LocalSet::new();
 
                 local.spawn_local(async move {
+                    let contacts_refcount = Rc::new(contacts);
+
                     while let Some(new_task) = recv.recv().await {
                         use JobType::*;
+
                         match new_task {
-                            Message(msg) => { tokio::task::spawn_local(handler(msg)); },
+                            Message(msg) => {
+                                spawn_local(handler(
+                                    contacts_refcount
+                                        .clone(),
+                                    msg,
+                                ));
+                            },
                             RunRequest => {
                                 use Job::*;
+
                                 match routine
                                     .next()
                                     .unwrap()
                                     .as_ref() {
-                                    Spacer(spacer) => sleep(Duration::from_secs(*spacer)),
-                                    Lambda(lambda) => { tokio::task::spawn_local(lambda()); },
+                                    Spacer(spacer) => sleep(Duration::from_millis(*spacer)),
+                                    Lambda(lambda) => { spawn_local(lambda(contacts_refcount.clone())); },
                                 };
                             },
                         };
@@ -109,46 +151,17 @@ A: 'static + Send + Future, {
 
     pub fn send(&self, message: M) -> ComponentResult<()> {
         self.send
-            .as_ref()
-            .ok_or(ComponentError::UninitializedComponent)
-            .and_then(|send| send
-                .send(JobType::Message(message))
-                .map_err(ComponentError::from)
-            )
+            .send(JobType::Message(message))
+            .map_err(ComponentError::from)
     }
 
-    pub fn send_run_request(&self) -> ComponentResult<()> {
+    pub fn run_next_job(&self) -> ComponentResult<()> {
         self.send
-            .as_ref()
-            .ok_or(ComponentError::UninitializedComponent)
-            .and_then(|send| send
-                .send(JobType::RunRequest)
-                .map_err(ComponentError::from)
-            )
+            .send(JobType::RunRequest)
+            .map_err(ComponentError::from)
     }
 
     pub fn id(&self) -> Identifier { self.id }
-
-    pub fn send_to(&self, id: Identifier, message: M) -> ComponentResult<()> {
-        self.components
-            .get(&id)
-            .ok_or(ComponentError::InvalidComponentId(id))
-            .and_then(|component| component.send(message))
-    }
-
-    pub fn components(&mut self) -> &mut BTreeMap<Identifier, Arc<Component<M, T, A>>> { &mut self.components }
-
-    pub fn add_component(&mut self, component: Arc<Component<M, T, A>>) -> () {
-        self.components
-            .entry(component.id())
-            .or_insert(component);
-    }
-
-    pub fn remove_component(&mut self, id: Identifier) -> ComponentResult<Arc<Component<M, T, A>>> {
-        self.components
-            .remove(&id)
-            .ok_or(ComponentError::InvalidComponentId(id))
-    }
 }
 
 impl<'a, M, T, A, N> From<ComponentBuilder<M, T, A, N>> for Component<M, T, A>

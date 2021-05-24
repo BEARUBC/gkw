@@ -1,27 +1,31 @@
-use std::sync::Arc;
-use std::future::Future;
+use std::{
+    sync::Arc,
+    future::Future,
+};
 
 use crate::{
+    builder::Builder,
     job::Job,
     routine::error::RoutineError,
     routine_builder::builder::RoutineBuilder,
-    builder::Builder,
 };
 
 pub type RoutineResult<T> = Result<T, RoutineError>;
 
-pub struct Routine<T>
+pub struct Routine<T, M>
 where
-T: 'static + Future + Sized, {
-    jobs: Box<[Arc<Job<T>>]>,
+T: 'static + Future + Sized,
+M: 'static + Future + Send, {
+    jobs: Box<[Arc<Job<T, M>>]>,
     current_index: usize,
     max_capacity: usize,
 }
 
-impl<T> Routine<T>
+impl<T, M> Routine<T, M>
 where
-T: 'static + Future + Sized, {
-    pub(crate) fn new(v: Vec<Arc<Job<T>>>) -> Self {
+T: 'static + Future + Sized,
+M: 'static + Future + Send, {
+    pub(crate) fn new(v: Vec<Arc<Job<T, M>>>) -> Self {
         let length = v.len();
 
         Self {
@@ -33,10 +37,11 @@ T: 'static + Future + Sized, {
     }
 }
 
-impl<T> Iterator for Routine<T>
+impl<T, M> Iterator for Routine<T, M>
 where
-T: 'static + Future + Sized, {
-    type Item = Arc<Job<T>>;
+T: 'static + Future + Sized,
+M: 'static + Future + Send, {
+    type Item = Arc<Job<T, M>>;
 
     fn next(&mut self) -> Option<Self::Item> {
         let result = Some(self.jobs
@@ -54,10 +59,11 @@ T: 'static + Future + Sized, {
     }
 }
 
-impl<T> From<RoutineBuilder<T>> for Routine<T>
+impl<T, M> From<RoutineBuilder<T, M>> for Routine<T, M>
 where
-T: 'static + Future + Sized, {
-    fn from(routine_builder: RoutineBuilder<T>) -> Self {
+T: 'static + Future + Sized,
+M: 'static + Future + Send, {
+    fn from(routine_builder: RoutineBuilder<T, M>) -> Self {
         routine_builder
             .build()
             .expect("unable to build")
