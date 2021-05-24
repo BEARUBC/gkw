@@ -3,5 +3,7 @@
 Cargo.lock
 
 # Python I/O
-/py_io/input.json
-/py_io/output.json
+/py/io/input/camera_input.json
+/py/io/input/emg_input.json
+/py/io/input/fsr_input.json
+/py/io/output/emg_output.json
