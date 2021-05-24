@@ -1,0 +1,3 @@
+# Note
+Do NOT touch/read this old stuff, it is a previous (and outdated) implementation of the async_framework.
+Reading it will just be a waste of your time; this will be deleted soon in the future, I'm keeping it here JIC...
