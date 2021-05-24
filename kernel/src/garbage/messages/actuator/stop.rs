@@ -13,7 +13,7 @@ use crate::messages::{
 
 pub struct Stop;
 
-impl Handler for Stop {
+impl Handler<()> for Stop {
     fn handler(self: &Self) -> () {
         println!("Stopped the system");
         println!("JK");

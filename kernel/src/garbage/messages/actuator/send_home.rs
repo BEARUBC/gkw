@@ -15,7 +15,7 @@ use crate::messages::{
 // #[rtype(result = "Response<()>")]
 pub struct SendHome;
 
-impl Handler for SendHome {
+impl Handler<()> for SendHome {
     fn handler(self: &Self) -> () {
         println!("Send home");
     }

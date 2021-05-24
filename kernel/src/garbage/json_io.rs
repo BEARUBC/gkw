@@ -18,7 +18,7 @@ use serde_json::Value;
 pub fn read_from_output() -> std::io::Result<Value> {
     let mut string_buffer = String::new();
 
-    match File::open(format!("./py_io/output.json")) {
+    match File::open(format!("./io/output.json")) {
         Ok(mut file) => {
             match file.read_to_string(&mut string_buffer) {
                 Ok(_) => {
@@ -39,7 +39,7 @@ pub fn write_to_input(json: Value) -> std::io::Result<()> {
     let json_string = json.to_string();
     let json_bytes = json_string.as_bytes();
 
-    match File::create("./py_io/input.json") {
+    match File::create("./io/input.json") {
         Ok(mut file) => {
             match file.write(json_bytes) {
                 Ok(_) => { return Ok(()); },

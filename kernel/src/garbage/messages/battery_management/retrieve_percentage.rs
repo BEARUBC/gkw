@@ -12,7 +12,7 @@ use crate::messages::{
 
 pub struct RetrievePercentage;
 
-impl Handler for RetrievePercentage {
+impl Handler<()> for RetrievePercentage {
     fn handler(self: &Self) -> () {
         println!("{}", 69);
     }
