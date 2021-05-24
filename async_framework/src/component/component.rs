@@ -8,17 +8,21 @@ use tokio::{
         LocalSet,
         spawn_local,
     },
+    time::sleep,
 };
 use std::{
     borrow::Cow,
     future::Future,
-    rc::Rc,
     thread::{
         self,
         JoinHandle,
-        sleep,
     },
     time::Duration,
+    fmt::{
+        Display,
+        Formatter,
+        Result as FmtResult,
+    },
 };
 
 use crate::{
@@ -36,21 +40,19 @@ use crate::{
 pub(crate) type Identifier = usize;
 pub type ComponentResult<T> = Result<T, ComponentError>;
 
+#[derive(Debug)]
 pub struct Component<M, T, A>
 where
 M: 'static + Future + Send,
 T: 'static + Future + Sized,
-A: 'static + Send + Future, {
+A: 'static + Future + Send, {
     id: Identifier,
-
-    #[allow(unused)]
     name: String,
-
     send: UnboundedSender<JobType<M>>,
     recv: Option<UnboundedReceiver<JobType<M>>>,
     contacts: Option<Contacts<M>>,
     routine: Option<Routine<T, M>>,
-    handler: Option<fn(Rc<Contacts<M>>, M) -> A>,
+    handler: Option<fn(Contacts<M>, M) -> A>,
 }
 
 impl<M, T, A> Component<M, T, A>
@@ -65,7 +67,7 @@ A: 'static + Send + Future, {
         recv: UnboundedReceiver<JobType<M>>,
         contacts: Contacts<M>,
         routine: Routine<T, M>,
-        handler: fn(Rc<Contacts<M>>, M) -> A,
+        handler: fn(Contacts<M>, M) -> A,
     ) -> Self
     where
     N: Into<Cow<'a, str>>, {
@@ -111,19 +113,11 @@ A: 'static + Send + Future, {
                 let local = LocalSet::new();
 
                 local.spawn_local(async move {
-                    let contacts_refcount = Rc::new(contacts);
-
                     while let Some(new_task) = recv.recv().await {
                         use JobType::*;
 
                         match new_task {
-                            Message(msg) => {
-                                spawn_local(handler(
-                                    contacts_refcount
-                                        .clone(),
-                                    msg,
-                                ));
-                            },
+                            Message(msg) => { spawn_local(handler(contacts.clone(), msg)); },
                             RunRequest => {
                                 use Job::*;
 
@@ -131,8 +125,8 @@ A: 'static + Send + Future, {
                                     .next()
                                     .unwrap()
                                     .as_ref() {
-                                    Spacer(spacer) => sleep(Duration::from_millis(*spacer)),
-                                    Lambda(lambda) => { spawn_local(lambda(contacts_refcount.clone())); },
+                                    Spacer(spacer) => sleep(Duration::from_millis(*spacer)).await,
+                                    Lambda(lambda) => { spawn_local(lambda(contacts.clone())); },
                                 };
                             },
                         };
@@ -172,6 +166,21 @@ N: Into<Cow<'a, str>>, {
     fn from(component_builder: ComponentBuilder<M, T, A, N>) -> Self {
         component_builder
             .build()
-            .expect("unable to build")
+            .expect("unable to build component")
+    }
+}
+
+impl<M, T, A> Display for Component<M, T, A>
+where
+M: 'static + Send + Future,
+T: 'static + Future + Sized,
+A: 'static + Send + Future, {
+    fn fmt(&self, f: &mut Formatter) -> FmtResult {
+        write!(
+            f,
+            "component - id: <{}> - name: <{}>",
+            self.id,
+            self.name,
+        )
     }
 }

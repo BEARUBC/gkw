@@ -3,6 +3,7 @@ extern crate lazy_static;
 
 pub mod builder;
 pub mod contacts;
+pub mod contacts_builder;
 pub mod component;
 pub mod component_builder;
 pub mod routine;

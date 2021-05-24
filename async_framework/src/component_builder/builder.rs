@@ -1,7 +1,6 @@
 use std::{
     borrow::Cow,
     future::Future,
-    rc::Rc,
 };
 use tokio::sync::mpsc::{
     UnboundedReceiver,
@@ -20,56 +19,48 @@ use crate::{
     },
     component_builder::error::ComponentBuilderError,
     contacts::contacts::Contacts,
+    contacts_builder::contacts_builder::ContactsBuilder,
     routine::routine::Routine,
-    utils::get_new_id,
+    utils::get_new_id
 };
 
 pub type ComponentBuilderResult<T> = Result<T, ComponentBuilderError>;
 
+#[derive(Debug)]
 pub struct ComponentBuilder<M, T, A, N>
 where
-M: 'static + Send + Future,
+M: 'static + Future + Send,
 T: 'static + Future + Sized,
-A: 'static + Send + Future, {
+A: 'static + Future + Send, {
     id: Identifier,
-
-    #[allow(unused)]
     name: N,
-
-    #[allow(unused)]
-    send: UnboundedSender<JobType<M>>,
-
-    #[allow(unused)]
-    recv: UnboundedReceiver<JobType<M>>,
-
-    #[allow(unused)]
+    sender: UnboundedSender<JobType<M>>,
+    recver: UnboundedReceiver<JobType<M>>,
     routine: Routine<T, M>,
-    contacts: Contacts<M>,
-
-    #[allow(unused)]
-    handler: fn(Rc<Contacts<M>>, M) -> A,
+    contacts: ContactsBuilder<M>,
+    handler: fn(Contacts<M>, M) -> A,
 }
 
 impl<'a, M, T, A, N> ComponentBuilder<M, T, A, N>
 where
-M: 'static + Send + Future,
+M: 'static + Future + Send,
 T: 'static + Future + Sized,
-A: 'static + Send + Future,
+A: 'static + Future + Send,
 N: Into<Cow<'a, str>>, {
     pub fn new(
         name: N,
         routine: Routine<T, M>,
-        handler: fn(Rc<Contacts<M>>, M) -> A
+        handler: fn(Contacts<M>, M) -> A
     ) -> ComponentBuilderResult<Self> {
         get_new_id()
             .map(|id| (id, unbounded_channel::<JobType<M>>()))
             .map(|(id, (send, recv))| Self {
                 id,
                 name,
-                send,
-                recv,
+                sender: send,
+                recver: recv,
                 routine,
-                contacts: Contacts::new(),
+                contacts: ContactsBuilder::new(),
                 handler,
             })
             .map_err(ComponentBuilderError::from)
@@ -77,15 +68,15 @@ N: Into<Cow<'a, str>>, {
 
     pub fn id(&self) -> Identifier { self.id }
 
-    pub fn send(&self) -> UnboundedSender<JobType<M>> { self.send.clone() }
+    pub fn sender(&self) -> UnboundedSender<JobType<M>> { self.sender.clone() }
 
-    pub fn contacts(&mut self) -> &mut Contacts<M> { &mut self.contacts }
+    pub fn contacts(&mut self) -> &mut ContactsBuilder<M> { &mut self.contacts }
 
     pub fn add_component(&mut self, component: Self) {
         self.contacts
             .add_sender(
                 component.id(),
-                component.send(),
+                component.sender(),
             )
     }
 
@@ -98,17 +89,17 @@ N: Into<Cow<'a, str>>, {
 
 impl<'a, M, T, A, N> Builder<Component<M, T, A>, ComponentBuilderError> for ComponentBuilder<M, T, A, N>
 where
-M: 'static + Send + Future,
+M: 'static + Future + Send,
 T: 'static + Future + Sized,
-A: 'static + Send + Future,
+A: 'static + Future + Send,
 N: Into<Cow<'a, str>>, {
     fn build(self) -> ComponentBuilderResult<Component<M, T, A>> {
         Ok(Component::new(
             self.id,
             self.name,
-            self.send,
-            self.recv,
-            self.contacts,
+            self.sender,
+            self.recver,
+            self.contacts.into(),
             self.routine,
             self.handler,
         ))

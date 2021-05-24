@@ -12,6 +12,7 @@ use crate::{
 
 pub type RoutineResult<T> = Result<T, RoutineError>;
 
+#[derive(Debug)]
 pub struct Routine<T, M>
 where
 T: 'static + Future + Sized,
