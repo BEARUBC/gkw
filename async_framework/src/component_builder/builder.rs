@@ -1,6 +1,7 @@
 use std::{
     borrow::Cow,
     future::Future,
+    rc::Rc,
 };
 use tokio::sync::mpsc::{
     UnboundedReceiver,
@@ -46,7 +47,7 @@ A: 'static + Send + Future, {
     contacts: Contacts<M>,
 
     #[allow(unused)]
-    handler: fn(Contacts<M>, M) -> A,
+    handler: fn(Rc<Contacts<M>>, M) -> A,
 }
 
 impl<'a, M, T, A, N> ComponentBuilder<M, T, A, N>
@@ -58,7 +59,7 @@ N: Into<Cow<'a, str>>, {
     pub fn new(
         name: N,
         routine: Routine<T, M>,
-        handler: fn(Contacts<M>, M) -> A
+        handler: fn(Rc<Contacts<M>>, M) -> A
     ) -> ComponentBuilderResult<Self> {
         get_new_id()
             .map(|id| (id, unbounded_channel::<JobType<M>>()))
@@ -101,24 +102,15 @@ M: 'static + Send + Future,
 T: 'static + Future + Sized,
 A: 'static + Send + Future,
 N: Into<Cow<'a, str>>, {
-    fn build(mut self) -> ComponentBuilderResult<Component<M, T, A>> {
-        // if self.name.is_none() {
-        //     Err(ComponentBuilderError::UninitializedComponent(UC::Name))
-        // } else if self.routine.is_none() {
-        //     Err(ComponentBuilderError::UninitializedComponent(UC::Routine))
-        // } else if self.handler.is_none() {
-        //     Err(ComponentBuilderError::UninitializedComponent(UC::Handler))
-        // } else {
-        //     Ok(())
-        // }
-        // .map(|()| Component::new(
-        //     self.id,
-        //     self.name
-        //         .take()
-        //         .unwrap(),
-        //         self.routine,
-        //         self.handler,
-        // ))
-        todo!()
+    fn build(self) -> ComponentBuilderResult<Component<M, T, A>> {
+        Ok(Component::new(
+            self.id,
+            self.name,
+            self.send,
+            self.recv,
+            self.contacts,
+            self.routine,
+            self.handler,
+        ))
     }
 }

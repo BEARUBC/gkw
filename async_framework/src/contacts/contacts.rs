@@ -27,8 +27,6 @@ where
 M: 'static + Send + Future, {
     pub fn new() -> Self { Self(BTreeMap::new()) }
 
-    pub fn contacts(&mut self) -> &mut BTreeMap<Identifier, UnboundedSender<JobType<M>>> { &mut self.0 }
-
     pub fn add_sender(&mut self, id: Identifier, sender: UnboundedSender<JobType<M>>) {
         self.0
             .insert(id, sender);

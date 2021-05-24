@@ -58,7 +58,6 @@ where
 M: 'static + Send + Future,
 T: 'static + Future + Sized,
 A: 'static + Send + Future, {
-    #[allow(unused)]
     pub(crate) fn new<'a, N>(
         id: Identifier,
         name: N,
