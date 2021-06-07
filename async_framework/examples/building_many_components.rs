@@ -1,92 +1,93 @@
-use std::{future::Future, pin::Pin, rc::Rc, sync::Arc, task::{
+use std::{
+    future::Future,
+    pin::Pin,
+    task::{
         Context,
-        Poll
-    }};
+        Poll,
+    },
+};
 
 use async_framework::{
+    builder::Builder,
     component_builder::builder::ComponentBuilder,
+    contacts::contacts::Contacts,
     job::Job,
     routine_builder::builder::RoutineBuilder,
-    builder::Builder,
+    system_builder::system_builder::SystemBuilder,
 };
 
 struct MS;
 
 impl Future for MS {
-    type Output = ();
+    type Output = u32;
 
     fn poll(self: Pin<&mut Self>, _: &mut Context<'_>) -> Poll<Self::Output> {
-        println!("MS poll method called");
-        Poll::Pending
+        println!("handler for the MS");
+        Poll::Ready(0u32)
     }
 }
 
-async fn handler(message: MS) -> () {
-    message.await;
+async fn handler(_: Contacts<MS>, message: MS) -> u32 {
+    println!("handler called");
+    tokio::time::sleep(std::time::Duration::from_secs(10u64)).await;
+
+    let result = message.await;
+    println!("result: {}", result);
+
+    result
+}
+
+async fn lambda_1(_: Contacts<MS>) -> u32 {
+    println!("1");
+    0u32
+}
+
+async fn lambda_2(_: Contacts<MS>) -> u32 {
+    println!("2");
+    0u32
 }
 
 fn main() -> () {
-    // COMPONENT 0
+    use std::env;
+
+    let key = "RUST_BACKTRACE";
+    env::set_var(key, "1");
+
     // creating jobs
-    let j0 = Arc::new(Job::Spacer(1u64));
-    let j1 = Arc::new(Job::Lambda(Box::new(async { println!("hello, world, from custom0!") })));
+    let j1 = Job::from_spacer(5u64);
+    let j2 = Job::from_lambda(lambda_1);
+    let j3 = Job::from_spacer(2u64);
+    let j4 = Job::from_lambda(lambda_2);
 
     // creating a routine_builder
-    let mut routine_builder0 = RoutineBuilder::new_with_capacity(2usize);
-    let vec0 = routine_builder0.as_mut();
-    
-    // adding jobs to the routine_builder
-    vec0.push(j0);
-    vec0.push(j1);
+    let mut routine_builder1 = RoutineBuilder::with_capacity(2usize);
+    let mut routine_builder2 = RoutineBuilder::with_capacity(2usize);
 
-    // consuming and transforming routine_builder into routine
-    let routine0 = routine_builder0
-        .build()
-        .unwrap();
+    // adding jobs to the routine_builder
+    routine_builder1.push(j1);
+    routine_builder1.push(j2);
+    routine_builder1.push(j3);
+    routine_builder1.push(j4);
 
     // building a component
-    let mut component_builder0 = ComponentBuilder::new().unwrap();
-    component_builder0.set_name("custom0");
-    component_builder0.set_routine(routine0);
-    component_builder0.set_handler(handler);
+    let component_builder1 = ComponentBuilder::new(
+        "custom1",
+        routine_builder1,
+        handler,
+    ).unwrap();
+    let component_builder2 = ComponentBuilder::new(
+        "custom2",
+        routine_builder2,
+        handler,
+    ).unwrap();
 
-    #[allow(unused)]
-    let component0 = component_builder0
-        .build()
-        .unwrap();
+    let mut system_builder = SystemBuilder::with_capacity(2usize);
+
+    let vec = system_builder.as_mut();
+    vec.push(component_builder1);
+    vec.push(component_builder2);
+
+    let system = system_builder.build().unwrap();
     
-    // COMPONENT 1
-    // creating jobs
-    let j2 = Arc::new(Job::Spacer(1u64));
-    let j3 = Arc::new(Job::Lambda(Box::new(async { println!("hello, world, from custom1") })));
-
-    // creating a routine_builder
-    let mut routine_builder1 = RoutineBuilder::new_with_capacity(2usize);
-    let vec1 = routine_builder1.as_mut();
-    
-    // adding jobs to the routine_builder
-    vec1.push(j2);
-    vec1.push(j3);
-
-    // consuming and transforming routine_builder into routine
-    let routine = routine_builder1
-        .build()
-        .unwrap();
-
-    // building a component
-    let mut component_builder1 = ComponentBuilder::new().unwrap();
-    component_builder1.set_name("custom1");
-    component_builder1.set_routine(routine);
-    component_builder1.set_handler(handler);
-
-    #[allow(unused)]
-    let component1 = component_builder1
-        .build()
-        .unwrap();
-    
-    #[allow(unused)]
-    let ac0 = Rc::new(component0);
-
-    #[allow(unused)]
-    let ac1 = Arc::new(component1);
+    system.run()
 }

@@ -1,2 +1,2 @@
-pub mod contacts_builder;
+pub mod builder;
 pub mod error;

@@ -8,7 +8,6 @@ use tokio::{
         LocalSet,
         spawn_local,
     },
-    time::sleep,
 };
 use std::{
     borrow::Cow,
@@ -16,6 +15,7 @@ use std::{
     thread::{
         self,
         JoinHandle,
+        sleep,
     },
     time::Duration,
     fmt::{
@@ -32,9 +32,11 @@ use crate::{
         job_type::JobType,
     },
     component_builder::builder::ComponentBuilder,
+    contacts::contacts::Contacts,
+    contacts_builder::builder::ContactsBuilder,
     job::Job,
     routine::routine::Routine,
-    contacts::contacts::Contacts,
+    routine_builder::builder::RoutineBuilder
 };
 
 pub(crate) type Identifier = usize;
@@ -48,8 +50,8 @@ T: 'static + Future + Sized,
 A: 'static + Future + Send, {
     id: Identifier,
     name: String,
-    send: UnboundedSender<JobType<M>>,
-    recv: Option<UnboundedReceiver<JobType<M>>>,
+    sender: UnboundedSender<JobType<M>>,
+    recver: Option<UnboundedReceiver<JobType<M>>>,
     contacts: Option<Contacts<M>>,
     routine: Option<Routine<T, M>>,
     handler: Option<fn(Contacts<M>, M) -> A>,
@@ -57,16 +59,16 @@ A: 'static + Future + Send, {
 
 impl<M, T, A> Component<M, T, A>
 where
-M: 'static + Send + Future,
+M: 'static + Future + Send,
 T: 'static + Future + Sized,
-A: 'static + Send + Future, {
+A: 'static + Future + Send, {
     pub(crate) fn new<'a, N>(
         id: Identifier,
         name: N,
         send: UnboundedSender<JobType<M>>,
         recv: UnboundedReceiver<JobType<M>>,
-        contacts: Contacts<M>,
-        routine: Routine<T, M>,
+        contacts: ContactsBuilder<M>,
+        routine: RoutineBuilder<T, M>,
         handler: fn(Contacts<M>, M) -> A,
     ) -> Self
     where
@@ -74,17 +76,17 @@ A: 'static + Send + Future, {
         Self {
             id,
             name: name.into().into_owned(),
-            send,
-            recv: Some(recv),
-            contacts: Some(contacts),
-            routine: Some(routine),
+            sender: send,
+            recver: Some(recv),
+            contacts: Some(contacts.into()),
+            routine: Some(routine.into()),
             handler: Some(handler),
         }
     }
 
     pub fn start(&mut self) -> ComponentResult<JoinHandle<()>> {
         if
-        self.recv
+        self.recver
             .is_some()
         && self.contacts
             .is_some()
@@ -93,7 +95,7 @@ A: 'static + Send + Future, {
         && self.handler
             .is_some() {
             Ok((
-                self.recv
+                self.recver
                     .take()
                     .unwrap(),
                 self.contacts
@@ -125,7 +127,7 @@ A: 'static + Send + Future, {
                                     .next()
                                     .unwrap()
                                     .as_ref() {
-                                    Spacer(spacer) => sleep(Duration::from_millis(*spacer)).await,
+                                    Spacer(spacer) => sleep(Duration::from_millis(*spacer)),
                                     Lambda(lambda) => { spawn_local(lambda(contacts.clone())); },
                                 };
                             },
@@ -143,25 +145,27 @@ A: 'static + Send + Future, {
     }
 
     pub fn send(&self, message: M) -> ComponentResult<()> {
-        self.send
+        self.sender
             .send(JobType::Message(message))
             .map_err(ComponentError::from)
     }
 
     pub fn run_next_job(&self) -> ComponentResult<()> {
-        self.send
+        self.sender
             .send(JobType::RunRequest)
             .map_err(ComponentError::from)
     }
 
     pub fn id(&self) -> Identifier { self.id }
+
+    pub fn name(&self) -> &String { &self.name }
 }
 
 impl<'a, M, T, A, N> From<ComponentBuilder<M, T, A, N>> for Component<M, T, A>
 where
-M: 'static + Send + Future,
+M: 'static + Future + Send,
 T: 'static + Future + Sized,
-A: 'static + Send + Future,
+A: 'static + Future + Send,
 N: Into<Cow<'a, str>>, {
     fn from(component_builder: ComponentBuilder<M, T, A, N>) -> Self {
         component_builder
@@ -172,9 +176,9 @@ N: Into<Cow<'a, str>>, {
 
 impl<M, T, A> Display for Component<M, T, A>
 where
-M: 'static + Send + Future,
+M: 'static + Future + Send,
 T: 'static + Future + Sized,
-A: 'static + Send + Future, {
+A: 'static + Future + Send, {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
         write!(
             f,

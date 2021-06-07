@@ -5,7 +5,7 @@ use std::{
 use tokio::sync::mpsc::{
     UnboundedReceiver,
     UnboundedSender,
-    unbounded_channel
+    unbounded_channel,
 };
 
 use crate::{
@@ -19,9 +19,9 @@ use crate::{
     },
     component_builder::error::ComponentBuilderError,
     contacts::contacts::Contacts,
-    contacts_builder::contacts_builder::ContactsBuilder,
-    routine::routine::Routine,
-    utils::get_new_id
+    contacts_builder::builder::ContactsBuilder,
+    routine_builder::builder::RoutineBuilder,
+    utils::get_new_id,
 };
 
 pub type ComponentBuilderResult<T> = Result<T, ComponentBuilderError>;
@@ -36,7 +36,7 @@ A: 'static + Future + Send, {
     name: N,
     sender: UnboundedSender<JobType<M>>,
     recver: UnboundedReceiver<JobType<M>>,
-    routine: Routine<T, M>,
+    routine: RoutineBuilder<T, M>,
     contacts: ContactsBuilder<M>,
     handler: fn(Contacts<M>, M) -> A,
 }
@@ -49,7 +49,7 @@ A: 'static + Future + Send,
 N: Into<Cow<'a, str>>, {
     pub fn new(
         name: N,
-        routine: Routine<T, M>,
+        routine: RoutineBuilder<T, M>,
         handler: fn(Contacts<M>, M) -> A
     ) -> ComponentBuilderResult<Self> {
         get_new_id()
@@ -72,11 +72,11 @@ N: Into<Cow<'a, str>>, {
 
     pub fn contacts(&mut self) -> &mut ContactsBuilder<M> { &mut self.contacts }
 
-    pub fn add_component(&mut self, component: Self) {
+    pub fn add_component(&mut self, component_builder: Self) {
         self.contacts
             .add_sender(
-                component.id(),
-                component.sender(),
+                component_builder.id(),
+                component_builder.sender(),
             )
     }
 
@@ -99,7 +99,7 @@ N: Into<Cow<'a, str>>, {
             self.name,
             self.sender,
             self.recver,
-            self.contacts.into(),
+            self.contacts,
             self.routine,
             self.handler,
         ))

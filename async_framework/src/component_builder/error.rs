@@ -4,9 +4,11 @@ use std::fmt::{
     Result,
 };
 
-use crate::{component::component::Identifier, utils::MutexError};
-
-use crate::contacts_builder::error::ContactsBuilderError;
+use crate::{
+    component::component::Identifier,
+    utils::MutexError,
+    contacts_builder::error::ContactsBuilderError,
+};
 
 #[derive(Debug, Clone)]
 pub enum ComponentBuilderError {

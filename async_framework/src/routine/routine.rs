@@ -6,11 +6,10 @@ use std::{
 use crate::{
     builder::Builder,
     job::Job,
-    routine::error::RoutineError,
     routine_builder::builder::RoutineBuilder,
 };
 
-pub type RoutineResult<T> = Result<T, RoutineError>;
+pub type RoutineResult<T> = Result<T, ()>;
 
 #[derive(Debug)]
 pub struct Routine<T, M>
@@ -67,6 +66,6 @@ M: 'static + Future + Send, {
     fn from(routine_builder: RoutineBuilder<T, M>) -> Self {
         routine_builder
             .build()
-            .expect("unable to build")
+            .expect("unable to build routine")
     }
 }

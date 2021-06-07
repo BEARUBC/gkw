@@ -12,11 +12,11 @@ pub enum ContactsBuilderError {
 }
 
 impl Display for ContactsBuilderError {
-    fn fmt(&self, _: &mut Formatter) -> Result {
+    fn fmt(&self, f: &mut Formatter) -> Result {
         use ContactsBuilderError::*;
 
         match self {
-            SenderDoesNotExist(_) => todo!(),
+            SenderDoesNotExist(id) => write!(f, "cannot find sender with id: {}", id),
         }
     }
 }

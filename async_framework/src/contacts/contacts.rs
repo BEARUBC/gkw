@@ -12,7 +12,7 @@ use crate::{
         component::Identifier,
     },
     contacts::error::ContactsError,
-    contacts_builder::contacts_builder::ContactsBuilder,
+    contacts_builder::builder::ContactsBuilder,
     builder::Builder,
 };
 
@@ -26,7 +26,9 @@ M: 'static + Send + Future,;
 impl<M> Contacts<M>
 where
 M: 'static + Send + Future, {
-    pub(crate) fn new(btree_map: BTreeMap<Identifier, UnboundedSender<JobType<M>>>) -> Self { Self(Arc::new(btree_map)) }
+    pub(crate) fn new(
+        btree_map: BTreeMap<Identifier, UnboundedSender<JobType<M>>>
+    ) -> Self { Self(Arc::new(btree_map)) }
 
     pub fn send(&self, id: Identifier, msg: M) -> ContactsResult<()> {
         self.0

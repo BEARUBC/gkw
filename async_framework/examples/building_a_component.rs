@@ -26,6 +26,7 @@ impl Future for MS {
 }
 
 async fn handler(_: Contacts<MS>, message: MS) -> u32 {
+    println!("handler called");
     tokio::time::sleep(std::time::Duration::from_secs(10u64)).await;
 
     let result = message.await;
@@ -62,13 +63,10 @@ fn main() -> () {
     routine_builder.push(j1);
     routine_builder.push(j2);
 
-    // consuming and transforming routine_builder into routine
-    let routine = routine_builder.build().unwrap();
-
     // building a component
     let component_builder = ComponentBuilder::new(
         "custom",
-        routine,
+        routine_builder,
         handler,
     ).unwrap();
 

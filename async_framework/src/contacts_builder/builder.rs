@@ -8,7 +8,9 @@ use std::{
 };
 use tokio::sync::mpsc::UnboundedSender;
 
-use crate::{builder::Builder, component::{
+use crate::{
+    builder::Builder,
+    component::{
         job_type::JobType,
         component::Identifier,
     },
@@ -26,7 +28,6 @@ M: 'static + Send + Future,;
 impl<M> ContactsBuilder<M>
 where
 M: 'static + Send + Future, {
-
     pub fn new() -> Self { Self(BTreeMap::new()) }
 
     pub fn add_sender(&mut self, id: Identifier, sender: UnboundedSender<JobType<M>>) {
