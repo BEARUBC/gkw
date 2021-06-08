@@ -25,6 +25,17 @@ impl<M, R> Job<M, R> {
     }
 }
 
+impl<M, R> Clone for Job<M, R> {
+    fn clone(&self) -> Self {
+        use Job::*;
+
+        match self {
+            Spacer(amount) => Self::Spacer(*amount),
+            _ => panic!(),
+        }
+    }
+}
+
 unsafe impl<M, R> Send for Job<M, R> {}
 
 unsafe impl<M, R> Sync for Job<M, R> {}

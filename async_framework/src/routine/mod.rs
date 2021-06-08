@@ -31,20 +31,25 @@ impl<M, R> Iterator for Routine<M, R> {
     type Item = Arc<Job<M, R>>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        let result = Some(
-            self.jobs
-                .get(self.current_index)
-                .unwrap() // unwrap should never fail
-                .clone()
-            );
-        
-        self.current_index = if self.current_index == (self.max_capacity - 1usize) {
-            0usize
+        if self.max_capacity == 0usize {
+            None
         } else {
-            self.current_index + 1usize
-        };
+            Some(
+                self.jobs
+                    .get(self.current_index)
+                    .unwrap() // unwrap should never fail
+                    .clone()
+            )
+        }
+        .map(|item| {
+            self.current_index = if self.current_index == (self.max_capacity - 1usize) {
+                0usize
+            } else {
+                self.current_index + 1usize
+            };
 
-        result
+            item
+        })
     }
 }
 

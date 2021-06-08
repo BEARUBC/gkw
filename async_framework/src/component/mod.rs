@@ -136,36 +136,39 @@ A: 'static + Future, {
         } else {
             Err(ComponentError::AlreadyInitializedComponent)
         }
-        .map(|(mut recv, contacts, mut routine, handler)| thread::spawn(move || {
-                let local = LocalSet::new();
+            .map(|(mut recv, contacts, mut routine, handler)|
+                thread::spawn(move || {
+                    let local = LocalSet::new();
 
-                local.spawn_local(async move {
-                    while let Some(new_task) = recv.recv().await {
-                        use Request::*;
+                    local.spawn_local(async move {
+                        while let Some(new_task) = recv.recv().await {
+                            use Request::*;
 
-                        match new_task {
-                            HandleMessage(msg) => { spawn_local(handler(contacts.clone(), msg)); },
-                            RunJob => {
-                                use Job::*;
+                            match new_task {
+                                HandleMessage(msg) => { spawn_local(handler(contacts.clone(), msg)); },
+                                RunJob => {
+                                    match routine.next() {
+                                        Some(job) => {
+                                            use Job::*;
 
-                                match routine
-                                    .next()
-                                    .unwrap()
-                                    .as_ref() {
-                                    Spacer(spacer) => sleep(Duration::from_millis(*spacer)).await,
-                                    Function(lambda) => { spawn_local(lambda(contacts.clone())); },
-                                };
-                            },
+                                            match job.as_ref() {
+                                                Spacer(spacer) => sleep(Duration::from_millis(*spacer)).await,
+                                                Function(lambda) => { spawn_local(lambda(contacts.clone())); },
+                                            };
+                                        },
+                                        _ => (),
+                                    }
+                                },
+                            };
                         };
-                    };
-                });
+                    });
 
-                TokioBuilder::new_current_thread()
-                    .enable_all()
-                    .build()
-                    .expect("unable to construct runtime")
-                    .block_on(local);
-            })
-        )
+                    TokioBuilder::new_current_thread()
+                        .enable_all()
+                        .build()
+                        .expect("unable to construct runtime")
+                        .block_on(local);
+                })
+            )
     }
 }
