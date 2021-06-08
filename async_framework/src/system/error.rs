@@ -5,9 +5,8 @@ use std::fmt::{
 };
 
 #[derive(Debug, Clone)]
-pub enum SystemError {
-}
+pub enum SystemError {}
 
 impl Display for SystemError {
-    fn fmt(&self, f: &mut Formatter) -> Result { write!(f, "poop") }
+    fn fmt(&self, _: &mut Formatter) -> Result { todo!() }
 }

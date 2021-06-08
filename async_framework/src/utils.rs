@@ -4,14 +4,15 @@ use std::sync::{
     MutexGuard,
 };
 
-use crate::component::component::Identifier;
+use crate::component::Identifier;
 
-pub type MutexError<'a> = PoisonError<MutexGuard<'a, Identifier>>;
+pub(crate) type MutexError<'a> = PoisonError<MutexGuard<'a, Identifier>>;
 
 lazy_static! {
     static ref ID_STORE: Mutex<usize> = Mutex::new(0usize);
 }
 
+#[allow(unused)]
 pub(crate) fn get_new_id<'a>() -> Result<usize, MutexError<'a>> {
     ID_STORE
         .lock()
