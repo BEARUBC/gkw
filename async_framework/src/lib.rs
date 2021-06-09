@@ -7,6 +7,5 @@ pub mod contacts;
 pub mod routine;
 pub mod builder;
 pub mod system;
-pub mod handler;
 pub mod prelude;
 pub(crate) mod utils;

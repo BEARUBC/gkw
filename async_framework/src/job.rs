@@ -6,13 +6,11 @@ use std::{
 use crate::contacts::Contacts;
 
 pub enum Job<M, R> {
-    #[allow(unused)]
     Spacer(u64),
     Function(Box<dyn Fn(Contacts<M>) -> Pin<Box<dyn Future<Output = R>>>>),
 }
 
 impl<M, R> Job<M, R> {
-    #[allow(unused)]
     pub fn from_spacer(amount: u64) -> Self { Self::Spacer(amount) }
 
     pub fn from_function<Fut>(f: fn(Contacts<M>) -> Fut) -> Self

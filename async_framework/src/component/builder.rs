@@ -1,4 +1,8 @@
-use std::{borrow::Cow, future::Future, pin::Pin};
+use std::{
+    borrow::Cow,
+    future::Future,
+    pin::Pin,
+};
 use tokio::sync::mpsc::{
     UnboundedReceiver,
     UnboundedSender,
@@ -22,7 +26,6 @@ use crate::{
     utils::get_new_id,
 };
 
-#[allow(unused)]
 pub struct ComponentBuilder<M, R, A, N>
 where
 M: 'static + Send,
@@ -43,7 +46,6 @@ M: 'static + Send,
 R: 'static,
 A: 'static,
 N: Into<Cow<'a, str>>, {
-    #[allow(unused)]
     pub fn new<Fut>(
         name: N,
         routine_builder: RoutineBuilder<M, R>,
@@ -65,13 +67,10 @@ N: Into<Cow<'a, str>>, {
             .map_err(ComponentError::from)
     }
 
-    #[allow(unused)]
     pub fn id(&self) -> Identifier { self.id }
 
-    #[allow(unused)]
     pub fn sender(&self) -> UnboundedSender<Request<M>> { self.sender.clone() }
 
-    #[allow(unused)]
     pub fn add_component(&mut self, component_builder: &Self) {
         self.contacts_builder
             .add_sender(

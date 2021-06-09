@@ -2,17 +2,28 @@ pub mod builder;
 pub mod error;
 pub mod request;
 
-use tokio::{runtime::Builder as TokioBuilder, sync::mpsc::{
+use tokio::{
+    runtime::Builder as TokioBuilder,
+    sync::mpsc::{
         UnboundedReceiver,
-        UnboundedSender
-    }, task::{
+        UnboundedSender,
+    },
+    task::{
         LocalSet,
         spawn_local,
-    }, time::sleep};
-use std::{borrow::Cow, future::Future, pin::Pin, thread::{
+    },
+    time::sleep,
+};
+use std::{
+    borrow::Cow,
+    future::Future,
+    pin::Pin,
+    thread::{
         self,
         JoinHandle,
-    }, time::Duration};
+    },
+    time::Duration,
+};
 
 use crate::{
     component::{
@@ -21,19 +32,18 @@ use crate::{
     },
     contacts::{
         Contacts,
-        builder::ContactsBuilder
+        builder::ContactsBuilder,
     },
     job::Job,
     routine::{
         Routine,
-        builder::RoutineBuilder
+        builder::RoutineBuilder,
     },
 };
 
 pub type Identifier = usize;
 pub type ComponentResult<T> = Result<T, ComponentError>;
 
-#[allow(unused)]
 pub struct Component<M, R, A>
 where
 M: 'static + Send,
@@ -45,7 +55,6 @@ A: 'static, {
     recver: Option<UnboundedReceiver<Request<M>>>,
     contacts: Option<Contacts<M>>,
     routine: Option<Routine<M, R>>,
-    // handler: Option<fn(Contacts<M>, M) -> A>,
     handler: Option<Box<dyn Fn(Contacts<M>, M) -> Pin<Box<dyn Future<Output = A>>> + Send>>,
 }
 
@@ -84,27 +93,22 @@ A: 'static, {
         }
     }
 
-    #[allow(unused)]
     pub fn send(&self, message: M) -> ComponentResult<()> {
         self.sender
             .send(Request::HandleMessage(message))
             .map_err(ComponentError::from)
     }
 
-    #[allow(unused)]
     pub fn run_next_job(&self) -> ComponentResult<()> {
         self.sender
             .send(Request::RunJob)
             .map_err(ComponentError::from)
     }
 
-    #[allow(unused)]
     pub fn id(&self) -> Identifier { self.id }
 
-    #[allow(unused)]
     pub fn name(&self) -> &String { &self.name }
 
-    #[allow(unused)]
     pub fn start(&mut self) -> ComponentResult<JoinHandle<()>> {
         if
         self.recver

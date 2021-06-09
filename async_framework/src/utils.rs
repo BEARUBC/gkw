@@ -12,7 +12,6 @@ lazy_static! {
     static ref ID_STORE: Mutex<usize> = Mutex::new(0usize);
 }
 
-#[allow(unused)]
 pub(crate) fn get_new_id<'a>() -> Result<usize, MutexError<'a>> {
     ID_STORE
         .lock()

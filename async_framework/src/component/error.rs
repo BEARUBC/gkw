@@ -12,13 +12,9 @@ use crate::{
 
 #[derive(Debug, Clone)]
 pub enum ComponentError {
-    #[allow(unused)]
     AlreadyInitializedComponent,
-
     SendError,
     IdError,
-
-    #[allow(unused)]
     ContactDoesNotExist(Identifier),
 }
 

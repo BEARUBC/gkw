@@ -25,10 +25,8 @@ pub struct ContactsBuilder<M>(
 );
 
 impl<M> ContactsBuilder<M> {
-    #[allow(unused)]
     pub fn new() -> Self { Self(BTreeMap::new()) }
 
-    #[allow(unused)]
     pub fn add_sender(
         &mut self,
         id: Identifier,

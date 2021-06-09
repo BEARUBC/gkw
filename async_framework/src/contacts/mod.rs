@@ -30,7 +30,6 @@ impl<M> Contacts<M> {
         Self(Arc::new(btreemap))
     }
 
-    #[allow(unused)]
     pub fn send(&self, id: Identifier, msg: M) -> ContactsResult<()> {
         self.0
             .as_ref()

@@ -1,17 +1,20 @@
 pub mod builder;
 pub mod error;
 
-use std::{
-    borrow::Cow,
-    future::Future,
-};
+use std::borrow::Cow;
 use tokio::runtime::Builder as TokioBuilder;
 
-use crate::{builder::Builder, component::{Component, builder::ComponentBuilder}};
-
-use self::{builder::SystemBuilder, error::SystemError};
-
-
+use crate::{
+    builder::Builder,
+    component::{
+        Component,
+        builder::ComponentBuilder
+    },
+    system::{
+        builder::SystemBuilder,
+        error::SystemError,
+    },
+};
 
 pub type SystemResult<T> = Result<T, SystemError>;
 
@@ -45,7 +48,6 @@ A: 'static, {
         )
     }
 
-    #[allow(unused)]
     pub fn run(mut self) -> ! {
         self.0.iter_mut().for_each(|component| { component.start().unwrap(); });
 

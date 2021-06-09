@@ -1,15 +1,20 @@
 use std::{
     borrow::Cow,
-    future::Future,
     ops::{
         Deref,
         DerefMut,
     },
 };
 
-use crate::{builder::Builder, component::builder::ComponentBuilder};
-
-use super::{System, SystemResult, error::SystemError};
+use crate::{
+    builder::Builder,
+    component::builder::ComponentBuilder,
+    system::{
+        System,
+        SystemResult,
+        error::SystemError,
+    },
+};
 
 pub struct SystemBuilder<M, R, A, N>(
     Vec<ComponentBuilder<M, R, A, N>>,
@@ -25,10 +30,8 @@ M: 'static + Send,
 R: 'static,
 A: 'static, 
 N: Into<Cow<'a, str>>, {
-    #[allow(unused)]
     pub fn with_capacity(capacity: usize) -> Self { Self(Vec::with_capacity(capacity)) }
 
-    #[allow(unused)]
     pub fn push(&mut self, component_builder: ComponentBuilder<M, R, A, N>) { self.0.push(component_builder) }
 }
 

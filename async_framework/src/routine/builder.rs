@@ -19,7 +19,6 @@ pub struct RoutineBuilder<M, R>(
 impl<M, R> RoutineBuilder<M, R> {
     pub fn with_capacity(capacity: usize) -> Self { Self(Vec::with_capacity(capacity)) }
 
-    #[allow(unused)]
     pub fn push(&mut self, job: Job<M, R>) { self.0.push(Arc::new(job)) }
 }
 
