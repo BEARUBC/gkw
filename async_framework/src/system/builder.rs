@@ -17,13 +17,13 @@ pub struct SystemBuilder<M, R, A, N>(
 where
 M: 'static + Send,
 R: 'static,
-A: 'static + Future,;
+A: 'static,;
 
 impl<'a, M, R, A, N> SystemBuilder<M, R, A, N>
 where
 M: 'static + Send,
 R: 'static,
-A: 'static + Future, 
+A: 'static, 
 N: Into<Cow<'a, str>>, {
     #[allow(unused)]
     pub fn with_capacity(capacity: usize) -> Self { Self(Vec::with_capacity(capacity)) }
@@ -36,7 +36,7 @@ impl<'a, M, R, A, N> Builder<System<M, R, A>, SystemError> for SystemBuilder<M, 
 where
 M: 'static + Send,
 R: 'static,
-A: 'static + Future,
+A: 'static,
 N: Into<Cow<'a, str>>, {
     fn build(self) -> SystemResult<System<M, R, A>> { Ok(System::new(self.0)) }
 }
@@ -45,7 +45,7 @@ impl<'a, M, R, A, N> Deref for SystemBuilder<M, R, A, N>
 where
 M: 'static + Send,
 R: 'static,
-A: 'static + Future,
+A: 'static,
 N: Into<Cow<'a, str>>, {
     type Target = Vec<ComponentBuilder<M, R, A, N>>;
 
@@ -56,7 +56,7 @@ impl<'a, M, R, A, N> DerefMut for SystemBuilder<M, R, A, N>
 where
 M: 'static + Send,
 R: 'static,
-A: 'static + Future,
+A: 'static,
 N: Into<Cow<'a, str>>, {
     fn deref_mut(&mut self) -> &mut Self::Target { &mut self.0 }
 }
@@ -65,7 +65,7 @@ impl<'a, M, R, A, N> AsRef<Vec<ComponentBuilder<M, R, A, N>>> for SystemBuilder<
 where
 M: 'static + Send,
 R: 'static,
-A: 'static + Future,
+A: 'static,
 N: Into<Cow<'a, str>>, {
     fn as_ref(&self) -> &Vec<ComponentBuilder<M, R, A, N>> { &self.0 }
 }
@@ -74,7 +74,7 @@ impl<'a, M, R, A, N> AsMut<Vec<ComponentBuilder<M, R, A, N>>> for SystemBuilder<
 where
 M: 'static + Send,
 R: 'static,
-A: 'static + Future,
+A: 'static,
 N: Into<Cow<'a, str>>, {
     fn as_mut(&mut self) -> &mut Vec<ComponentBuilder<M, R, A, N>> { &mut self.0 }
 }

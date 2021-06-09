@@ -9,15 +9,10 @@ use tokio::{runtime::Builder as TokioBuilder, sync::mpsc::{
         LocalSet,
         spawn_local,
     }, time::sleep};
-use std::{
-    borrow::Cow,
-    future::Future,
-    thread::{
+use std::{borrow::Cow, future::Future, pin::Pin, thread::{
         self,
         JoinHandle,
-    },
-    time::Duration,
-};
+    }, time::Duration};
 
 use crate::{
     component::{
@@ -43,21 +38,22 @@ pub struct Component<M, R, A>
 where
 M: 'static + Send,
 R: 'static,
-A: 'static + Future, {
+A: 'static, {
     id: Identifier,
     name: String,
     sender: UnboundedSender<Request<M>>,
     recver: Option<UnboundedReceiver<Request<M>>>,
     contacts: Option<Contacts<M>>,
     routine: Option<Routine<M, R>>,
-    handler: Option<fn(Contacts<M>, M) -> A>,
+    // handler: Option<fn(Contacts<M>, M) -> A>,
+    handler: Option<Box<dyn Fn(Contacts<M>, M) -> Pin<Box<dyn Future<Output = A>>> + Send>>,
 }
 
 impl<M, R, A> Component<M, R, A>
 where
 M: 'static + Send,
 R: 'static,
-A: 'static + Future, {
+A: 'static, {
     pub(crate) fn new<'a, N>(
         id: Identifier,
         name: N,
@@ -65,7 +61,7 @@ A: 'static + Future, {
         recver: UnboundedReceiver<Request<M>>,
         contacts_builder: ContactsBuilder<M>,
         routine_builder: RoutineBuilder<M, R>,
-        handler: fn(Contacts<M>, M) -> A,
+        handler: Box<dyn Fn(Contacts<M>, M) -> Pin<Box<dyn Future<Output = A>>> + Send>,
     ) -> Self
     where
     N: Into<Cow<'a, str>>, {
@@ -146,18 +142,16 @@ A: 'static + Future, {
 
                             match new_task {
                                 HandleMessage(msg) => { spawn_local(handler(contacts.clone(), msg)); },
-                                RunJob => {
-                                    match routine.next() {
-                                        Some(job) => {
-                                            use Job::*;
+                                RunJob => match routine.next() {
+                                    Some(job) => {
+                                        use Job::*;
 
-                                            match job.as_ref() {
-                                                Spacer(spacer) => sleep(Duration::from_millis(*spacer)).await,
-                                                Function(lambda) => { spawn_local(lambda(contacts.clone())); },
-                                            };
-                                        },
-                                        _ => (),
-                                    }
+                                        match job.as_ref() {
+                                            Spacer(spacer) => sleep(Duration::from_millis(*spacer)).await,
+                                            Function(lambda) => { spawn_local(lambda(contacts.clone())); },
+                                        };
+                                    },
+                                    _ => (),
                                 },
                             };
                         };

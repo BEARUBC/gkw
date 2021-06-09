@@ -1,4 +1,4 @@
-use std::{borrow::Cow, future::Future};
+use std::{borrow::Cow, future::Future, pin::Pin};
 use tokio::sync::mpsc::{
     UnboundedReceiver,
     UnboundedSender,
@@ -22,32 +22,35 @@ use crate::{
     utils::get_new_id,
 };
 
+#[allow(unused)]
 pub struct ComponentBuilder<M, R, A, N>
 where
 M: 'static + Send,
 R: 'static,
-A: 'static + Future, {
+A: 'static, {
     id: Identifier,
     name: N,
     sender: UnboundedSender<Request<M>>,
     recver: UnboundedReceiver<Request<M>>,
     routine_builder: RoutineBuilder<M, R>,
     contacts_builder: ContactsBuilder<M>,
-    handler: fn(Contacts<M>, M) -> A,
+    handler: Box<dyn Fn(Contacts<M>, M) -> Pin<Box<dyn Future<Output = A>>> + Send>,
 }
 
 impl<'a, M, R, A, N> ComponentBuilder<M, R, A, N>
 where
 M: 'static + Send,
 R: 'static,
-A: 'static + Future,
+A: 'static,
 N: Into<Cow<'a, str>>, {
     #[allow(unused)]
-    pub fn new(
+    pub fn new<Fut>(
         name: N,
         routine_builder: RoutineBuilder<M, R>,
-        handler: fn(Contacts<M>, M) -> A,
-    ) -> ComponentResult<Self> {
+        handler: fn(Contacts<M>, M) -> Fut,
+    ) -> ComponentResult<Self>
+    where
+    Fut: 'static + Future<Output = A>, {
         get_new_id()
             .map(|id| (id, unbounded_channel::<Request<M>>()))
             .map(|(id, (send, recv))| Self {
@@ -57,7 +60,7 @@ N: Into<Cow<'a, str>>, {
                 recver: recv,
                 routine_builder,
                 contacts_builder: ContactsBuilder::new(),
-                handler,
+                handler: Box::new(move |contacts, message| Box::pin(handler(contacts, message))),
             })
             .map_err(ComponentError::from)
     }
@@ -82,7 +85,7 @@ impl<'a, M, R, A, N> Builder<Component<M, R, A>, ComponentError> for ComponentBu
 where
 M: 'static + Send,
 R: 'static,
-A: 'static + Future,
+A: 'static,
 N: Into<Cow<'a, str>>, {
     fn build(self) -> ComponentResult<Component<M, R, A>> {
         Ok(Component::new(

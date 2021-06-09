@@ -65,7 +65,8 @@ async fn get_humidity_levels(_: Contacts<MS>) -> SystemJob {
 #[derive(Clone)]
 struct MS;
 
-async fn handler(_: Contacts<MS>, _: MS) { println!("got a message") }
+async fn handler1(_: Contacts<MS>, _: MS) { println!("got a message") }
+async fn handler2(_: Contacts<MS>, _: MS) { println!("got a message") }
 
 fn main() {
     // create all jobs
@@ -93,13 +94,13 @@ fn main() {
     let mut critical_component_builder = ComponentBuilder::new(
         "critical",
         critical_routine_builder,
-        handler,
+        handler1,
     ).unwrap();
 
     let mut user_component_builder = ComponentBuilder::new(
         "user",
         user_routine_builder,
-        handler,
+        handler2,
     )
         .unwrap();
 

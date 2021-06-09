@@ -21,13 +21,13 @@ pub struct System<M, R, A>(
 where
 M: 'static + Send,
 R: 'static,
-A: 'static + Future,;
+A: 'static,;
 
 impl<M, R, A> System<M, R, A>
 where
 M: 'static + Send,
 R: 'static,
-A: 'static + Future, {
+A: 'static, {
     pub(crate) fn new<'a, N>(
         component_builders: Vec<ComponentBuilder<M, R, A, N>>,
     ) -> Self
@@ -71,7 +71,7 @@ impl<'a, M, R, A, N> From<SystemBuilder<M, R, A, N>> for System<M, R, A>
 where
 M: 'static + Send,
 R: 'static,
-A: 'static + Future,
+A: 'static,
 N: Into<Cow<'a, str>>, {
     fn from(system_builder: SystemBuilder<M, R, A, N>) -> Self {
         system_builder
