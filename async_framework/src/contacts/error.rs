@@ -3,13 +3,12 @@ use std::fmt::{
     Formatter,
     Result,
 };
-use tokio::sync::mpsc::error::SendError;
 
-use crate::component::Identifier;
+use tokio::sync::mpsc::error::SendError;
 
 #[derive(Debug, Clone)]
 pub enum ContactsError {
-    SenderDoesNotExist(Identifier),
+    SenderDoesNotExist(String),
     SendError,
 }
 

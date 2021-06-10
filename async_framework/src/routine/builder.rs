@@ -1,7 +1,7 @@
 use std::{
     ops::{
         Deref,
-        DerefMut
+        DerefMut,
     },
     sync::Arc,
 };
@@ -12,9 +12,7 @@ use crate::{
     routine::Routine,
 };
 
-pub struct RoutineBuilder<M, R>(
-    Vec<Arc<Job<M, R>>>,
-);
+pub struct RoutineBuilder<M, R>(Vec<Arc<Job<M, R>>>);
 
 impl<M, R> RoutineBuilder<M, R> {
     pub fn with_capacity(capacity: usize) -> Self { Self(Vec::with_capacity(capacity)) }

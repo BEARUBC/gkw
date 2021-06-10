@@ -1,6 +1,7 @@
 use std::time::Duration;
-use tokio::time::sleep;
+
 use async_framework::prelude::*;
+use tokio::time::sleep;
 
 enum SensorsCheck {
     BatteryLevel(u8),
@@ -31,9 +32,7 @@ async fn get_battery_levels(_: Contacts<MS>) -> SystemJob {
     println!("got battery percentage");
     let battery_levels = 97u8;
 
-    SystemJob::SensorsCheck(
-        SensorsCheck::BatteryLevel(battery_levels)
-    )
+    SystemJob::SensorsCheck(SensorsCheck::BatteryLevel(battery_levels))
 }
 
 async fn get_temperature_levels(_: Contacts<MS>) -> SystemJob {
@@ -46,9 +45,7 @@ async fn get_temperature_levels(_: Contacts<MS>) -> SystemJob {
     println!("got temperature levels");
     let temperature_levels = 25u32;
 
-    SystemJob::SensorsCheck(
-        SensorsCheck::TemperatureLevel(temperature_levels)
-    )
+    SystemJob::SensorsCheck(SensorsCheck::TemperatureLevel(temperature_levels))
 }
 
 async fn get_humidity_levels(_: Contacts<MS>) -> SystemJob {
@@ -61,9 +58,7 @@ async fn get_humidity_levels(_: Contacts<MS>) -> SystemJob {
     println!("got humidity levels");
     let humidity_levels = 101.101f64;
 
-    SystemJob::SensorsCheck(
-        SensorsCheck::HumidityLevel(humidity_levels)
-    )
+    SystemJob::SensorsCheck(SensorsCheck::HumidityLevel(humidity_levels))
 }
 
 async fn run_emg_analytics(_: Contacts<MS>) -> SystemJob {
@@ -77,12 +72,10 @@ async fn run_emg_analytics(_: Contacts<MS>) -> SystemJob {
     let upper_arm_voltage = 0.10f64;
     let lower_arm_voltage = 0.07f64;
 
-    SystemJob::MachineLearningAnalysis(
-        MachineLearningAnalysis::EMG {
-            upper_arm_voltage,
-            lower_arm_voltage,
-        }
-    )
+    SystemJob::MachineLearningAnalysis(MachineLearningAnalysis::EMG {
+        upper_arm_voltage,
+        lower_arm_voltage,
+    })
 }
 
 #[derive(Clone)]
@@ -116,18 +109,11 @@ fn main() {
         rb
     };
 
-    let mut critical_component_builder = ComponentBuilder::new(
-        "critical",
-        critical_routine_builder,
-        handler,
-    ).unwrap();
+    let mut critical_component_builder =
+        ComponentBuilder::new("critical", critical_routine_builder, handler).unwrap();
 
-    let mut user_component_builder = ComponentBuilder::new(
-        "user",
-        user_routine_builder,
-        handler,
-    )
-        .unwrap();
+    let mut user_component_builder =
+        ComponentBuilder::new("user", user_routine_builder, handler).unwrap();
 
     // adding components to each others' contacts
     critical_component_builder.add_component(&user_component_builder);
@@ -137,8 +123,5 @@ fn main() {
     sb.push(critical_component_builder);
     sb.push(user_component_builder);
 
-    sb
-        .build()
-        .unwrap()
-        .run();
+    sb.build().unwrap().run();
 }
