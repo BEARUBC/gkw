@@ -31,11 +31,9 @@ where
 M: 'static + Send,
 R: 'static,
 A: 'static, {
-    pub(crate) fn new<'a, N>(
-        component_builders: Vec<ComponentBuilder<M, R, A, N>>,
-    ) -> Self
-    where
-    N: Into<Cow<'a, str>>, {
+    pub(crate) fn new(
+        component_builders: Vec<ComponentBuilder<M, R, A>>,
+    ) -> Self {
         Self(
             component_builders
                 .into_iter()
@@ -69,13 +67,12 @@ A: 'static, {
     }
 }
 
-impl<'a, M, R, A, N> From<SystemBuilder<M, R, A, N>> for System<M, R, A>
+impl<M, R, A> From<SystemBuilder<M, R, A>> for System<M, R, A>
 where
 M: 'static + Send,
 R: 'static,
-A: 'static,
-N: Into<Cow<'a, str>>, {
-    fn from(system_builder: SystemBuilder<M, R, A, N>) -> Self {
+A: 'static, {
+    fn from(system_builder: SystemBuilder<M, R, A>) -> Self {
         system_builder
             .build()
             .unwrap()

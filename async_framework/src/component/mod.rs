@@ -63,22 +63,18 @@ where
 M: 'static + Send,
 R: 'static,
 A: 'static, {
-    pub(crate) fn new<'a, N>(
+    pub(crate) fn new(
         id: Identifier,
-        name: N,
+        name: String,
         sender: UnboundedSender<Request<M>>,
         recver: UnboundedReceiver<Request<M>>,
         contacts_builder: ContactsBuilder<M>,
         routine_builder: RoutineBuilder<M, R>,
         handler: Box<dyn Fn(Contacts<M>, M) -> Pin<Box<dyn Future<Output = A>>> + Send>,
-    ) -> Self
-    where
-    N: Into<Cow<'a, str>>, {
+    ) -> Self {
         Self {
             id,
-            name: name
-                .into()
-                .into_owned(),
+            name,
             sender,
             recver: Some(recver),
             contacts: Some(

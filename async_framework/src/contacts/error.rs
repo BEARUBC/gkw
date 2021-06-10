@@ -9,7 +9,7 @@ use crate::component::Identifier;
 
 #[derive(Debug, Clone)]
 pub enum ContactsError {
-    SenderDoesNotExist(Identifier),
+    SenderDoesNotExist(String),
     SendError,
 }
 

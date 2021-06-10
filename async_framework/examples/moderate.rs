@@ -30,7 +30,7 @@ async fn get_battery_levels(contacts: Contacts<MS>) -> SystemJob {
     let battery_levels = 97u8;
 
     contacts
-        .send(1usize, MS)
+        .send("user", MS)
         .unwrap();
 
     SystemJob::SensorsCheck(

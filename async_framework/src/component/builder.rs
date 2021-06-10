@@ -26,13 +26,13 @@ use crate::{
     utils::get_new_id,
 };
 
-pub struct ComponentBuilder<M, R, A, N>
+pub struct ComponentBuilder<M, R, A>
 where
 M: 'static + Send,
 R: 'static,
 A: 'static, {
     id: Identifier,
-    name: N,
+    name: String,
     sender: UnboundedSender<Request<M>>,
     recver: UnboundedReceiver<Request<M>>,
     routine_builder: RoutineBuilder<M, R>,
@@ -40,24 +40,26 @@ A: 'static, {
     handler: Box<dyn Fn(Contacts<M>, M) -> Pin<Box<dyn Future<Output = A>>> + Send>,
 }
 
-impl<'a, M, R, A, N> ComponentBuilder<M, R, A, N>
+impl<'a, M, R, A> ComponentBuilder<M, R, A>
 where
 M: 'static + Send,
 R: 'static,
-A: 'static,
-N: Into<Cow<'a, str>>, {
-    pub fn new<Fut>(
+A: 'static, {
+    pub fn new<N, Fut>(
         name: N,
         routine_builder: RoutineBuilder<M, R>,
         handler: fn(Contacts<M>, M) -> Fut,
     ) -> ComponentResult<Self>
     where
-    Fut: 'static + Future<Output = A>, {
+    Fut: 'static + Future<Output = A>,
+    N: Into<Cow<'a, str>>, {
         get_new_id()
             .map(|id| (id, unbounded_channel::<Request<M>>()))
             .map(|(id, (send, recv))| Self {
                 id,
-                name,
+                name: name
+                    .into()
+                    .into_owned(),
                 sender: send,
                 recver: recv,
                 routine_builder,
@@ -71,21 +73,25 @@ N: Into<Cow<'a, str>>, {
 
     pub fn sender(&self) -> UnboundedSender<Request<M>> { self.sender.clone() }
 
+    pub fn name(&self) -> &String { &self.name }
+
     pub fn add_component(&mut self, component_builder: &Self) {
         self.contacts_builder
             .add_sender(
-                component_builder.id(),
-                component_builder.sender(),
+                component_builder
+                    .name()
+                    .clone(),
+                component_builder
+                    .sender(),
             )
     }
 }
 
-impl<'a, M, R, A, N> Builder<Component<M, R, A>, ComponentError> for ComponentBuilder<M, R, A, N>
+impl<'a, M, R, A> Builder<Component<M, R, A>, ComponentError> for ComponentBuilder<M, R, A>
 where
 M: 'static + Send,
 R: 'static,
-A: 'static,
-N: Into<Cow<'a, str>>, {
+A: 'static, {
     fn build(self) -> ComponentResult<Component<M, R, A>> {
         Ok(Component::new(
             self.id,

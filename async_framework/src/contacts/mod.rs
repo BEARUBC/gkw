@@ -1,10 +1,7 @@
 pub mod builder;
 pub mod error;
 
-use std::{
-    collections::BTreeMap,
-    sync::Arc,
-};
+use std::{borrow::Cow, collections::BTreeMap, sync::Arc};
 use tokio::sync::mpsc::UnboundedSender;
 
 use crate::{
@@ -20,25 +17,30 @@ use crate::{
 pub type ContactsResult<T> = Result<T, ContactsError>;
 
 pub struct Contacts<M>(
-    Arc<BTreeMap<Identifier, UnboundedSender<Request<M>>>>,
+    Arc<BTreeMap<String, UnboundedSender<Request<M>>>>,
 );
 
 impl<M> Contacts<M> {
     pub fn new(
-        btreemap: BTreeMap<Identifier, UnboundedSender<Request<M>>>,
+        btreemap: BTreeMap<String, UnboundedSender<Request<M>>>,
     ) -> Self {
         Self(Arc::new(btreemap))
     }
 
-    pub fn send(&self, id: Identifier, msg: M) -> ContactsResult<()> {
+    pub fn send<'a, N>(&self, name: N, msg: M) -> ContactsResult<()>
+    where
+    N: Into<Cow<'a, str>>, {
+        let owned_name: String = name
+            .into()
+            .into_owned();
+
         self.0
             .as_ref()
-            .get(&id)
-            .ok_or(ContactsError::SenderDoesNotExist(id))
-            .and_then(
-                |sender| sender
-                    .send(Request::HandleMessage(msg))
-                    .map_err(ContactsError::from)
+            .get(&owned_name)
+            .ok_or(ContactsError::SenderDoesNotExist(owned_name))
+            .and_then(|sender| sender
+                .send(Request::HandleMessage(msg))
+                .map_err(ContactsError::from)
             )
     }
 }

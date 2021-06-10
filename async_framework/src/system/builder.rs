@@ -16,68 +16,62 @@ use crate::{
     },
 };
 
-pub struct SystemBuilder<M, R, A, N>(
-    Vec<ComponentBuilder<M, R, A, N>>,
+pub struct SystemBuilder<M, R, A>(
+    Vec<ComponentBuilder<M, R, A>>,
 )
 where
 M: 'static + Send,
 R: 'static,
 A: 'static,;
 
-impl<'a, M, R, A, N> SystemBuilder<M, R, A, N>
+impl<'a, M, R, A> SystemBuilder<M, R, A>
 where
 M: 'static + Send,
 R: 'static,
-A: 'static, 
-N: Into<Cow<'a, str>>, {
+A: 'static, {
     pub fn with_capacity(capacity: usize) -> Self { Self(Vec::with_capacity(capacity)) }
 
-    pub fn push(&mut self, component_builder: ComponentBuilder<M, R, A, N>) { self.0.push(component_builder) }
+    pub fn push(&mut self, component_builder: ComponentBuilder<M, R, A>) { self.0.push(component_builder) }
 }
 
-impl<'a, M, R, A, N> Builder<System<M, R, A>, SystemError> for SystemBuilder<M, R, A, N>
+impl<'a, M, R, A> Builder<System<M, R, A>, SystemError> for SystemBuilder<M, R, A>
 where
 M: 'static + Send,
 R: 'static,
-A: 'static,
-N: Into<Cow<'a, str>>, {
+A: 'static, {
     fn build(self) -> SystemResult<System<M, R, A>> { Ok(System::new(self.0)) }
 }
 
-impl<'a, M, R, A, N> Deref for SystemBuilder<M, R, A, N>
+impl<'a, M, R, A> Deref for SystemBuilder<M, R, A>
 where
 M: 'static + Send,
 R: 'static,
-A: 'static,
-N: Into<Cow<'a, str>>, {
-    type Target = Vec<ComponentBuilder<M, R, A, N>>;
+A: 'static, {
+    type Target = Vec<ComponentBuilder<M, R, A>>;
 
     fn deref(&self) -> &Self::Target { &self.0 }
 }
 
-impl<'a, M, R, A, N> DerefMut for SystemBuilder<M, R, A, N>
+impl<'a, M, R, A> DerefMut for SystemBuilder<M, R, A>
 where
 M: 'static + Send,
 R: 'static,
-A: 'static,
-N: Into<Cow<'a, str>>, {
+A: 'static, {
     fn deref_mut(&mut self) -> &mut Self::Target { &mut self.0 }
 }
 
-impl<'a, M, R, A, N> AsRef<Vec<ComponentBuilder<M, R, A, N>>> for SystemBuilder<M, R, A, N>
+impl<'a, M, R, A> AsRef<Vec<ComponentBuilder<M, R, A>>> for SystemBuilder<M, R, A>
 where
 M: 'static + Send,
 R: 'static,
-A: 'static,
-N: Into<Cow<'a, str>>, {
-    fn as_ref(&self) -> &Vec<ComponentBuilder<M, R, A, N>> { &self.0 }
+A: 'static, {
+    fn as_ref(&self) -> &Vec<ComponentBuilder<M, R, A>> { &self.0 }
 }
 
-impl<'a, M, R, A, N> AsMut<Vec<ComponentBuilder<M, R, A, N>>> for SystemBuilder<M, R, A, N>
+impl<'a, M, R, A> AsMut<Vec<ComponentBuilder<M, R, A>>> for SystemBuilder<M, R, A>
 where
 M: 'static + Send,
 R: 'static,
-A: 'static,
-N: Into<Cow<'a, str>>, {
-    fn as_mut(&mut self) -> &mut Vec<ComponentBuilder<M, R, A, N>> { &mut self.0 }
+A: 'static, {
+    fn as_mut(&mut self) -> &mut Vec<ComponentBuilder<M, R, A>> { &mut self.0 }
 }

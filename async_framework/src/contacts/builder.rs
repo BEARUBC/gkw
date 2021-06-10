@@ -21,7 +21,7 @@ use crate::{
 };
 
 pub struct ContactsBuilder<M>(
-    BTreeMap<Identifier, UnboundedSender<Request<M>>>,
+    BTreeMap<String, UnboundedSender<Request<M>>>,
 );
 
 impl<M> ContactsBuilder<M> {
@@ -29,11 +29,11 @@ impl<M> ContactsBuilder<M> {
 
     pub fn add_sender(
         &mut self,
-        id: Identifier,
+        name: String,
         sender: UnboundedSender<Request<M>>
     ) {
         self.0
-            .insert(id, sender);
+            .insert(name, sender);
     }
 }
 
@@ -42,7 +42,7 @@ impl<M> Builder<Contacts<M>, ContactsError> for ContactsBuilder<M> {
 }
 
 impl<M> Deref for ContactsBuilder<M> {
-    type Target = BTreeMap<Identifier, UnboundedSender<Request<M>>>;
+    type Target = BTreeMap<String, UnboundedSender<Request<M>>>;
 
     fn deref(&self) -> &Self::Target { &self.0 }
 }
@@ -51,11 +51,11 @@ impl<M> DerefMut for ContactsBuilder<M> {
     fn deref_mut(&mut self) -> &mut Self::Target { &mut self.0 }
 }
 
-impl<M> AsRef<BTreeMap<Identifier, UnboundedSender<Request<M>>>> for ContactsBuilder<M> {
-    fn as_ref(&self) -> &BTreeMap<Identifier, UnboundedSender<Request<M>>> { &self.0 }
+impl<M> AsRef<BTreeMap<String, UnboundedSender<Request<M>>>> for ContactsBuilder<M> {
+    fn as_ref(&self) -> &BTreeMap<String, UnboundedSender<Request<M>>> { &self.0 }
 }
 
-impl<M> AsMut<BTreeMap<Identifier, UnboundedSender<Request<M>>>> for ContactsBuilder<M> {
-    fn as_mut(&mut self) -> &mut BTreeMap<Identifier, UnboundedSender<Request<M>>> { &mut self.0 }
+impl<M> AsMut<BTreeMap<String, UnboundedSender<Request<M>>>> for ContactsBuilder<M> {
+    fn as_mut(&mut self) -> &mut BTreeMap<String, UnboundedSender<Request<M>>> { &mut self.0 }
 }
 
