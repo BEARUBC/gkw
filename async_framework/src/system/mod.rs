@@ -1,7 +1,6 @@
 pub mod builder;
 pub mod error;
 
-use std::borrow::Cow;
 use tokio::runtime::Builder as TokioBuilder;
 
 use crate::{

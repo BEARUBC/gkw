@@ -9,10 +9,7 @@ use tokio::sync::mpsc::UnboundedSender;
 
 use crate::{
     builder::Builder,
-    component::{
-        Identifier,
-        request::Request,
-    },
+    component::request::Request,
     contacts::{
         error::ContactsError,
         Contacts,

@@ -15,7 +15,6 @@ use tokio::{
     time::sleep,
 };
 use std::{
-    borrow::Cow,
     future::Future,
     pin::Pin,
     thread::{

@@ -1,17 +1,20 @@
 pub mod builder;
 pub mod error;
 
-use std::{borrow::Cow, collections::BTreeMap, sync::Arc};
+use std::{
+    borrow::Cow,
+    collections::BTreeMap,
+    sync::Arc,
+};
 use tokio::sync::mpsc::UnboundedSender;
 
 use crate::{
-    component::{
-        Identifier,
-        request::Request,
-    },
-    contacts::error::ContactsError,
     builder::Builder,
-    contacts::builder::ContactsBuilder,
+    component::request::Request,
+    contacts::{
+        error::ContactsError,
+        builder::ContactsBuilder,
+    },
 };
 
 pub type ContactsResult<T> = Result<T, ContactsError>;

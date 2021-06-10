@@ -1,9 +1,6 @@
-use std::{
-    borrow::Cow,
-    ops::{
-        Deref,
-        DerefMut,
-    },
+use std::ops::{
+    Deref,
+    DerefMut,
 };
 
 use crate::{

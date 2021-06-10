@@ -5,8 +5,6 @@ use std::fmt::{
 };
 use tokio::sync::mpsc::error::SendError;
 
-use crate::component::Identifier;
-
 #[derive(Debug, Clone)]
 pub enum ContactsError {
     SenderDoesNotExist(String),
