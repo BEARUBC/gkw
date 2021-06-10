@@ -4,6 +4,7 @@ use std::{
         Deref,
         DerefMut,
     },
+    path::Path,
 };
 
 use crate::{
@@ -33,6 +34,8 @@ N: Into<Cow<'a, str>>, {
     pub fn with_capacity(capacity: usize) -> Self { Self(Vec::with_capacity(capacity)) }
 
     pub fn push(&mut self, component_builder: ComponentBuilder<M, R, A, N>) { self.0.push(component_builder) }
+
+    pub fn from_file_tree(_: &Path) -> Self { todo!() }
 }
 
 impl<'a, M, R, A, N> Builder<System<M, R, A>, SystemError> for SystemBuilder<M, R, A, N>
