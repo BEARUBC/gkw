@@ -1,5 +1,6 @@
 pub mod builder;
 pub mod error;
+pub mod automated_builder;
 
 use tokio::runtime::Builder as TokioBuilder;
 

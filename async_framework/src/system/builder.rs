@@ -3,7 +3,7 @@ use std::{
         Deref,
         DerefMut,
     },
-    path::Path,
+    path::PathBuf,
 };
 
 use crate::{
@@ -34,7 +34,11 @@ where
         self.0.push(component_builder)
     }
 
-    pub fn from_file_tree(_: &Path) -> Self { todo!() }
+    pub fn from_automated_builder(absolute_root: PathBuf, src: PathBuf) -> Self {
+        use super::automated_builder::build;
+
+        build(absolute_root, src).unwrap()
+    }
 }
 
 impl<'a, M, R, A> Builder<System<M, R, A>, SystemError> for SystemBuilder<M, R, A>
