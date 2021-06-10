@@ -19,8 +19,7 @@ impl<M, R> Routine<M, R> {
         let max_capacity = jobs.len();
 
         Self {
-            jobs: jobs
-                .into_boxed_slice(),
+            jobs: jobs.into_boxed_slice(),
             current_index: 0usize,
             max_capacity,
         }
@@ -38,7 +37,7 @@ impl<M, R> Iterator for Routine<M, R> {
                 self.jobs
                     .get(self.current_index)
                     .unwrap() // unwrap should never fail
-                    .clone()
+                    .clone(),
             )
         }
         .map(|item| {
@@ -55,8 +54,6 @@ impl<M, R> Iterator for Routine<M, R> {
 
 impl<M, R> From<RoutineBuilder<M, R>> for Routine<M, R> {
     fn from(routine_builder: RoutineBuilder<M, R>) -> Self {
-        routine_builder
-            .build()
-            .expect("unable to build routine")
+        routine_builder.build().expect("unable to build routine")
     }
 }

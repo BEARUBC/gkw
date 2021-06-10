@@ -1,7 +1,7 @@
 use std::sync::{
     Mutex,
-    PoisonError,
     MutexGuard,
+    PoisonError,
 };
 
 use crate::component::Identifier;
@@ -13,12 +13,10 @@ lazy_static! {
 }
 
 pub(crate) fn get_new_id<'a>() -> Result<usize, MutexError<'a>> {
-    ID_STORE
-        .lock()
-        .map(|mut ref_id| {
-            let id = *ref_id;
-            *ref_id += 1usize;
+    ID_STORE.lock().map(|mut ref_id| {
+        let id = *ref_id;
+        *ref_id += 1usize;
 
-            id
-        })
+        id
+    })
 }

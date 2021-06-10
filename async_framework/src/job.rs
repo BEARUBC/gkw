@@ -15,11 +15,10 @@ impl<M, R> Job<M, R> {
 
     pub fn from_function<Fut>(f: fn(Contacts<M>) -> Fut) -> Self
     where
-    M: 'static,
-    Fut: 'static + Future<Output = R>, {
-        Self::Function(
-            Box::new(move |contacts| Box::pin(f(contacts)))
-        )
+        M: 'static,
+        Fut: 'static + Future<Output = R>,
+    {
+        Self::Function(Box::new(move |contacts| Box::pin(f(contacts))))
     }
 }
 

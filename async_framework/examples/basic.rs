@@ -1,6 +1,7 @@
 use std::time::Duration;
-use tokio::time::sleep;
+
 use async_framework::prelude::*;
+use tokio::time::sleep;
 
 async fn test1(_: Contacts<MS>) -> u32 {
     println!("TEST1");
@@ -35,17 +36,9 @@ fn main() {
     rb2.push(j3);
     rb2.push(j4);
 
-    let mut cb1 = ComponentBuilder::new(
-        "component1",
-        rb1,
-        handler,
-    ).unwrap();
+    let mut cb1 = ComponentBuilder::new("component1", rb1, handler).unwrap();
 
-    let mut cb2 = ComponentBuilder::new(
-        "component2",
-        rb2,
-        handler,
-    ).unwrap();
+    let mut cb2 = ComponentBuilder::new("component2", rb2, handler).unwrap();
 
     cb1.add_component(&cb2);
     cb2.add_component(&cb1);
@@ -54,8 +47,5 @@ fn main() {
     sb.push(cb1);
     sb.push(cb2);
 
-    sb
-        .build()
-        .unwrap()
-        .run();
+    sb.build().unwrap().run();
 }

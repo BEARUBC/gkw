@@ -1,6 +1,7 @@
 use std::time::Duration;
-use tokio::time::sleep;
+
 use async_framework::prelude::*;
+use tokio::time::sleep;
 
 enum SensorsCheck {
     BatteryLevel(u8),
@@ -29,13 +30,9 @@ async fn get_battery_levels(contacts: Contacts<MS>) -> SystemJob {
 
     let battery_levels = 97u8;
 
-    contacts
-        .send("user", MS)
-        .unwrap();
+    contacts.send("user", MS).unwrap();
 
-    SystemJob::SensorsCheck(
-        SensorsCheck::BatteryLevel(battery_levels)
-    )
+    SystemJob::SensorsCheck(SensorsCheck::BatteryLevel(battery_levels))
 }
 
 async fn get_temperature_levels(_: Contacts<MS>) -> SystemJob {
@@ -45,9 +42,7 @@ async fn get_temperature_levels(_: Contacts<MS>) -> SystemJob {
 
     let temperature_levels = 25u32;
 
-    SystemJob::SensorsCheck(
-        SensorsCheck::TemperatureLevel(temperature_levels)
-    )
+    SystemJob::SensorsCheck(SensorsCheck::TemperatureLevel(temperature_levels))
 }
 
 async fn get_humidity_levels(_: Contacts<MS>) -> SystemJob {
@@ -57,9 +52,7 @@ async fn get_humidity_levels(_: Contacts<MS>) -> SystemJob {
 
     let humidity_levels = 101.101f64;
 
-    SystemJob::SensorsCheck(
-        SensorsCheck::HumidityLevel(humidity_levels)
-    )
+    SystemJob::SensorsCheck(SensorsCheck::HumidityLevel(humidity_levels))
 }
 
 #[derive(Clone)]
@@ -91,18 +84,11 @@ fn main() {
         rb
     };
 
-    let mut critical_component_builder = ComponentBuilder::new(
-        "critical",
-        critical_routine_builder,
-        handler1,
-    ).unwrap();
+    let mut critical_component_builder =
+        ComponentBuilder::new("critical", critical_routine_builder, handler1).unwrap();
 
-    let mut user_component_builder = ComponentBuilder::new(
-        "user",
-        user_routine_builder,
-        handler2,
-    )
-        .unwrap();
+    let mut user_component_builder =
+        ComponentBuilder::new("user", user_routine_builder, handler2).unwrap();
 
     // adding components to each others' contacts
     critical_component_builder.add_component(&user_component_builder);
@@ -112,8 +98,5 @@ fn main() {
     sb.push(critical_component_builder);
     sb.push(user_component_builder);
 
-    sb
-        .build()
-        .unwrap()
-        .run();
+    sb.build().unwrap().run();
 }

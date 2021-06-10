@@ -5,6 +5,7 @@ use std::{
         DerefMut,
     },
 };
+
 use tokio::sync::mpsc::UnboundedSender;
 
 use crate::{
@@ -17,20 +18,13 @@ use crate::{
     },
 };
 
-pub struct ContactsBuilder<M>(
-    BTreeMap<String, UnboundedSender<Request<M>>>,
-);
+pub struct ContactsBuilder<M>(BTreeMap<String, UnboundedSender<Request<M>>>);
 
 impl<M> ContactsBuilder<M> {
     pub fn new() -> Self { Self(BTreeMap::new()) }
 
-    pub fn add_sender(
-        &mut self,
-        name: String,
-        sender: UnboundedSender<Request<M>>
-    ) {
-        self.0
-            .insert(name, sender);
+    pub fn add_sender(&mut self, name: String, sender: UnboundedSender<Request<M>>) {
+        self.0.insert(name, sender);
     }
 }
 
@@ -55,4 +49,3 @@ impl<M> AsRef<BTreeMap<String, UnboundedSender<Request<M>>>> for ContactsBuilder
 impl<M> AsMut<BTreeMap<String, UnboundedSender<Request<M>>>> for ContactsBuilder<M> {
     fn as_mut(&mut self) -> &mut BTreeMap<String, UnboundedSender<Request<M>>> { &mut self.0 }
 }
-
