@@ -69,7 +69,7 @@ async fn get_humidity_levels(_: Contacts<MS>) -> SystemJob {
 async fn run_emg_analytics(_: Contacts<MS>) -> SystemJob {
     println!("running emg analytics");
 
-    // running a lot of Python, and Python's super slow so ya :)
+    // running a lot of Python
     // assume this takes a very, VERY long
     sleep(Duration::from_millis(20_000u64)).await;
 
