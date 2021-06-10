@@ -1,41 +1,38 @@
 use std::{
     future::Future,
-    rc::Rc,
+    pin::Pin,
 };
 
-use crate::contacts::contacts::Contacts;
+use crate::contacts::Contacts;
 
-#[derive(Debug, Clone)]
-pub enum Job<T, M>
-where
-T: 'static + Future + Sized,
-M: 'static + Future + Send, {
+pub enum Job<M, R> {
     Spacer(u64),
-    Lambda(Box<fn(Contacts<M>) -> T>),
+    Function(Box<dyn Fn(Contacts<M>) -> Pin<Box<dyn Future<Output = R>>>>),
 }
 
-impl<T, M> Job<T, M>
-where
-T: 'static + Future + Sized,
-M: 'static + Future + Send, {
-    pub fn from_spacer(spacer: u64) -> Self { Self::Spacer(spacer) }
+impl<M, R> Job<M, R> {
+    pub fn from_spacer(amount: u64) -> Self { Self::Spacer(amount) }
 
-    pub fn from_lambda(lambda: fn(Contacts<M>) -> T) -> Self { Self::Lambda(Box::new(lambda)) }
+    pub fn from_function<Fut>(f: fn(Contacts<M>) -> Fut) -> Self
+    where
+        M: 'static,
+        Fut: 'static + Future<Output = R>,
+    {
+        Self::Function(Box::new(move |contacts| Box::pin(f(contacts))))
+    }
 }
 
-unsafe impl<T, M> Send for Job<T, M>
-where
-T: 'static + Future + Sized,
-M: 'static + Future + Send, {}
+impl<M, R> Clone for Job<M, R> {
+    fn clone(&self) -> Self {
+        use Job::*;
 
-unsafe impl<T, M> Sync for Job<T, M>
-where
-T: 'static + Future + Sized,
-M: 'static + Future + Send, {}
+        match self {
+            Spacer(amount) => Self::Spacer(*amount),
+            _ => panic!(),
+        }
+    }
+}
 
-// impl<T, M> From<fn(Rc<Contacts<M>>) -> T> for Job<T, M>
-// where
-// T: 'static + Future + Sized,
-// M: 'static + Future + Send, {
-//     fn from(lambda: fn(Rc<Contacts<M>>) -> T) -> Self { Self::Lambda(Box::new(lambda)) }
-// }
+unsafe impl<M, R> Send for Job<M, R> {}
+
+unsafe impl<M, R> Sync for Job<M, R> {}

@@ -1,10 +1,26 @@
+use std::fmt::{
+    Display,
+    Formatter,
+    Result,
+};
+
 use tokio::sync::mpsc::error::SendError;
 
-use crate::component::component::Identifier;
-
+#[derive(Debug, Clone)]
 pub enum ContactsError {
-    SenderDoesNotExist(Identifier),
+    SenderDoesNotExist(String),
     SendError,
+}
+
+impl Display for ContactsError {
+    fn fmt(&self, _: &mut Formatter) -> Result {
+        use ContactsError::*;
+
+        match self {
+            SenderDoesNotExist(_) => todo!(),
+            SendError => todo!(),
+        }
+    }
 }
 
 impl<T> From<SendError<T>> for ContactsError {
