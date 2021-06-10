@@ -2,6 +2,5 @@
 
 members = [
 	"kernel",
-	"async_framework",
 	"state_machine",
 ]
