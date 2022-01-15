@@ -1,6 +1,3 @@
-/* external crates */
-
-/* external uses */
 // use pyo3::{
 //     prelude::*,
 //     types::{
@@ -9,230 +6,208 @@
 //     },
 // };
 
-/* internal crates */
+mod actor;
 mod json_io;
 mod messages;
+mod state_machine;
 
-/* internal uses */
-#[allow(unused_imports)]
-use crate::{
-    messages::{
-        actuator::{
-            contract,
-            send_home,
-            stop,
-        },
-        diagnostics::{
-            check::{
-                CheckResponse,
-                Check,
-            },
-            ping::Ping,
-        },
-        response::{
-            Response:: {
-                Accepted,
-                Rejected,
-            },
-            Rejected:: {
-                EventLoopTooFull,
-                InvalidState,
-                Other,
-            },
-        }
-    },
-};
+use crate::messages::actuator::contract;
+use crate::messages::actuator::send_home;
+use crate::messages::actuator::stop;
+use crate::messages::diagnostics::check::Check;
+use crate::messages::diagnostics::check::CheckResponse;
+use crate::messages::diagnostics::ping::Ping;
+use crate::messages::response::Rejected::EventLoopTooFull;
+use crate::messages::response::Rejected::InvalidState;
+use crate::messages::response::Rejected::Other;
+use crate::messages::response::Response::Accepted;
+use crate::messages::response::Response::Rejected;
 
-/* internal mods */
 fn main() -> () {
-    /*let system_runner = System::new("Grasp -- main_binary: v0.0.1");
+    // let system_runner = System::new("Grasp -- main_binary: v0.0.1");
+    //
+    //
+    // let poll = Poll::new();
+    // let events = Events::with_capacity(128);
+    // let (tx, rx) = mpsc::channel();
+    // let arbiter_1 = Arbiter::new();
+    // let status_addr = StatusActor::start_in_arbiter(
+    // &arbiter_1,
+    // |_: &mut Context<StatusActor>| StatusActor::new()
+    // );
+    // let arbiter_2 = Arbiter::new();
+    // let user_addr = UserActor::start_in_arbiter(
+    // &arbiter_2,
+    // |_: &mut Context<UserActor>| UserActor::new()
+    // );
+    //
+    // let addr_clone = status_addr.clone();
+    // let diagnostics = async move {
+    // let diagnostics_send = addr_clone.send(Check).await;
+    //
+    // match diagnostics_send {
+    // Ok(res) => {
+    // match res {
+    // Accepted(result) => {
+    // println!("{}", result.battery_percentage);
+    // }
+    // Rejected(rejected) => {
+    // match rejected {
+    // EventLoopTooFull => {
+    // println!("Event loop too full");
+    // }
+    // InvalidState => {
+    // println!("Arm's current state does not support request");
+    // }
+    // Other => {
+    // println!("bla");
+    // }
+    // }
+    // }
+    // }
+    // }
+    // Err(e) => {
+    // println!("event loop too full");
+    // }
+    // }
+    // };
+    //
+    // let diagnostics2 = async move {
+    // let diagnostics_send = status_addr.send(Check).await;
+    //
+    // match diagnostics_send {
+    // Ok(res) => {
+    // match res {
+    // Accepted(result) => {
+    // println!("{}", result.battery_percentage + 100.0);
+    // }
+    // Rejected(rejected) => {
+    // match rejected {
+    // EventLoopTooFull => {
+    // println!("Event loop too full");
+    // }
+    // InvalidState => {
+    // println!("Arm's current state does not support request");
+    // }
+    // Other => {
+    // println!("bla");
+    // }
+    // }
+    // }
+    // }
+    // }
+    // Err(e) => {
+    // println!("event loop too full");
+    // }
+    // }
+    // };
+    // Arbiter::spawn(diagnostics2);
+    // Arbiter::spawn(diagnostics);
 
+    // let temp = thread::spawn(|| { // thread for status actor
+    // let diagnostics = async move {
+    // let diagnostics_send = status_addr.send(Check).await;
+    //
+    // match diagnostics_send {
+    // Ok(res) => {
+    // match res {
+    // Accepted(result) => {
+    // println!("{}", result.battery_percentage);
+    // }
+    // Rejected(rejected) => {
+    // match rejected {
+    // EventLoopTooFull => {
+    // println!("Event loop too full");
+    // }
+    // InvalidState => {
+    // println!("Arm's current state does not support request");
+    // }
+    // Other => {
+    // println!("bla");
+    // }
+    // }
+    // }
+    // }
+    // }
+    // Err(e) => {
+    // println!("event loop too full");
+    // }
+    // }
+    // };
+    // Arbiter::spawn(diagnostics);
+    //
+    // });
+    // let temp_2 = thread::spawn(|| { // thread for user actor
+    // });
+    // temp.join().unwrap();
 
-    let poll = Poll::new();
-    let events = Events::with_capacity(128);
-    //let (tx, rx) = mpsc::channel();
-    let arbiter_1 = Arbiter::new();
-    let status_addr = StatusActor::start_in_arbiter(
-        &arbiter_1,
-        |_: &mut Context<StatusActor>| StatusActor::new()
-    );
-    let arbiter_2 = Arbiter::new();
-    let user_addr = UserActor::start_in_arbiter(
-        &arbiter_2,
-        |_: &mut Context<UserActor>| UserActor::new()
-    );
+    // Arbiter::spawn(async move {
+    // status_addr.send(UserAddress(user_addr.clone())).await;
+    //
+    // match status_addr.send(UserAddress(user_addr.clone())).await {
+    //     Ok(response) => match response {
+    //         Response::Accepted(is_addr_set) => match is_addr_set {
+    //             false => panic!(),
+    //             _ => (),
+    //         },
+    //         Response::Rejected(_) => panic!(),
+    //     },
+    //     Err(_) => panic!(),
+    // };
+    // match user_addr.send(StatusAddress(status_addr)).await {
+    //     Ok(response) => match response {
+    //         Response::Accepted(is_addr_set) => match is_addr_set {
+    //             false => panic!(),
+    //             _ => (),
+    //         },
+    // Response::Rejected(_) => panic!(),
+    //     },
+    //     Err(_) => panic!(),
+    // };
+    //
+    // for _ in 0i32..100i32 {
+    // println!("asdf");
+    // }
+    //
+    // println!("DONE!");
+    // });
+    //
+    // Arbiter::spawn(async move {
+    // let diagnostics_send = status_addr.send(Check).await;
+    //
+    // match diagnostics_send {
+    // Ok(res) => {
+    // match res {
+    // Accepted(result) => {
+    // println!("{}", result.battery_percentage);
+    // }
+    // Rejected(rejected) => {
+    // match rejected {
+    // EventLoopTooFull => {
+    // println!("Event loop too full");
+    // }
+    // InvalidState => {
+    // println!("Arm's current state does not support request");
+    // }
+    // Other => {
+    // println!("bla");
+    // }
+    // }
+    // }
+    // }
+    // }
+    // Err(e) => {
+    // println!("Event loop is too full");
+    // }
+    // }
+    // });
 
-    let addr_clone = status_addr.clone();
-    let diagnostics = async move {
-        let diagnostics_send = addr_clone.send(Check).await;
+    // match system_runner.run() {
+    // Ok(_) => println!("we good?"),
+    // Err(_) => println!("error caught :("),
+    // }
 
-        match diagnostics_send {
-            Ok(res) => {
-                match res {
-                    Accepted(result) => {
-                        println!("{}", result.battery_percentage);
-                    }
-                    Rejected(rejected) => {
-                        match rejected {
-                            EventLoopTooFull => {
-                                println!("Event loop too full");
-                            }
-                            InvalidState => {
-                                println!("Arm's current state does not support request");
-                            }
-                            Other => {
-                                println!("bla");
-                            }
-                        }
-                    }
-                }
-            }
-            Err(e) => {
-                println!("event loop too full");
-            }
-        }
-    };
-
-    let diagnostics2 = async move {
-        let diagnostics_send = status_addr.send(Check).await;
-
-        match diagnostics_send {
-            Ok(res) => {
-                match res {
-                    Accepted(result) => {
-                        println!("{}", result.battery_percentage + 100.0);
-                    }
-                    Rejected(rejected) => {
-                        match rejected {
-                            EventLoopTooFull => {
-                                println!("Event loop too full");
-                            }
-                            InvalidState => {
-                                println!("Arm's current state does not support request");
-                            }
-                            Other => {
-                                println!("bla");
-                            }
-                        }
-                    }
-                }
-            }
-            Err(e) => {
-                println!("event loop too full");
-            }
-        }
-    };
-    Arbiter::spawn(diagnostics2);
-    Arbiter::spawn(diagnostics);
-    */
-
-
-    /*let temp = thread::spawn(|| { // thread for status actor
-        let diagnostics = async move {
-            let diagnostics_send = status_addr.send(Check).await;
-
-            match diagnostics_send {
-                Ok(res) => {
-                    match res {
-                        Accepted(result) => {
-                            println!("{}", result.battery_percentage);
-                        }
-                        Rejected(rejected) => {
-                            match rejected {
-                                EventLoopTooFull => {
-                                    println!("Event loop too full");
-                                }
-                                InvalidState => {
-                                    println!("Arm's current state does not support request");
-                                }
-                                Other => {
-                                    println!("bla");
-                                }
-                            }
-                        }
-                    }
-                }
-                Err(e) => {
-                    println!("event loop too full");
-                }
-            }
-        };
-        Arbiter::spawn(diagnostics);
-
-    });*/
-    /*let temp_2 = thread::spawn(|| { // thread for user actor
-    });*/
-    //temp.join().unwrap();
-
-
-    /*Arbiter::spawn(async move {
-        status_addr.send(UserAddress(user_addr.clone())).await;
-
-        // match status_addr.send(UserAddress(user_addr.clone())).await {
-        //     Ok(response) => match response {
-        //         Response::Accepted(is_addr_set) => match is_addr_set {
-        //             false => panic!(),
-        //             _ => (),
-        //         },
-        //         Response::Rejected(_) => panic!(),
-        //     },
-        //     Err(_) => panic!(),
-        // };
-        // match user_addr.send(StatusAddress(status_addr)).await {
-        //     Ok(response) => match response {
-        //         Response::Accepted(is_addr_set) => match is_addr_set {
-        //             false => panic!(),
-        //             _ => (),
-        //         },
-                // Response::Rejected(_) => panic!(),
-        //     },
-        //     Err(_) => panic!(),
-        // };
-
-        for _ in 0i32..100i32 {
-            println!("asdf");
-        }
-
-        println!("DONE!");
-    });
-
-    Arbiter::spawn(async move {
-        let diagnostics_send = status_addr.send(Check).await;
-
-        match diagnostics_send {
-            Ok(res) => {
-                match res {
-                    Accepted(result) => {
-                        println!("{}", result.battery_percentage);
-                    }
-                    Rejected(rejected) => {
-                        match rejected {
-                            EventLoopTooFull => {
-                                println!("Event loop too full");
-                            }
-                            InvalidState => {
-                                println!("Arm's current state does not support request");
-                            }
-                            Other => {
-                                println!("bla");
-                            }
-                        }
-                    }
-                }
-            }
-            Err(e) => {
-                println!("Event loop is too full");
-            }
-        }
-    });*/
-
-    
-    /*match system_runner.run() {
-        Ok(_) => println!("we good?"),
-        Err(_) => println!("error caught :("),
-    }*/
-
-    //System::current().stop();
+    // System::current().stop();
 
     // create_file("input.json");
     // create_file("output.json");
@@ -241,8 +216,10 @@ fn main() -> () {
 
     // let arbiter_1 = Arbiter::new();
     // let arbiter_2 = Arbiter::new();
-    // let status_actor = actor::status_actor::StatusActor::start_in_arbiter(&arbiter_1, move |_ctx: &mut Context<actor::status_actor::StatusActor>| StatusActor::new());
-    // let user_actor = actor::user_actor::UserActor::start_in_arbiter(&arbiter_2, move |_ctx: &mut Context<actor::user_actor::UserActor>| UserActor::start());
+    // let status_actor = actor::status_actor::StatusActor::start_in_arbiter(&arbiter_1, move |_ctx:
+    // &mut Context<actor::status_actor::StatusActor>| StatusActor::new()); let user_actor =
+    // actor::user_actor::UserActor::start_in_arbiter(&arbiter_2, move |_ctx: &mut
+    // Context<actor::user_actor::UserActor>| UserActor::start());
 
     // let diagnostics_send = status_actor.send(Check).await;
 
@@ -276,6 +253,7 @@ fn main() -> () {
 #[cfg(test)]
 mod main_test {
     use std::fs::File;
+
     #[allow(unused)]
     fn create_file(file_name: &str) -> () {
         match File::create(format!("./py_io/{}", file_name)) {
@@ -300,7 +278,8 @@ mod main_test {
 
 //     return Python::with_gil(|py| {
 //         let filename: &str = "py/test.py";
-//         let contents: String = fs::read_to_string(filename).expect("error reading the python file");
+//         let contents: String = fs::read_to_string(filename).expect("error reading the python
+// file");
 
 //         let test = PyModule::from_code(py, &contents, "test.py", "test")?;
 

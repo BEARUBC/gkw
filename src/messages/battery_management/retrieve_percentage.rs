@@ -1,14 +1,5 @@
-/* external crates */
-
-/* external uses */
-
-/* internal mods */
-
-/* internal uses */
-use crate::messages::{
-    response::Response,
-    message_handler::Handler
-};
+use crate::messages::message_handler::Handler;
+use crate::messages::response::Response;
 
 pub struct RetrievePercentage;
 
@@ -17,4 +8,3 @@ impl Handler for RetrievePercentage {
         println!("{}", 69);
     }
 }
-

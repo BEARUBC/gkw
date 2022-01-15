@@ -1,15 +1,7 @@
-/* external crates */
-
-/* external uses */
 use std::io::Error;
 
-/* internal mods */
-
-/* internal uses */
-use super::{
-    interface::Interface,
-    states::States,
-};
+use super::interface::Interface;
+use super::states::States;
 
 pub(in super::super) struct Machine {
     current_state: States,
@@ -17,7 +9,9 @@ pub(in super::super) struct Machine {
 
 impl Machine {
     pub(in super::super) fn new() -> Self {
-        Machine{ current_state: States::Active}
+        Machine {
+            current_state: States::Active,
+        }
     }
 
     #[allow(unused)]
@@ -34,6 +28,7 @@ impl Interface for Machine {
             States::Failure => {},
         };
     }
+
     fn b(self: &mut Self) -> () {
         match &(*self).current_state {
             States::Safety => {},

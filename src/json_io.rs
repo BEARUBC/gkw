@@ -1,18 +1,8 @@
-/* external crates */
+use std::fs::File;
+use std::io::prelude::*;
+use std::io::ErrorKind;
 
-/* external uses */
-use std::{
-    fs::File,
-    io::{
-        prelude::*,
-        ErrorKind
-    },
-};
 use serde_json::Value;
-
-/* internal mods */
-
-/* internal uses */
 
 #[allow(unused)]
 pub fn read_from_output() -> std::io::Result<Value> {
@@ -21,16 +11,25 @@ pub fn read_from_output() -> std::io::Result<Value> {
     match File::open(format!("./py_io/output.json")) {
         Ok(mut file) => {
             match file.read_to_string(&mut string_buffer) {
-                Ok(_) => {
-                    match serde_json::from_str(string_buffer.as_str()) {
-                        Ok(value) => { return Ok(value); },
-                        Err(err) => { return Err(std::io::Error::new(ErrorKind::Other, "unable to construct json from file")); },
-                    }
+                Ok(_) => match serde_json::from_str(string_buffer.as_str()) {
+                    Ok(value) => {
+                        return Ok(value);
+                    },
+                    Err(err) => {
+                        return Err(std::io::Error::new(
+                            ErrorKind::Other,
+                            "unable to construct json from file",
+                        ));
+                    },
                 },
-                Err(err) => { return Err(err); },
+                Err(err) => {
+                    return Err(err);
+                },
             };
         },
-        Err(err) => { return Err(err); },
+        Err(err) => {
+            return Err(err);
+        },
     };
 }
 
@@ -40,19 +39,24 @@ pub fn write_to_input(json: Value) -> std::io::Result<()> {
     let json_bytes = json_string.as_bytes();
 
     match File::create("./py_io/input.json") {
-        Ok(mut file) => {
-            match file.write(json_bytes) {
-                Ok(_) => { return Ok(()); },
-                Err(err) => { return Err(err); }
-            }
+        Ok(mut file) => match file.write(json_bytes) {
+            Ok(_) => {
+                return Ok(());
+            },
+            Err(err) => {
+                return Err(err);
+            },
         },
-        Err(err) => { return Err(err); },
+        Err(err) => {
+            return Err(err);
+        },
     };
 }
 
 #[cfg(test)]
 mod json_io_test {
     use serde_json::json;
+
     use super::*;
 
     #[test]
@@ -67,7 +71,9 @@ mod json_io_test {
 
         match result {
             Ok(()) => (),
-            Err(_) => { panic!(); },
+            Err(_) => {
+                panic!();
+            },
         }
     }
 
@@ -84,7 +90,9 @@ mod json_io_test {
 
         match result {
             Ok(()) => (),
-            Err(_) => { panic!(); },
+            Err(_) => {
+                panic!();
+            },
         }
     }
 
@@ -92,7 +100,9 @@ mod json_io_test {
     fn simple_read() -> () {
         match read_from_output() {
             Ok(_) => (),
-            Err(_) => { panic!(); }
+            Err(_) => {
+                panic!();
+            },
         };
     }
 }

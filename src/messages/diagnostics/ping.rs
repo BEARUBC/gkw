@@ -1,13 +1,4 @@
-/* external crates */
-
-/* external uses */
-use crate::messages::{
-    response::Response,
-    message_handler::Handler
-};
-
-/* internal mods */
-
-/* internal uses */
+use crate::messages::message_handler::Handler;
+use crate::messages::response::Response;
 
 pub struct Ping;

@@ -1,18 +1,8 @@
-/* external crates */
-
-/* external uses */
 use actix::prelude::*;
 
-/* internal mods */
-
-/* internal uses */
-use crate::{
-    actor::status_actor::StatusActor,
-    messages::{
-        address::status_address::StatusAddress,
-        response::Response,
-    },
-};
+use crate::actor::status_actor::StatusActor;
+use crate::messages::address::status_address::StatusAddress;
+use crate::messages::response::Response;
 
 pub struct UserActor {
     #[allow(unused)]
@@ -22,9 +12,7 @@ pub struct UserActor {
 impl UserActor {
     #[allow(unused)]
     pub fn new() -> Self {
-        return UserActor {
-            status_addr: None,
-        };
+        return UserActor { status_addr: None };
     }
 
     #[allow(unused)]
@@ -45,7 +33,7 @@ impl Actor for UserActor {
     fn started(&mut self, _: &mut Context<Self>) {
         println!("user actor has started");
     }
- 
+
     fn stopped(&mut self, _: &mut Context<Self>) {
         println!("user actor has stopped");
     }

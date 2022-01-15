@@ -1,15 +1,5 @@
-/* external crates */
-
-/* external uses */
-
-/* internal mods */
-
-/* internal uses */
-
-use crate::messages::{
-    response::Response,
-    message_handler::Handler
-};
+use crate::messages::message_handler::Handler;
+use crate::messages::response::Response;
 
 // #[derive(Message)]
 // #[rtype(result = "Response<()>")]
@@ -20,5 +10,3 @@ impl Handler for SendHome {
         println!("Send home");
     }
 }
-
-

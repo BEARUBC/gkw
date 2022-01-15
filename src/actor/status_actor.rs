@@ -1,34 +1,19 @@
-/* external crates */
-
-/* external uses */
 use actix::prelude::*;
 
-/* internal mods */
 #[path = "../state_machine/mod.rs"]
 mod state_machine;
 
-/* internal uses */
-use crate::{
-    messages::{
-        actuator::{
-            contract::Contract,
-            stop::Stop,
-            send_home::SendHome,
-        },
-        battery_management::retrieve_percentage::RetrievePercentage,
-        diagnostics::{
-            check::{
-                Check,
-                CheckResponse,
-            },
-            ping::Ping,
-        },
-        address::user_address::UserAddress,
-        response::Response,
-    },
-    actor::user_actor::UserActor,
-};
 use self::state_machine::machine::Machine;
+use crate::actor::user_actor::UserActor;
+use crate::messages::actuator::contract::Contract;
+use crate::messages::actuator::send_home::SendHome;
+use crate::messages::actuator::stop::Stop;
+use crate::messages::address::user_address::UserAddress;
+use crate::messages::battery_management::retrieve_percentage::RetrievePercentage;
+use crate::messages::diagnostics::check::Check;
+use crate::messages::diagnostics::check::CheckResponse;
+use crate::messages::diagnostics::ping::Ping;
+use crate::messages::response::Response;
 
 pub struct StatusActor {
     #[allow(unused)]
@@ -52,7 +37,7 @@ impl Actor for StatusActor {
     fn started(&mut self, _: &mut Context<Self>) -> () {
         println!("critical actor has started");
     }
- 
+
     fn stopped(&mut self, _: &mut Context<Self>) -> () {
         println!("critical actor has stopped");
     }
@@ -91,7 +76,7 @@ impl Handler<Check> for StatusActor {
     #[allow(unused)]
     fn handle(&mut self, msg: Check, ctx: &mut Context<Self>) -> Self::Result {
         return MessageResult(Response::Accepted(CheckResponse {
-            battery_percentage: 90.0f64
+            battery_percentage: 90.0f64,
         }));
     }
 }

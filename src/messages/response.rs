@@ -1,11 +1,3 @@
-/* external crates */
-
-/* external uses */
-
-/* internal mods */
-
-/* internal uses */
-
 #[allow(unused)]
 pub enum Response<T> {
     Accepted(T),
