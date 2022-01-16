@@ -9,20 +9,21 @@ description = "The main, asynchronous, non-blocking IO, event-loop for the syste
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+tokio = { version = "1.4.0", features = ["rt", "macros", "net", "io-util", "rt-multi-thread", "sync"] }
+lazy_static = "1.4.0"
+serde_json = "1.0"
 
 # ASYNC RUNTIME:
 # tokio = { version = "1.0.2", features = ["full"] }
-actix = "0.10.0"
-actix-rt = "2.1.0"
-mio = "0.7"
-tokio = { version = "1.4.0", features = ["rt", "net", "io-util", "rt-multi-thread", "sync"] }
-async_framework = { path = "local_lib/async_framework"}
+# actix = "0.10.0"
+# actix-rt = "2.1.0"
+# mio = "0.7"
+# async_framework = { path = "local_lib/async_framework"}
 
 # MICRO-MAESTRO INTERFACE:
 # raestro = "0.1.0"
 
 # JSON SER. AND DESER.:
-serde_json = "1.0"
 
 # PYTHON INTERPRETER BINDINGS:
 # [dependencies.pyo3]
