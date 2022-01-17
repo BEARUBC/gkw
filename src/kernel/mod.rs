@@ -1,14 +1,27 @@
-pub mod api;
+pub mod peripherals;
 
 use std::io;
+use std::sync::Arc;
+use std::sync::Mutex;
+use std::sync::MutexGuard;
 
 use lazy_static::lazy_static;
 
+use crate::error::ToIoError;
+use crate::kernel::peripherals::bms::Bms;
+use crate::kernel::peripherals::fingers::Fingers;
+use crate::kernel::peripherals::wrist::Wrist;
+
 lazy_static! {
-    pub static ref KERNEL: Kernel = Kernel::default();
+    /// A static kernel reference which can be (thread-safely) referenced and mutated.
+    /// This represents a singleton instance in the entire system.
+    ///
+    /// All `Kernel` functions (i.e., all functions residing in `impl Kernel { ... }`) will internally refer to and/or mutate this object.
+    static ref KERNEL: Arc<Mutex<Kernel>> = Arc::new(Mutex::new(Kernel::default()));
 }
 
 /// A transition matrix for the internal state-machine.
+///
 /// Each row represents each corresponding state.
 /// Each element in each row represents whether or not that other state can transition to it.
 ///
@@ -42,7 +55,7 @@ const NUMBER_OF_STATES: usize = 4usize;
 /// (I.e., it is not the case that just because a state has a higher number, it is "more important"
 /// or anything).
 #[repr(C)]
-#[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub enum State {
     /// Safety:
     /// Used for when the arm is in a potentially harmful/dangerous state (i.e., low-battery).
@@ -70,7 +83,7 @@ pub enum State {
     /// Used for when the arm is initially booting up, and is performing booting up
     /// procedures/scripts.
     ///
-    /// APIs are not exposed at this point, since booting up is still occurring.
+    /// APIs are not exposed at this point since booting up is still occurring.
     Init = 3,
 }
 
@@ -85,30 +98,67 @@ impl Default for State {
 /// StateMachine for internal usage.
 /// Represents the current state of the GKW software.
 ///
-/// All APIs should be first routed through this class
-#[derive(Default)]
+/// All APIs exposed by the kernel should be first routed through this class.
+#[derive(Default, Debug, Clone, Copy)]
 pub struct Kernel {
-    current_state: State,
+    /// Internal state of the kernel.
+    state: State,
+
+    /// Fingers state-management.
+    #[allow(unused)]
+    fingers: Fingers,
+
+    /// Wrist state-management.
+    #[allow(unused)]
+    wrist: Wrist,
+
+    /// Bms state-management.
+    bms: Bms,
 }
 
+/// Private implementations for internal usage by the `Kernel` class only.
 impl Kernel {
-    /// Transitions a kernel from its current internal state to another.
-    /// Throws an error if the state provided is cannot be transitioned to from the current state.
+    /// Transitions kernel from its current internal state to another.
+    /// Returns `true` iff the next-state is transitionable from the current-state.
+    /// Returns `false` otherwise.
+    ///
+    /// The transition function should only be callable from `Kernel` functions.
+    /// Third-parties should *not* be able to request state-transitions (i.e., state should be
+    /// something that is strictly abstracted away from external users).
     #[allow(unused)]
-    pub fn transition(&mut self, #[allow(unused)] next_state: State) -> io::Result<()> {
-        let curr = self.current_state as usize;
+    fn try_transition(next_state: State) -> io::Result<bool> {
+        let mut krn = kernel()?;
+
+        let curr = krn.state as usize;
         let next = next_state as usize;
+
+        if curr == next {
+            return Ok(true);
+        }
 
         let can_transition = TRANSITION[next][curr];
 
         if can_transition {
-            self.current_state = next_state;
-            Ok(())
+            krn.state = next_state;
+            Ok(true)
         } else {
-            Err(io::Error::new(
-                io::ErrorKind::InvalidInput,
-                "invalid transition",
-            ))
+            Ok(false)
         }
     }
+
+    /// Gets current state of Kernel.
+    ///
+    /// Third-parties should *not* be able to request state-transitions (i.e., state should be
+    /// something that is strictly abstracted away from external users).
+    #[allow(unused)]
+    fn state() -> io::Result<State> {
+        kernel().map(|kernel| kernel.state)
+    }
+}
+
+/// Convenience function to get a clone of KERNEL.
+fn kernel() -> io::Result<MutexGuard<'static, Kernel>> {
+    KERNEL.lock().map_err(|err| {
+        err.to_io_error("Something went wrong while trying to retrieve the kernel state.")
+    })
 }
