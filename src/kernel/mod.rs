@@ -56,7 +56,7 @@ const NUMBER_OF_STATES: usize = 4usize;
 /// or anything).
 #[repr(C)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
-pub enum State {
+enum State {
     /// Safety:
     /// Used for when the arm is in a potentially harmful/dangerous state (i.e., low-battery).
     ///
