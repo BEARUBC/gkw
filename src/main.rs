@@ -3,7 +3,6 @@ use std::process::exit;
 
 use log::error;
 use log::info;
-use tokio;
 
 mod error;
 mod kernel;
@@ -61,6 +60,7 @@ async fn main() -> ! {
         },
     };
 
+    #[allow(clippy::empty_loop)]
     loop {}
 
     error!("The GKW main-loop has crashed unexpectedly. Exiting...");
