@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-const { run, finish } = require('../utils');
+const { command, run, finish } = require('../utils');
 
 const { stdout } = command({
   command: 'git',
