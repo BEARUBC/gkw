@@ -32,10 +32,4 @@ run({
   args: ['+nightly clippy'],
 });
 
-run({
-  title: 'Hello!',
-  command: 'ls',
-  args: ['-las'],
-});
-
 finish();
