@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 const { command, run, finish } = require('../utils');
+const { branch_name_policy } = require('../.config/global.config');
 
 const { stdout } = command({
   command: 'git',
