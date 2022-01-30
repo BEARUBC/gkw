@@ -1,6 +1,6 @@
 module.exports = {
     shellOptions: { shell: true, stdio: 'inherit' },
-    branch_name_policy: /(bug|task)\/WAVY-[0-9]+/,
+    branch_name_policy: /(bug|task)\/GKW-[0-9]+/,
     hooks: [
         'pre-commit',
         'pre-push',
