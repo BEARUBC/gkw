@@ -1,7 +1,7 @@
-# Cargo dependencies
-/target
+# Cargo dependencies + artefacts
+target
 Cargo.lock
 
-# Python I/O
-/py_io/input.json
-/py_io/output.json
+# Node dependencies + artefacts
+node_modules
+yarn.lock
