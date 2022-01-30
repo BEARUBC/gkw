@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-const { command, run, finish } = require('../utils');
+const { command, run, finish, error } = require('../utils');
 const { branch_name_policy } = require('../.config/config');
 
 const { stdout } = command({
