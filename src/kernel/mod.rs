@@ -1,13 +1,12 @@
 pub mod peripherals;
 
-use std::io;
 use std::sync::Arc;
 use std::sync::Mutex;
 use std::sync::MutexGuard;
 
 use lazy_static::lazy_static;
 
-use crate::error::ToIoError;
+use crate::gkw;
 use crate::kernel::peripherals::bms::Bms;
 use crate::kernel::peripherals::fingers::Fingers;
 use crate::kernel::peripherals::wrist::Wrist;
@@ -126,7 +125,7 @@ impl Kernel {
     /// Third-parties should *not* be able to request state-transitions (i.e., state should be
     /// something that is strictly abstracted away from external users).
     #[allow(unused)]
-    fn try_transition(next_state: State) -> io::Result<bool> {
+    fn try_transition(next_state: State) -> gkw::Result<bool> {
         let mut krn = kernel()?;
 
         let curr = krn.state as usize;
@@ -151,14 +150,12 @@ impl Kernel {
     /// Third-parties should *not* be able to request state-transitions (i.e., state should be
     /// something that is strictly abstracted away from external users).
     #[allow(unused)]
-    fn state() -> io::Result<State> {
+    fn state() -> gkw::Result<State> {
         kernel().map(|kernel| kernel.state)
     }
 }
 
 /// Convenience function to get a clone of KERNEL.
-fn kernel() -> io::Result<MutexGuard<'static, Kernel>> {
-    KERNEL.lock().map_err(|err| {
-        err.to_io_error("Something went wrong while trying to retrieve the kernel state.")
-    })
+fn kernel() -> gkw::Result<MutexGuard<'static, Kernel>> {
+    Ok(KERNEL.lock()?)
 }

@@ -1,5 +1,4 @@
-use std::io;
-
+use crate::gkw;
 use crate::kernel::kernel;
 use crate::kernel::peripherals::Percentage;
 use crate::kernel::Kernel;
@@ -19,7 +18,7 @@ impl Kernel {
     /// This function does *NOT* read battery-percentage from the BMS; it only returns the cached
     /// percentage from the latest read.
     #[allow(unused)]
-    pub fn get_percentage() -> io::Result<Percentage> {
+    pub fn get_percentage() -> gkw::Result<Percentage> {
         kernel().map(|krn| krn.bms.percentage)
     }
 
@@ -32,7 +31,7 @@ impl Kernel {
     /// `Active` state, but a current read returns a low-battery percentage, the kernel will be
     /// transitioned to the `Safety` state).
     #[allow(unused)]
-    pub fn read_percentage() -> io::Result<Percentage> {
+    pub fn read_percentage() -> gkw::Result<Percentage> {
         todo!()
     }
 }
