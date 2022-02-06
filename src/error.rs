@@ -8,6 +8,7 @@ use crate::kernel::Kernel;
 #[allow(non_camel_case_types)]
 #[repr(C)]
 #[derive(Debug, Display, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+#[allow(clippy::zero_prefixed_literal)]
 pub enum ErrorCode {
     #[allow(dead_code)]
     #[display(fmt = "other error")]
