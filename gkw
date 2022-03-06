@@ -12,8 +12,6 @@ const { program, Command } = require('commander');
 
 const { hooks: configHooks, shellOptions } = require(`${cliConfigDir}/config.js`);
 
-
-
 const constants = {
     init: {
         hooks: {
@@ -36,9 +34,6 @@ const constants = {
             },
         },
     },
-    // ssh: {
-    //     action: user => spawnSync('ssh', [`${user}@${bastion_ip_address}`], shellOptions),
-    // },
 };
 
 program
@@ -49,13 +44,6 @@ program
                     .action(constants.init.hooks.action)
             )
     );
-    // .addCommand(
-    //     new Command('ssh').description('ssh into the remote bastion server')
-    //         .addArgument(
-    //             new Argument('USER', 'the user to ssh into the remote bastion server as').argRequired(),
-    //         )
-    //         .action(constants.ssh.action)
-    // )
 
 program.parse(process.argv);
 
