@@ -3,12 +3,6 @@ use std::process::exit;
 use log::error;
 use log::info;
 
-mod error;
-mod gkw {
-    pub use crate::error::Error;
-    pub use crate::error::ErrorCode;
-    pub type Result<T> = std::result::Result<T, crate::error::Error>;
-}
 mod kernel;
 
 /// Initialize logging.
@@ -36,7 +30,7 @@ fn init_logging() {
 /// Initialization sequence.
 ///
 /// Serves to --apart from other things-- initialize instances of lazy-statics across GKW.
-async fn init() -> gkw::Result<()> {
+async fn init() -> gkw_utils::Result<()> {
     info!("Initializing GKW...");
 
     // ... initialization sequences go here

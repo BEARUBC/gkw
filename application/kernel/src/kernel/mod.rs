@@ -1,22 +1,14 @@
 pub mod peripherals;
 
 use std::sync::Arc;
-use std::sync::Mutex;
-use std::sync::MutexGuard;
+use std::sync::RwLock;
 
 use lazy_static::lazy_static;
 
-use crate::gkw;
-use crate::kernel::peripherals::bms::Bms;
-use crate::kernel::peripherals::fingers::Fingers;
-use crate::kernel::peripherals::wrist::Wrist;
-
 lazy_static! {
-    /// A static kernel reference which can be (thread-safely) referenced and mutated.
-    /// This represents a singleton instance in the entire system.
-    ///
-    /// All `Kernel` functions (i.e., all functions residing in `impl Kernel { ... }`) will internally refer to and/or mutate this object.
-    static ref KERNEL: Arc<Mutex<Kernel>> = Arc::new(Mutex::new(Kernel::default()));
+    /// A global state value which can be (thread-safely) referenced and mutated.
+    /// The `RwLock` allows for 1 or more readers XOR only 1 writer.
+    static ref STATE: Arc<RwLock<State>> = Arc::new(RwLock::new(State::default()));
 }
 
 /// A transition matrix for the internal state-machine.
@@ -29,7 +21,7 @@ lazy_static! {
 /// let state_a: State = ... as usize;
 /// let state_b: State = ... as usize;
 ///
-/// // can transition from `state_b -> state_a`;
+/// // can transition from `state_a -> state_b`;
 /// let can_transition: bool = TRANSITION[state_a][state_b];
 /// ```
 ///
@@ -55,7 +47,7 @@ const NUMBER_OF_STATES: usize = 4usize;
 /// or anything).
 #[repr(C)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
-enum State {
+pub enum State {
     /// Safety:
     /// Used for when the arm is in a potentially harmful/dangerous state (i.e., low-battery).
     ///
@@ -94,68 +86,34 @@ impl Default for State {
     }
 }
 
-/// StateMachine for internal usage.
-/// Represents the current state of the GKW software.
-///
-/// All APIs exposed by the kernel should be first routed through this class.
-#[derive(Default, Debug, Clone, Copy)]
-pub struct Kernel {
-    /// Internal state of the kernel.
-    state: State,
-
-    /// Fingers state-management.
+impl State {
+    /// Convenience function to get an immutable copy of the STATE.
     #[allow(unused)]
-    fingers: Fingers,
-
-    /// Wrist state-management.
-    #[allow(unused)]
-    wrist: Wrist,
-
-    /// Bms state-management.
-    bms: Bms,
-}
-
-/// Private implementations for internal usage by the `Kernel` class only.
-impl Kernel {
-    /// Transitions kernel from its current internal state to another.
-    /// Returns `true` iff the next-state is transitionable from the current-state.
-    /// Returns `false` otherwise.
-    ///
-    /// The transition function should only be callable from `Kernel` functions.
-    /// Third-parties should *not* be able to request state-transitions (i.e., state should be
-    /// something that is strictly abstracted away from external users).
-    #[allow(unused)]
-    fn try_transition(next_state: State) -> gkw::Result<bool> {
-        let mut krn = kernel()?;
-
-        let curr = krn.state as usize;
-        let next = next_state as usize;
-
-        if curr == next {
-            return Ok(true);
-        }
-
-        let can_transition = TRANSITION[next][curr];
-
-        if can_transition {
-            krn.state = next_state;
-            Ok(true)
-        } else {
-            Ok(false)
-        }
+    fn state() -> gkw_utils::Result<State> {
+        STATE
+            .read()
+            .map(|guard| guard.clone())
+            .map_err(gkw_utils::Error::from)
     }
 
-    /// Gets current state of Kernel.
-    ///
-    /// Third-parties should *not* be able to request state-transitions (i.e., state should be
-    /// something that is strictly abstracted away from external users).
     #[allow(unused)]
-    fn state() -> gkw::Result<State> {
-        kernel().map(|kernel| kernel.state)
-    }
-}
+    fn try_transition(new_state: State) -> gkw_utils::Result<()> {
+        let can_transition =
+            Self::state().map(|curr_state| TRANSITION[curr_state as usize][new_state as usize])?;
 
-/// Convenience function to get a clone of KERNEL.
-fn kernel() -> gkw::Result<MutexGuard<'static, Kernel>> {
-    Ok(KERNEL.lock()?)
+        match can_transition {
+            true => {
+                let mut old_state = STATE.write()?;
+                let _ = std::mem::replace(&mut *old_state, new_state);
+
+                Ok(())
+            },
+            false => Err(gkw_utils::Error::new(
+                gkw_utils::ErrorCode::unable_to_transition,
+                Some(
+                    "Cannot transition from current state to the provided one; invalid transition.",
+                ),
+            )),
+        }
+    }
 }

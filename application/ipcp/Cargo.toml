@@ -1,0 +1,15 @@
+[package]
+name = "ipcp"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+serde = { version = "1.0.136", features = ["derive"] }
+serde_json = "1.0.79"
+serde_repr = "0.1.7"
+uuid = { version = "0.8.2", features = ["serde"] }
+derivative = "2.2.0"
+strum = "0.24.0"
+strum_macros = "0.24.0"
