@@ -1,0 +1,49 @@
+[package]
+name = "kernel"
+version = "0.1.0"
+authors = [
+    "nathan-n-poon <nathannpoon@gmail.com>",
+    "raunakab <rabhagat31@gmail.com>",
+    "bzhou64 <billzhou64@gmail.com>",
+]
+edition = "2018"
+license = "MIT"
+description = "The main, asynchronous, non-blocking IO, event-loop for the systems software for GRASP, owned by UBC Bionics"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+# async runtime
+tokio = { version = "1.4.0", features = ["rt", "macros", "net", "io-util", "rt-multi-thread", "sync"] }
+
+# global (lazily loaded) statics
+lazy_static = "1.4.0"
+
+# serialization + deserialization utils
+serde_json = "1.0.79"
+
+# logging + stringifying utils
+log = "0.4.14"
+env_logger = "0.9.0"
+derive_more = "0.99.17"
+
+# internal libraries
+ipcp = { version = "0.1.0", path = "../ipcp" }
+gkw-utils = { version = "0.3.1", path = "../gkw-utils" }
+
+# ASYNC RUNTIME:
+# tokio = { version = "1.0.2", features = ["full"] }
+# actix = "0.10.0"
+# actix-rt = "2.1.0"
+# mio = "0.7"
+# async_framework = { path = "local_lib/async_framework"}
+
+# MICRO-MAESTRO INTERFACE:
+# raestro = "0.1.0"
+
+# JSON SER. AND DESER.:
+
+# PYTHON INTERPRETER BINDINGS:
+# [dependencies.pyo3]
+# version = "0.13.1"
+# features = ["auto-initialize"]
