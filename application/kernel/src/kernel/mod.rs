@@ -88,11 +88,11 @@ impl Default for State {
 
 impl State {
     /// Convenience function to get an immutable copy of the STATE.
-    #[allow(unused)]
+    #[allow(unused, clippy::self_named_constructors)]
     fn state() -> gkw_utils::Result<State> {
         STATE
             .read()
-            .map(|guard| guard.clone())
+            .map(|guard| *guard)
             .map_err(gkw_utils::Error::from)
     }
 
