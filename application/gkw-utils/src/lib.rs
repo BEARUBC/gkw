@@ -21,16 +21,26 @@ pub enum ErrorCode {
 
     #[display(fmt = "other error")]
     unable_to_transition = 002,
+
+    #[display(fmt = "other error")]
+    unable_to_serialize_deserialize = 003,
+
+    #[display(fmt = "other error")]
+    unable_to_initialize = 004,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Error {
     code: ErrorCode,
-    msg: Option<&'static str>,
+    msg: Option<String>,
 }
 
 impl Error {
-    pub fn new(code: ErrorCode, msg: Option<&'static str>) -> Self {
+    pub fn new<S>(code: ErrorCode, msg: Option<S>) -> Self
+    where
+        S: Into<String>,
+    {
+        let msg = msg.map(S::into);
         Self { code, msg }
     }
 }
@@ -51,6 +61,15 @@ impl<T> From<PoisonError<RwLockWriteGuard<'static, T>>> for Error {
         Self::new(
             ErrorCode::unable_to_grab_lock,
             Some("Something went wrong while trying to grab a mutable copy of the requested lock."),
+        )
+    }
+}
+
+impl From<serde_json::Error> for Error {
+    fn from(_: serde_json::Error) -> Self {
+        Self::new(
+            ErrorCode::unable_to_serialize_deserialize,
+            Some("Unable to serialize/deserialize the given information."),
         )
     }
 }
