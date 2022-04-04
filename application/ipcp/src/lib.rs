@@ -25,36 +25,79 @@ pub enum Method {
 
 #[derive(Derivative, Deserialize, Serialize, Clone, Debug)]
 #[derivative(Hash)]
-pub struct IpcpRequest<P = String>
+pub struct IpcpRequest<P = String, B = Value> {
+    pub id: Uuid,
+
+    #[derivative(Hash = "ignore")]
+    pub flow_type: FlowType,
+
+    #[derivative(Hash = "ignore")]
+    pub method: Method,
+
+    #[derivative(Hash = "ignore")]
+    pub path: P,
+
+    #[derivative(Hash = "ignore")]
+    pub body: B,
+}
+
+impl<'a, P, B> TryFrom<&'a [u8]> for IpcpRequest<P, B>
 where
-    P: ToString,
+    P: Deserialize<'a>,
+    B: Deserialize<'a>,
 {
-    id: Uuid,
+    type Error = gkw_utils::Error;
 
-    #[derivative(Hash = "ignore")]
-    flow_type: FlowType,
+    fn try_from(data: &'a [u8]) -> gkw_utils::Result<Self> {
+        serde_json::from_slice(data).map_err(gkw_utils::Error::from)
+    }
+}
 
-    #[derivative(Hash = "ignore")]
-    method: Method,
+impl<P, B> TryFrom<IpcpRequest<P, B>> for Vec<u8>
+where
+    P: Serialize,
+    B: Serialize,
+{
+    type Error = gkw_utils::Error;
 
-    #[derivative(Hash = "ignore")]
-    path: P,
-
-    #[derivative(Hash = "ignore")]
-    body: Value,
+    fn try_from(req: IpcpRequest<P, B>) -> gkw_utils::Result<Self> {
+        serde_json::to_vec(&req).map_err(gkw_utils::Error::from)
+    }
 }
 
 #[derive(Derivative, Deserialize, Serialize, Clone, Debug)]
 #[derivative(Hash)]
-pub struct IpcpResponse {
-    id: Uuid,
+pub struct IpcpResponse<B = Value> {
+    pub id: Uuid,
 
     #[derivative(Hash = "ignore")]
-    request_id: Uuid,
+    pub request_id: Uuid,
 
     #[derivative(Hash = "ignore")]
-    sequence_number: u16,
+    pub sequence_number: u16,
 
     #[derivative(Hash = "ignore")]
-    body: Value,
+    pub body: B,
+}
+
+impl<'a, B> TryFrom<&'a [u8]> for IpcpResponse<B>
+where
+    B: Deserialize<'a>,
+{
+    type Error = gkw_utils::Error;
+
+    fn try_from(data: &'a [u8]) -> gkw_utils::Result<Self> {
+        serde_json::from_slice(data).map_err(gkw_utils::Error::from)
+    }
+}
+
+impl<B> TryFrom<IpcpResponse<B>> for Vec<u8>
+where
+    B: Serialize,
+{
+    type Error = gkw_utils::Error;
+
+    fn try_from(req: IpcpResponse<B>) -> gkw_utils::Result<Self> {
+        serde_json::to_vec(&req).map_err(gkw_utils::Error::from)
+    }
 }
