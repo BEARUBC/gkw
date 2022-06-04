@@ -192,7 +192,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_function() {
+    fn test_capitalize() {
         let python_process_res = Analytics::new("./python/wrapper.py");
         let mut python_process = if let Ok(python_process) = python_process_res{
             python_process
@@ -210,6 +210,27 @@ mod tests {
 
         assert_eq!("HELLO", res);
     }
+
+    #[test]
+    fn test_addten() {
+        let python_process_res = Analytics::new("./python/wrapper.py");
+        let mut python_process = if let Ok(python_process) = python_process_res{
+            python_process
+        } else {
+            panic!("Failed to start wrapper");
+        };
+
+        let result = python_process.make_request("add_ten".to_string(), Value::String(10.to_string()));
+        let res = if let Ok(res) = result {
+            res
+        } else {
+            println!("Failed, error: \"{:?}\"", result);
+            "failed".to_string()
+        };
+
+        assert_eq!(20.to_string(), res);
+    }
+
 
     #[test]
     fn it_works() {
