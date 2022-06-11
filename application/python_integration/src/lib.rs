@@ -229,6 +229,7 @@ mod tests {
         };
 
         assert_eq!(20.to_string(), res);
+        assert_ne!(21.to_string(), res);
     }
 
 
