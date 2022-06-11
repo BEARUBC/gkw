@@ -2,7 +2,7 @@
 
 members = [
     "application/kernel",
-    "application/gkw-utils",
+    "application/gkw_utils",
     "application/ipcp",
     "application/python_integration"
 ]

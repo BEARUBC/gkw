@@ -29,7 +29,8 @@ derive_more = "0.99.17"
 
 # internal libraries
 ipcp = { version = "0.1.0", path = "../ipcp" }
-gkw-utils = { version = "0.3.1", path = "../gkw-utils" }
+gkw_utils = { version = "0.3.1", path = "../gkw_utils" }
+python_integration = { path = "../python_integration" }
 
 # ASYNC RUNTIME:
 # tokio = { version = "1.0.2", features = ["full"] }
