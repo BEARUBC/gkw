@@ -7,7 +7,9 @@ use uuid::Uuid;
 use serde::{Serialize, Deserialize};
 use serde_json::value::Value;
 use std::sync::{Arc, Mutex};
-use gkw_utils;
+use gkw_utils::Result as gkwResult;
+use gkw_utils::Error as gkwError;
+use gkw_utils::ErrorCode as code;
 
 #[derive(Serialize, Deserialize, Debug)] 
 pub struct Request {
@@ -35,7 +37,7 @@ impl Analytics {
     //process then loops until it gets a response. Once it recieves a response it puts it in storage
     //Parameters: child_process - name of the child process
     //Returns: Analytics struct 
-    pub fn new(python_process: &str) -> Result<Analytics, &str> {
+    pub fn new(python_process: &str) -> gkwResult<Analytics>{
         // start child process
         let child_process_res = Command::new("python")
                 .args([python_process])
@@ -47,7 +49,7 @@ impl Analytics {
         let mut child_process = if let Ok(child_process) = child_process_res{
             child_process
         } else {
-            return Err("Failed to start child process");
+            return Err(gkwError::new(code::other, Some("Failed to start child process")));
         };
 
         //get stdin and stdout and verify it works
@@ -55,13 +57,14 @@ impl Analytics {
         let stdin = if let Some(stdin) = stdin_res{
             stdin
         } else {
-            return Err("Failed to get stdin");
+            return Err(gkwError::new(code::other, Some("Failed to get stdin")));
         };
+
         let stdout_res = child_process.stdout.take();
         let stdout = if let Some(stdout) = stdout_res{
             stdout
         } else {
-            return Err("Failed to get stdout");
+            return Err(gkwError::new(code::other, Some("Failed to get stdout")));
         };
 
         //create a map and a map clone for the data
@@ -122,7 +125,7 @@ impl Analytics {
     //Parameters: func - string that specifies the function
     //            parameters - map that holds each parameter name and value
     //Returns: String version of the response
-    pub fn make_request(&mut self, func: String, parameters: Value) -> Result<String, &str> {
+    pub fn make_request(&mut self, func: String, parameters: Value) -> gkwResult<String> {
         // make the request object
         let my_uuid = Uuid::new_v4();
         let request_packet = Request{
@@ -136,7 +139,7 @@ impl Analytics {
             json_string + "\n"
         } else {
             // Error case, return error
-            return Err("Unable to stringify request.");
+            return Err(gkwError::new(code::other, Some("Unable to stringify request.")));
         };
 
         // make space in map
@@ -145,7 +148,7 @@ impl Analytics {
             let mut locked_map = if let Ok(locked_map) = locked_map_res {
                 locked_map
             } else {
-                return Err("Unable to make space in map.");
+                return Err(gkwError::new(code::other, Some("Unable to make space in map.")));
             };
             locked_map.insert(my_uuid, None);
         }
@@ -154,7 +157,7 @@ impl Analytics {
         // send string over
         let result = self.stdin.write_all(json_string.as_bytes());
         if let Err(e) = result {
-            return Err("Failed to write to child's stdin.");
+            return Err(gkwError::new(code::other, Some("Failed to write to child's stdin.")));
         }
         println!("Sent Data");
 
@@ -164,13 +167,13 @@ impl Analytics {
             let locked_map = if let Ok(locked_map) = locked_map_res {
                 locked_map
             } else {
-                return Err("Cannot lock map.");
+                return Err(gkwError::new(code::other, Some("Cannot lock map.")));
             };
             let val_res = locked_map.get(&my_uuid);
             let val = if let Some(val) = val_res {
                 val
             } else {
-                return Err("Failed to get value in map");
+                return Err(gkwError::new(code::other, Some("Failed to get value in map")));
             };
             if let Some(res) = val{
                 return Ok(res.data.clone());
