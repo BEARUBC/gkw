@@ -6,7 +6,7 @@ use std::{time, thread};
 
 
 fn main(){
-    let emg_integration = library::EMG_INTEGRATION::new();
+    let emg_integration = library::EMG_INTEGRATION::new(".././a.out");
     match emg_integration {
         Err(e) => println!("{}", e),
         Ok(emg_integration) => {
@@ -17,7 +17,7 @@ fn main(){
             //         println!("{}", i);
             //     }
 
-            let ten_millis = time::Duration::from_millis(1000);
+            let ten_millis = time::Duration::from_millis(100);
 
             thread::sleep(ten_millis);
             let x = emg_integration.get_data(9);
