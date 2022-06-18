@@ -14,7 +14,8 @@ use gkw_utils;
 pub struct EMG_INTEGRATION {
     //pipe: std::process::ChildStdout,
     pub data: Arc<Mutex<Vec<u32>>>,
-    pub read_thread: JoinHandle<()>
+    pub read_thread: JoinHandle<()>,
+    child: Child
 
 }
 
@@ -30,14 +31,14 @@ fn print_type_of<T>(_: &T) {
 impl EMG_INTEGRATION{
     pub fn new(emg_name: &str) -> Result<EMG_INTEGRATION, StdError> {
         
-        // let mut child = Command::new("python")
-        //                         .args(["python/test.py"])
-        //                         .stdout(Stdio::piped())
-        //                         .spawn()?;
-        let mut child = Command::new(emg_name)
-        .stdout(Stdio::piped())
-        .stdin(Stdio::piped())
-        .spawn()?;
+        let mut child = Command::new("python")
+                                .args([emg_name])
+                                .stdout(Stdio::piped())
+                                .spawn()?;
+        // let mut child = Command::new(emg_name)
+        // .stdout(Stdio::piped())
+        // .stdin(Stdio::piped())
+        // .spawn()?;
 
         let pipe = child.stdout.take().expect("Failed to get stdout");
         let data = Arc::new( Mutex::new( Vec::new() ) );
@@ -46,6 +47,7 @@ impl EMG_INTEGRATION{
 
         return Ok( 
             EMG_INTEGRATION{
+                child: child,
                 data: data,
                 read_thread: thread::spawn(move || {
         
@@ -99,6 +101,11 @@ impl EMG_INTEGRATION{
         }
         return Ok(ret_data);
     }
+
+    pub fn kill_emg(mut self) -> Result<(), StdError> {
+        self.child.kill()
+    }
+
 }
 
 
@@ -110,7 +117,7 @@ mod tests {
     fn test_get_data() {
         println!("gSTART");
         // let mut results = Vec::new();
-        let emg_integration = EMG_INTEGRATION::new("./a.out");
+        let emg_integration = EMG_INTEGRATION::new("python/test.py");
         match emg_integration {
             Err(e) => println!("{}", e),
             Ok(emg_integration) => {
@@ -133,6 +140,8 @@ mod tests {
                             assert_eq!(results[i], prev-1);
                             prev = results[i];
                         }
+
+                        emg_integration.kill_emg();
                         return;
                     }
                 }
