@@ -8,13 +8,10 @@ use std::sync::{Arc, Mutex};
 
 use gkw_utils;
 
-// #[derive(Clone)]
 pub struct EMG_INTEGRATION {
-    //pipe: std::process::ChildStdout,
     pub data: Arc<Mutex<Vec<u32>>>,
     pub read_thread: JoinHandle<()>,
     child: Child
-
 }
 
 impl EMG_INTEGRATION{
@@ -88,10 +85,9 @@ mod tests {
 
     #[test]
     fn test_get_data_queue() {
-        // let mut results = Vec::new();
         let emg_integration = EMG_INTEGRATION::new("python/test.py");
         match emg_integration {
-            Err(e) => println!("ERROR IS {}", e),
+            Err(e) => println!("ERROR IS {:?}", e),
             Ok(emg_integration) => {
     
                 let ten_millis = time::Duration::from_millis(1000);
