@@ -24,7 +24,7 @@ fn main(){
                 }
             }
 
-            //thread::sleep(ten_millis);
+            thread::sleep(ten_millis);
             let x = emg_integration.get_data_queue(9);
             match x {
                 Err(e) => println!("{:?}", e),
@@ -34,7 +34,7 @@ fn main(){
                 }
             }
 
-            // thread::sleep(ten_millis);
+            thread::sleep(ten_millis);
             let x = emg_integration.get_data_queue(9);
             match x {
                 Err(e) => println!("{:?}", e),
@@ -43,6 +43,8 @@ fn main(){
 
                 }
             }
+
+            println!("size is {}", emg_integration.data.lock().unwrap().clone().len());
 
             emg_integration.kill_emg();
         }

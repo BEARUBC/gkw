@@ -3,6 +3,7 @@ use std::thread::JoinHandle;
 use std::process::{Command, Stdio, Child, ChildStdin, ChildStdout};
 use std::io::{Write, Read, BufReader, BufRead, ErrorKind};
 use std::io::Error as StdError;
+use std::collections::VecDeque;
 use std::vec::Vec;
 use std::sync::{Arc, Mutex};
 
@@ -10,7 +11,7 @@ use gkw_utils;
 
 pub struct EMG_INTEGRATION {
     pub maxRequestSize: u16,
-    pub data: Arc<Mutex<Vec<u32>>>,
+    pub data: Arc<Mutex<VecDeque<u32>>>,
     pub read_thread: JoinHandle<()>,
     child: Child
 }
@@ -29,7 +30,7 @@ impl EMG_INTEGRATION{
                                 .spawn()?;
 
         let pipe = child.stdout.take().expect("Failed to get stdout");
-        let data = Arc::new( Mutex::new( vec![0; requestSize as usize] ) );
+        let data = Arc::new( Mutex::new( VecDeque::with_capacity(maxRequestSize.into()) ) );
 
         let mut data_clone = data.clone();
 
@@ -42,21 +43,15 @@ impl EMG_INTEGRATION{
         
                     let mut buf_reader = BufReader::new(pipe);
                     
-                    let mut counter = 0;
                     loop {
                         let mut data_str = String::new();
 
                         buf_reader.read_line(&mut data_str).unwrap();
                         data_str.pop();
-                        data_clone.lock().unwrap()[counter] = data_str.parse::<u32>().unwrap() ;
-                        
-                        let data_check = data_clone.lock().unwrap();
-                        
-                        let data_from_check = data_check.get(data_check.len() - 1);  
-
-                        counter = counter + 1;
-                        if counter >= maxRequestSize.into() {
-                            counter = 0;
+                        data_clone.lock().unwrap().push_back( data_str.parse::<u32>().unwrap() );
+                    
+                        if data_clone.lock().unwrap().len() > maxRequestSize.into() {
+                            data_clone.lock().unwrap().pop_front();
                         }
                     }
                 }),
@@ -74,7 +69,7 @@ impl EMG_INTEGRATION{
         let mut read_data = self.data.lock().unwrap().clone();
 
         for _ in 0..std::cmp::min(data_num, read_data.len() as u32) {
-            let data = read_data.pop();
+            let data = read_data.pop_front();
             match data {
                 None => break,
         
@@ -107,6 +102,7 @@ mod tests {
     
                 thread::sleep(ten_millis);
                 let results = emg_integration.get_data_queue(9);
+
                 match results {
                     Err(e) => panic!("ERROR IS {:?}", e),
                     Ok(results) => {
@@ -116,7 +112,7 @@ mod tests {
                         let mut prev = results[0];
 
                         for i in 1..results.len() - 1 {
-                            assert_eq!(results[i], prev-1);
+                            assert_eq!(results[i], prev+1);
                             prev = results[i];
                         }
 
