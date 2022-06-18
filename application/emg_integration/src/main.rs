@@ -6,7 +6,7 @@ use std::{time, thread};
 
 
 fn main(){
-    let emg_integration = library::EMG_INTEGRATION::new("../python/test.py");
+    let emg_integration = library::EMG_INTEGRATION::new("../python/test.py", 10);
     match emg_integration {
         Err(e) => println!("{:?}", e),
         Ok(emg_integration) => {
