@@ -81,8 +81,16 @@ impl EMG_INTEGRATION{
         return Ok(ret_data);
     }
 
-    pub fn kill_emg(mut self) -> Result<(), StdError> {
+    pub fn kill_emg(&mut self) -> Result<(), StdError> {
         self.child.kill()
+    }
+}
+
+impl Drop for EMG_INTEGRATION {
+    fn drop(&mut self) {
+            println!("DROPPING EMG");
+            // self.child.kill();
+            (self).kill_emg();
     }
 }
 
@@ -96,7 +104,7 @@ mod tests {
         let emg_integration = EMG_INTEGRATION::new("python/test.py", 10);
         match emg_integration {
             Err(e) => println!("ERROR IS {:?}", e),
-            Ok(emg_integration) => {
+            Ok(mut emg_integration) => {
     
                 let ten_millis = time::Duration::from_millis(1000);
     

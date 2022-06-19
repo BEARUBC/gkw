@@ -9,7 +9,7 @@ fn main(){
     let emg_integration = library::EMG_INTEGRATION::new("../python/test.py", 10);
     match emg_integration {
         Err(e) => println!("{:?}", e),
-        Ok(emg_integration) => {
+        Ok(mut emg_integration) => {
 
             let ten_millis = time::Duration::from_millis(100);
 
