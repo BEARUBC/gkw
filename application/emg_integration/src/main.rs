@@ -43,10 +43,6 @@ fn main(){
 
                 }
             }
-
-            println!("size is {}", emg_integration.data.lock().unwrap().clone().len());
-
-            emg_integration.kill_emg();
         }
     }
     println!("DONE");

@@ -10,9 +10,9 @@ use std::sync::{Arc, Mutex};
 use gkw_utils;
 
 pub struct EMG_INTEGRATION {
-    pub maxRequestSize: u16,
-    pub data: Arc<Mutex<VecDeque<u32>>>,
-    pub read_thread: JoinHandle<()>,
+    maxRequestSize: u16,
+    data: Arc<Mutex<VecDeque<u32>>>,
+    read_thread: JoinHandle<()>,
     child: Child
 }
 
@@ -63,7 +63,7 @@ impl EMG_INTEGRATION{
         let mut ret_data: Vec<u32> = Vec::new();
 
         if data_num < 0 || data_num > self.maxRequestSize.into() {
-            return Err(StdError::new(ErrorKind::Other, "data_num must be greater than or equal to 0"));
+            return Err(StdError::new(ErrorKind::Other, "data_num must be greater than or equal to 0, less than requestSize"));
         }
 
         let mut read_data = self.data.lock().unwrap().clone();
@@ -124,7 +124,6 @@ mod tests {
                             prev = results[i];
                         }
 
-                        emg_integration.kill_emg();
                         return;
                     }
                 }
