@@ -11,43 +11,43 @@ mod kernel;
 /// The default number of threads on our Raspberry Pi is 4.
 /// Therefore, without hyper-threading the CPU, the number of native-threads that should be
 /// instantiated is 4.
-#[allow(unreachable_code)]
-#[tokio::main(flavor = "multi_thread", worker_threads = 4)]
-async fn main() -> ! {
-    init::init_logging();
+// #[allow(unreachable_code)]
+// #[tokio::main(flavor = "multi_thread", worker_threads = 4)]
+// async fn main() -> ! {
+//     init::init_logging();
 
-    match init::init().await {
-        Ok(()) => info!("GKW initialization has succeeded."),
-        Err(err) => {
-            error!("GKW initialization has failed with error: {}.", err);
-            exit(1);
-        },
+//     match init::init().await {
+//         Ok(()) => info!("GKW initialization has succeeded."),
+//         Err(err) => {
+//             error!("GKW initialization has failed with error: {}.", err);
+//             exit(1);
+//         },
+//     };
+
+//     #[allow(clippy::empty_loop)]
+//     loop {
+        
+//     }
+
+//     error!("The GKW main-loop has crashed unexpectedly. Exiting...");
+//     unreachable!()
+// }
+
+fn main() {
+    let python_process_res = Analytics::new("./application/python_integration/python/wrapper.py");
+    let mut python_process = if let Ok(python_process) = python_process_res{
+        python_process
+    } else {
+        panic!("Failed to start wrapper");
     };
 
-    #[allow(clippy::empty_loop)]
-    loop {
-        
-    }
+    let result = python_process.make_request("add_ten".to_string(), Value::String(10.to_string()));
+    let res = if let Ok(res) = result {
+        res
+    } else {
+        println!("Failed, error: \"{:?}\"", result);
+        "failed".to_string()
+    };
 
-    error!("The GKW main-loop has crashed unexpectedly. Exiting...");
-    unreachable!()
+    println!("{}", res);
 }
-
-// fn main() {
-//     let python_process_res = Analytics::new("./application/python_integration/python/wrapper.py");
-//     let mut python_process = if let Ok(python_process) = python_process_res{
-//         python_process
-//     } else {
-//         panic!("Failed to start wrapper");
-//     };
-
-//     let result = python_process.make_request("add_ten".to_string(), Value::String(10.to_string()));
-//     let res = if let Ok(res) = result {
-//         res
-//     } else {
-//         println!("Failed, error: \"{:?}\"", result);
-//         "failed".to_string()
-//     };
-
-//     println!("{}", res);
-// }
