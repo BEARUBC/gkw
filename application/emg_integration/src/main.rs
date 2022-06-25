@@ -9,7 +9,7 @@ fn main(){
     let emg_integration = library::EMG_INTEGRATION::new("../python/test.py", 10);
     match emg_integration {
         Err(e) => println!("{:?}", e),
-        Ok(emg_integration) => {
+        Ok(mut emg_integration) => {
 
             let ten_millis = time::Duration::from_millis(100);
 
@@ -24,7 +24,7 @@ fn main(){
                 }
             }
 
-            //thread::sleep(ten_millis);
+            thread::sleep(ten_millis);
             let x = emg_integration.get_data_queue(9);
             match x {
                 Err(e) => println!("{:?}", e),
@@ -34,7 +34,7 @@ fn main(){
                 }
             }
 
-            // thread::sleep(ten_millis);
+            thread::sleep(ten_millis);
             let x = emg_integration.get_data_queue(9);
             match x {
                 Err(e) => println!("{:?}", e),
@@ -43,8 +43,6 @@ fn main(){
 
                 }
             }
-
-            emg_integration.kill_emg();
         }
     }
     println!("DONE");
