@@ -24,7 +24,7 @@ impl EMG_INTEGRATION{
 
         let maxRequestSize = requestSize;
         
-        let mut child = Command::new("python")
+        let mut child = Command::new("python3")
                                 .args([emg_cmd])
                                 .stdout(Stdio::piped())
                                 .spawn()?;
