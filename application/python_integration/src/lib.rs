@@ -6,6 +6,7 @@ use std::collections::{HashMap};
 use uuid::Uuid;
 use serde::{Serialize, Deserialize};
 use serde_json::value::Value;
+use serde_json::json;
 use std::sync::{Arc, Mutex};
 use gkw_utils::Result as gkwResult;
 use gkw_utils::Error as gkwError;
@@ -22,7 +23,7 @@ pub struct Request {
 pub struct Response {
     request_id: Uuid,
     valid_bit: i8,
-    data: String
+    data: Value
 }
 
 pub struct Analytics{
@@ -125,7 +126,7 @@ impl Analytics {
     //Parameters: func - string that specifies the function
     //            parameters - map that holds each parameter name and value
     //Returns: String version of the response
-    pub fn make_request(&mut self, func: String, parameters: Value) -> gkwResult<String> {
+    pub fn make_request(&mut self, func: String, parameters: Value) -> gkwResult<Value> {
         // make the request object
         let my_uuid = Uuid::new_v4();
         let request_packet = Request{
@@ -184,10 +185,7 @@ impl Analytics {
         
     }    
     // TODO:
-    // - Change the return type of new and make request to Result
-    // - Make places with expect or unwrap return error
-    // - Change the return statment to wrap it in the proper type
-    // - When checking response continue instead of throwing an error and eventually timeout
+    // - When checking response eventually timeout
 }
 
 #[cfg(test)]
@@ -207,11 +205,10 @@ mod tests {
         let res = if let Ok(res) = result {
             res
         } else {
-            println!("Failed, error: \"{:?}\"", result);
-            "failed".to_string()
+            panic!("Failed, error: \"{:?}\"", result);
         };
 
-        assert_eq!("HELLO", res);
+        assert_eq!(json!("HELLO"), res);
     }
 
     #[test]
@@ -227,14 +224,12 @@ mod tests {
         let res = if let Ok(res) = result {
             res
         } else {
-            println!("Failed, error: \"{:?}\"", result);
-            "failed".to_string()
+            panic!("Failed, error: \"{:?}\"", result);
         };
 
-        assert_eq!(20.to_string(), res);
-        assert_ne!(21.to_string(), res);
+        assert_eq!(json!(i32::from(20)), res);
+        assert_ne!(json!(i32::from(21)), res);
     }
-
 
     #[test]
     fn it_works() {

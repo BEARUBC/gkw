@@ -4,5 +4,6 @@ members = [
     "application/kernel",
     "application/gkw_utils",
     "application/ipcp",
-    "application/python_integration"
+    "application/python_integration",
+    "application/emg_integration"
 ]

@@ -39,7 +39,7 @@ def main():
             response_packet = {
                 'request_id': process['request_id'],
                 'valid_bit': 1,
-                'data': str(locals()[process["request_type"]].run(process["params"]))
+                'data': locals()[process["request_type"]].run(process["params"])
             }
             sys.stdout.write(json.dumps(response_packet) + "\n")
             sys.stdout.flush()
