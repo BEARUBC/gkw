@@ -40,7 +40,7 @@ impl Analytics {
     //Returns: Analytics struct 
     pub fn new(python_process: &str) -> gkwResult<Analytics>{
         // start child process
-        let child_process_res = Command::new("python")
+        let child_process_res = Command::new("python3")
                 .args([python_process])
                 .stdin(Stdio::piped())
                 .stdout(Stdio::piped())

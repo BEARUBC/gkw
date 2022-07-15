@@ -14,7 +14,7 @@ description = "The main, asynchronous, non-blocking IO, event-loop for the syste
 
 [dependencies]
 # async runtime
-tokio = { version = "1.4.0", features = ["rt", "macros", "net", "io-util", "rt-multi-thread", "sync"] }
+# tokio = { version = "1.4.0", features = ["rt", "macros", "net", "io-util", "rt-multi-thread", "sync"] }
 
 # global (lazily loaded) statics
 lazy_static = "1.4.0"
