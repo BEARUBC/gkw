@@ -6,6 +6,8 @@ use log::info;
 use serde_json::value::Value;
 
 use python_integration::Analytics;
+use emg_integration::EMG_INTEGRATION;
+//Note: originally wouldn't work cause it was named library.rs not lib.rs
 
 mod init;
 mod kernel;
@@ -40,27 +42,43 @@ mod kernel;
 //Shuyao version
 
 fn main() {
-    // let python_process_res = Analytics::new("./application/python_integration/python/wrapper.py");
-    // let mut python_process = if let Ok(python_process) = python_process_res{
-    //     python_process
-    // } else {
-    //     panic!("Failed to start wrapper");
-    // };
+    //Setup Analytics struct
+    let python_process_res = Analytics::new("./application/python_integration/python/wrapper.py");
+    let mut python_process = if let Ok(python_process) = python_process_res{
+        python_process
+    } else {
+        panic!("Failed to start wrapper");
+    };
 
-    // let result = python_process.make_request("add_ten".to_string(), Value::String(10.to_string()));
-    // let res = if let Ok(res) = result {
-    //     res
-    // } else {
-    //     println!("Failed, error: \"{:?}\"", result);
-    //     "failed".to_string()
-    // };
+    //Setup emg struct
+    let emg_res = EMG_INTEGRATION::new(".../emg_integration/python/test.py", 10);
+    let mut emg = if let Ok(emg) = emg_res{
+        emg
+    } else {
+        panic!("Failed to start emg");
+    };
 
-    // println!("{}", res);
+    //Call Analytics function
+    let result = python_process.make_request("capitalize".to_string(), Value::String("hello".to_string()));
+    let res = if let Ok(res) = result {
+        res
+    } else {
+        println!("Failed, error: \"{:?}\"", result);
+        "failed".to_string()
+    };
+
+    //Get data from emg
+    let emg_data_res = emg.get_data_queue(9);
+    let emg_data = if let Ok(emg_data) = emg_data_res {
+        emg_data
+    } else {
+        println!("Failed, error: \"{:?}\"", emg_data_res);
+        "failed".to_string()
+    };
+            
 }
 
-fn main2() {
 // setup the instance of the two structs, emg and our struct
 // get data from emg
 // call analytics function
 // pull raestro in
-}
