@@ -1,12 +1,12 @@
 use std::io::{Write, BufReader, BufRead};
-use std::{thread, time};
+use std::{thread, time, format};
 use std::thread::JoinHandle;
 use std::process::{Command, Stdio, Child, ChildStdin};
 use std::collections::{HashMap};
 use uuid::Uuid;
 use serde::{Serialize, Deserialize};
 use serde_json::value::Value;
-use serde_json::json;
+pub use serde_json::json;
 use std::sync::{Arc, Mutex};
 use gkw_utils::Result as gkwResult;
 use gkw_utils::Error as gkwError;
@@ -40,32 +40,29 @@ impl Analytics {
     //Returns: Analytics struct 
     pub fn new(python_process: &str) -> gkwResult<Analytics>{
         // start child process
-        let child_process_res = Command::new("python3")
+        let mut child_process = match Command::new("python3")
                 .args([python_process])
                 .stdin(Stdio::piped())
                 .stdout(Stdio::piped())
-                .spawn();
-
-        // ensure child process starts correctly
-        let mut child_process = if let Ok(child_process) = child_process_res{
-            child_process
-        } else {
-            return Err(gkwError::new(code::other, Some("Failed to start child process")));
+                .spawn() {
+            Ok(child_process) => child_process,
+            Err(e) => {
+                return Err(gkwError::new(code::other, Some(format!("Failed to start child process. Error: {}", e))));
+            }
         };
 
         //get stdin and stdout and verify it works
-        let stdin_res = child_process.stdin.take();
-        let stdin = if let Some(stdin) = stdin_res{
-            stdin
-        } else {
-            return Err(gkwError::new(code::other, Some("Failed to get stdin")));
+        let stdin = match child_process.stdin.take() {
+            Some(stdin) => stdin,
+            None => {
+                return Err(gkwError::new(code::other, Some("Failed to get stdin")));
+            }
         };
-
-        let stdout_res = child_process.stdout.take();
-        let stdout = if let Some(stdout) = stdout_res{
-            stdout
-        } else {
-            return Err(gkwError::new(code::other, Some("Failed to get stdout")));
+        let stdout = match child_process.stdout.take() {
+            Some(stdin) => stdin,
+            None => {
+                return Err(gkwError::new(code::other, Some("Failed to get stdout")));
+            }
         };
 
         //create a map and a map clone for the data
@@ -80,7 +77,7 @@ impl Analytics {
 
                 //read from the stdout using Bufreader and verify it works
                 let check_read = f.read_line(&mut resp_string);
-                if let Err(e) = check_read{
+                if let Err(_e) = check_read{
                     //continue if it fails, to avoid an infinite loop it will eventually timeout
                     continue;
                 }
@@ -88,23 +85,23 @@ impl Analytics {
                 //check if there was a response or if there was nothing
                 if resp_string!="" {
                     //turn the string from Python into a Response struct and verify it works
-                    let response_packet_res:Result<Response, serde_json::Error> = serde_json::from_str(&resp_string);
-                    let response_packet = if let Ok(response_packet)=response_packet_res{
-                        response_packet
-                    } else{
-                        //continue if it fails
-                        continue;
+                    let response_packet: Response = match serde_json::from_str(&resp_string) {
+                        Ok(response_packet) => response_packet,
+                        Err(_e) => {
+                            //continue if it fails
+                            continue;
+                        }
                     };
 
                     //get access to the map and verify it works
-                    let locked_map_clone_res = storage_clone.lock(); 
-                    let mut locked_map_clone = if let Ok(locked_map_clone) = locked_map_clone_res{
-                        locked_map_clone
-                    }
-                    else{
-                        //continue if it fails
-                        continue;
+                    let mut locked_map_clone = match storage_clone.lock() {
+                        Ok(locked_map_clone) => locked_map_clone,
+                        Err(_e) => {
+                            //continue if it fails
+                            continue;
+                        }
                     };
+                    
                     //insert the response into the map
                     locked_map_clone.insert(response_packet.request_id, Option::Some(response_packet));
                 }
@@ -135,21 +132,21 @@ impl Analytics {
             params: parameters
         };
 
-        let json_str_res = serde_json::to_string(&request_packet);
-        let json_string = if let Ok(json_string) = json_str_res {
-            json_string + "\n"
-        } else {
-            // Error case, return error
-            return Err(gkwError::new(code::other, Some("Unable to stringify request.")));
+        let json_string = match serde_json::to_string(&request_packet) {
+            Ok(json_string) => json_string + "\n",
+            Err(e) => {
+                // Error case, return error
+                return Err(gkwError::new(code::other, Some(format!("Unable to stringify request. Error: {}", e))));
+            }
         };
 
         // make space in map
         {
-            let locked_map_res = self.response_holder.lock();
-            let mut locked_map = if let Ok(locked_map) = locked_map_res {
-                locked_map
-            } else {
-                return Err(gkwError::new(code::other, Some("Unable to make space in map.")));
+            let mut locked_map = match self.response_holder.lock() {
+                Ok(locked_map) => locked_map,
+                Err(e) => {
+                    return Err(gkwError::new(code::other, Some(format!("Unable to make space in map. Error: {}", e))));
+                }
             };
             locked_map.insert(my_uuid, None);
         }
@@ -158,23 +155,24 @@ impl Analytics {
         // send string over
         let result = self.stdin.write_all(json_string.as_bytes());
         if let Err(e) = result {
-            return Err(gkwError::new(code::other, Some("Failed to write to child's stdin.")));
+            return Err(gkwError::new(code::other, Some(format!("Failed to write to child's stdin. Error: {}", e))));
         }
         println!("Sent Data");
 
         // wait for child process to finish processing
         loop{
-            let locked_map_res = self.response_holder.lock();
-            let locked_map = if let Ok(locked_map) = locked_map_res {
-                locked_map
-            } else {
-                return Err(gkwError::new(code::other, Some("Cannot lock map.")));
+            let locked_map = match self.response_holder.lock() {
+                Ok(locked_map) => locked_map,
+                Err(e) => {
+                    return Err(gkwError::new(code::other, Some(format!("Cannot lock map. Error: {}", e))));
+                }
             };
-            let val_res = locked_map.get(&my_uuid);
-            let val = if let Some(val) = val_res {
-                val
-            } else {
-                return Err(gkwError::new(code::other, Some("Failed to get value in map")));
+            
+            let val = match locked_map.get(&my_uuid) {
+                Some(val) => val,
+                None => {
+                    return Err(gkwError::new(code::other, Some("Failed to get value in map")));
+                }
             };
             if let Some(res) = val{
                 return Ok(res.data.clone());
@@ -194,38 +192,18 @@ mod tests {
 
     #[test]
     fn test_capitalize() {
-        let python_process_res = Analytics::new("./python/wrapper.py");
-        let mut python_process = if let Ok(python_process) = python_process_res{
-            python_process
-        } else {
-            panic!("Failed to start wrapper");
-        };
-
-        let result = python_process.make_request("capitalize".to_string(), Value::String("hello".to_string()));
-        let res = if let Ok(res) = result {
-            res
-        } else {
-            panic!("Failed, error: \"{:?}\"", result);
-        };
-
+        let mut python_process = Analytics::new("./python/wrapper.py").expect("Failed to start wrapper");
+        let res = python_process
+            .make_request("capitalize".to_string(), Value::String("hello".to_string())).expect("Failed to make request");
         assert_eq!(json!("HELLO"), res);
     }
 
     #[test]
     fn test_addten() {
-        let python_process_res = Analytics::new("./python/wrapper.py");
-        let mut python_process = if let Ok(python_process) = python_process_res{
-            python_process
-        } else {
-            panic!("Failed to start wrapper");
-        };
+        let mut python_process = Analytics::new("./python/wrapper.py").expect("Failed to start wrapper");
 
-        let result = python_process.make_request("add_ten".to_string(), Value::String(10.to_string()));
-        let res = if let Ok(res) = result {
-            res
-        } else {
-            panic!("Failed, error: \"{:?}\"", result);
-        };
+        let res = python_process
+            .make_request("add_ten".to_string(), Value::String(10.to_string())).expect("Failed to make request");
 
         assert_eq!(json!(i32::from(20)), res);
         assert_ne!(json!(i32::from(21)), res);
