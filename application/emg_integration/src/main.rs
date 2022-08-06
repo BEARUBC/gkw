@@ -1,11 +1,11 @@
 use std::io::{Write, Read};
 use std::process::{Command, Stdio, Child, ChildStdin, ChildStdout};
-mod library;
+mod lib;
 use std::{time, thread};
 
 
 fn main(){
-    let emg_integration = library::EMG_INTEGRATION::new("../python/test.py", 10);
+    let emg_integration = lib::EMG_INTEGRATION::new("../python/test.py", 10);
     match emg_integration {
         Err(e) => println!("{:?}", e),
         Ok(mut emg_integration) => {
