@@ -1,6 +1,6 @@
 use std::io::{Write, Read};
 use std::process::{Command, Stdio, Child, ChildStdin, ChildStdout};
-mod library;
+mod lib;
 use std::{time, thread};
 
 

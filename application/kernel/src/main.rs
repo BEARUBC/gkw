@@ -65,7 +65,8 @@ fn main() {
         res
     } else {
         println!("Failed, error: \"{:?}\"", result);
-        json!("failed".to_string())
+        panic!("Failed to start emg");
+        // json!("failed".to_string())
     };
 
     //Get data from emg
@@ -74,7 +75,8 @@ fn main() {
         emg_data
     } else {
         println!("Failed, error: \"{:?}\"", emg_data_res);
-        json!("failed".to_string())
+        panic!("Failed to start emg");
+        // json!("failed".to_string())
     };
             
 }
