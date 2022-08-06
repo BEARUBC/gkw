@@ -5,6 +5,7 @@ use log::info;
 
 use serde_json::value::Value;
 
+use python_integration::json;
 use python_integration::Analytics;
 use emg_integration::EMG_INTEGRATION;
 //Note: originally wouldn't work cause it was named library.rs not lib.rs
@@ -64,7 +65,7 @@ fn main() {
         res
     } else {
         println!("Failed, error: \"{:?}\"", result);
-        "failed".to_string()
+        json!("failed".to_string())
     };
 
     //Get data from emg
@@ -73,7 +74,7 @@ fn main() {
         emg_data
     } else {
         println!("Failed, error: \"{:?}\"", emg_data_res);
-        "failed".to_string()
+        json!("failed".to_string())
     };
             
 }
