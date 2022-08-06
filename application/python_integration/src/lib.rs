@@ -186,6 +186,8 @@ impl Analytics {
     // - When checking response eventually timeout
 }
 
+// Note: to run all tests in the python_integration package, run:
+// cargo test -p python_integration
 #[cfg(test)]
 mod tests {
     use super::*;
