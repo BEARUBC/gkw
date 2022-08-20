@@ -1,5 +1,3 @@
-use std::io::{Write, Read};
-use std::process::{Command, Stdio, Child, ChildStdin, ChildStdout};
 mod lib;
 use std::{time, thread};
 
@@ -8,7 +6,7 @@ fn main(){
     let emg_integration = lib::EMG_INTEGRATION::new("../python/test.py", 10);
     match emg_integration {
         Err(e) => println!("{:?}", e),
-        Ok(mut emg_integration) => {
+        Ok(emg_integration) => {
 
             let ten_millis = time::Duration::from_millis(100);
 

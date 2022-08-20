@@ -1,5 +1,4 @@
-use std::fs::File;
-use std::io::{Write, BufReader, BufRead, Error};
+use std::io::{Write, BufReader, BufRead};
 use std::{thread, time, format};
 use std::thread::JoinHandle;
 use std::process::{Command, Stdio, Child, ChildStdin};

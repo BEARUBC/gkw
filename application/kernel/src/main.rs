@@ -1,11 +1,5 @@
-use std::process::exit;
-
-use log::error;
-use log::info;
-
 use serde_json::value::Value;
 
-use python_integration::json;
 use python_integration::Analytics;
 use emg_integration::EMG_INTEGRATION;
 //Note: originally wouldn't work cause it was named library.rs not lib.rs
@@ -53,7 +47,7 @@ fn main() {
 
     //Setup emg struct
     let emg_res = EMG_INTEGRATION::new(".../emg_integration/python/test.py", 10);
-    let mut emg = if let Ok(emg) = emg_res{
+    let emg = if let Ok(emg) = emg_res{
         emg
     } else {
         panic!("Failed to start emg");

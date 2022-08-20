@@ -1,13 +1,11 @@
 use std::{thread, time};
 use std::thread::JoinHandle;
-use std::process::{Command, Stdio, Child, ChildStdin, ChildStdout};
-use std::io::{Write, Read, BufReader, BufRead, ErrorKind};
+use std::process::{Command, Stdio, Child};
+use std::io::{BufReader, BufRead, ErrorKind};
 use std::io::Error as StdError;
 use std::collections::VecDeque;
 use std::vec::Vec;
 use std::sync::{Arc, Mutex};
-
-use gkw_utils;
 
 pub struct EMG_INTEGRATION {
     maxRequestSize: u16,
@@ -32,7 +30,7 @@ impl EMG_INTEGRATION{
         let pipe = child.stdout.take().expect("Failed to get stdout");
         let data = Arc::new( Mutex::new( VecDeque::with_capacity(maxRequestSize.into()) ) );
 
-        let mut data_clone = data.clone();
+        let data_clone = data.clone();
 
         return Ok( 
             EMG_INTEGRATION{
@@ -104,7 +102,7 @@ mod tests {
         let emg_integration = EMG_INTEGRATION::new("python/test.py", 10);
         match emg_integration {
             Err(e) => println!("ERROR IS {:?}", e),
-            Ok(mut emg_integration) => {
+            Ok(emg_integration) => {
     
                 let ten_millis = time::Duration::from_millis(1000);
     

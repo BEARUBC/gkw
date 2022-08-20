@@ -19,7 +19,7 @@ impl Custom_log{
         let id_string = id.to_hyphenated().to_string();
         let mut word = "logs/".to_owned();
         word.push_str(&id_string);
-        let mut file = match OpenOptions::new()
+        let file = match OpenOptions::new()
             .read(true)
             .write(true)
             .create(true)

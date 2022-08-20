@@ -4,7 +4,7 @@ use std::process::ChildStdin;
 use std::process::ChildStdout;
 use std::process::Command;
 use std::process::Stdio;
-use python_integration::{Analytics, Request, Response};
+use python_integration::{Analytics};
 
 use log::info;
 
@@ -89,7 +89,7 @@ pub async fn init() -> gkw_utils::Result<()> {
     // let emg = GkwSubProcess::new("EMG", "<emg-executable>", &["<path-to-emg-binary>"])?;
 
     let analytics_res = Analytics::new("./application/python_integration/python/wrapper.py");
-    let mut analytics = if let Ok(analytics) = analytics_res{
+    let analytics = if let Ok(analytics) = analytics_res{
         analytics
     } else {
         panic!("Failed to start wrapper");
