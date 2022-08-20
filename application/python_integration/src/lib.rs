@@ -1,4 +1,5 @@
-use std::io::{Write, BufReader, BufRead};
+use std::fs::File;
+use std::io::{Write, BufReader, BufRead, Error};
 use std::{thread, time, format};
 use std::thread::JoinHandle;
 use std::process::{Command, Stdio, Child, ChildStdin};
@@ -11,6 +12,7 @@ use std::sync::{Arc, Mutex};
 use gkw_utils::Result as gkwResult;
 use gkw_utils::Error as gkwError;
 use gkw_utils::ErrorCode as code;
+use messages::Custom_log;
 
 #[derive(Serialize, Deserialize, Debug)] 
 pub struct Request {
@@ -33,12 +35,22 @@ pub struct Analytics{
     response_holder: Arc<Mutex<HashMap<Uuid, Option<Response>>>>
 }
 
+
 impl Analytics {
     //Description: Begins the process of getting a response from the Python code. Starts the child
     //process then loops until it gets a response. Once it recieves a response it puts it in storage
     //Parameters: child_process - name of the child process
     //Returns: Analytics struct 
+
     pub fn new(python_process: &str) -> gkwResult<Analytics>{
+
+        let python_log_res = Custom_log::new();
+        let mut python_log = if let Ok(python_log) = python_log_res{
+            python_log
+        } else {
+            panic!("Failed to start log");
+        };
+        python_log.write_log(b"starting log");
         // start child process
         let mut child_process = match Command::new("python3")
                 .args([python_process])
@@ -108,6 +120,7 @@ impl Analytics {
             }
         });
 
+        python_log.write_log(b"Generated Analytics Struct");
         return Ok(
             Analytics {
             child_process: child_process,
