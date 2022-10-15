@@ -3,7 +3,7 @@ use std::{time, thread};
 
 
 fn main(){
-    let emg_integration = lib::EMG_INTEGRATION::new("../python/test.py", 10);
+    let emg_integration = lib::EMG_INTEGRATION::new("application/emg_integration/python/test.py", 10);
     match emg_integration {
         Err(e) => println!("{:?}", e),
         Ok(emg_integration) => {
@@ -16,8 +16,6 @@ fn main(){
                 Err(e) => println!("{:?}", e),
                 Ok(x) => {
                     println!("got data is: {:?}", x);
-
-                
                 }
             }
 
@@ -27,7 +25,6 @@ fn main(){
                 Err(e) => println!("{:?}", e),
                 Ok(x) => {
                     println!("got data is: {:?}", x);
-
                 }
             }
 
@@ -37,7 +34,6 @@ fn main(){
                 Err(e) => println!("{:?}", e),
                 Ok(x) => {
                     println!("got data is: {:?}", x);
-
                 }
             }
         }

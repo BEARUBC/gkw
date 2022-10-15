@@ -7,9 +7,11 @@ use std::collections::VecDeque;
 use std::vec::Vec;
 use std::sync::{Arc, Mutex};
 
+const  DATA_LENGTH: usize = 10;
+
 pub struct EMG_INTEGRATION {
     maxRequestSize: u16,
-    data: Arc<Mutex<VecDeque<u32>>>,
+    data: Arc<Mutex<VecDeque<Data>>>,
     read_thread: JoinHandle<()>,
     child: Child
 }
@@ -46,19 +48,29 @@ impl EMG_INTEGRATION{
 
                         buf_reader.read_line(&mut data_str).unwrap();
                         data_str.pop();
-                        data_clone.lock().unwrap().push_back( data_str.parse::<u32>().unwrap() );
+
+                        let data = Data::new(&data_str);
+
+                        match data {
+                            Err(e) => (),
+                            Ok(d) => {
+                                data_clone.lock().unwrap().push_back( d );
                     
-                        if data_clone.lock().unwrap().len() > maxRequestSize.into() {
-                            data_clone.lock().unwrap().pop_front();
+                                if data_clone.lock().unwrap().len() > maxRequestSize.into() {
+                                    data_clone.lock().unwrap().pop_front();
+                                }
+                            }
+                            
                         }
+        
                     }
                 }),
             },
         );            
     }
 
-    pub fn get_data_queue(&self, data_num: u32) -> Result<Vec<u32>, StdError> {
-        let mut ret_data: Vec<u32> = Vec::new();
+    pub fn get_data_queue(&self, data_num: u32) -> Result<Vec<Data>, StdError> {
+        let mut ret_data: Vec<Data> = Vec::new();
 
         if data_num < 0 || data_num > self.maxRequestSize.into() {
             return Err(StdError::new(ErrorKind::Other, "data_num must be greater than or equal to 0, less than requestSize"));
@@ -97,37 +109,99 @@ impl Drop for EMG_INTEGRATION {
 mod tests {
     use super::*;
 
+    // #[test]
+    // fn test_get_data_queue() {
+    //     let emg_integration = EMG_INTEGRATION::new("python/test.py", 10);
+    //     match emg_integration {
+    //         Err(e) => println!("ERROR IS {:?}", e),
+    //         Ok(emg_integration) => {
+    
+    //             let ten_millis = time::Duration::from_millis(1000);
+    
+    //             thread::sleep(ten_millis);
+    //             let results = emg_integration.get_data_queue(9);
+
+    //             match results {
+    //                 Err(e) => panic!("ERROR IS {:?}", e),
+    //                 Ok(results) => {
+    //                     println!("got data is: {:?}", results);
+
+    //                     assert_eq!(results.len(), 9);
+    //                     let mut prev = results[0];
+
+    //                     for i in 1..results.len() - 1 {
+    //                         assert_eq!(results[i], prev+1);
+    //                         prev = results[i];
+    //                     }
+
+    //                     return;
+    //                 }
+    //             }
+    //         }
+    //     }
+
+    //     assert_eq!(false, true);
+    // }
+
+
+
     #[test]
-    fn test_get_data_queue() {
-        let emg_integration = EMG_INTEGRATION::new("python/test.py", 10);
-        match emg_integration {
-            Err(e) => println!("ERROR IS {:?}", e),
-            Ok(emg_integration) => {
-    
-                let ten_millis = time::Duration::from_millis(1000);
-    
-                thread::sleep(ten_millis);
-                let results = emg_integration.get_data_queue(9);
+    fn test_data(){
+        let data = Data::new("1010101010");
 
-                match results {
-                    Err(e) => panic!("ERROR IS {:?}", e),
-                    Ok(results) => {
-                        println!("got data is: {:?}", results);
+        match data {
+            Err(e) => println!("Error!"),
+            Ok(d) => println!("{:?}", d.data_array),
+        };
 
-                        assert_eq!(results.len(), 9);
-                        let mut prev = results[0];
+    }
 
-                        for i in 1..results.len() - 1 {
-                            assert_eq!(results[i], prev+1);
-                            prev = results[i];
-                        }
 
-                        return;
-                    }
+
+
+
+
+}
+
+
+
+
+#[derive(Clone, Debug)]
+pub struct Data{
+    data_array: [u8; DATA_LENGTH]
+}
+
+
+impl Data {
+    pub fn new(incoming_data: &str) -> Result<Data, StdError> {
+        let data = Data::read_data(incoming_data);
+        
+        match data {
+            Err(e) => return Err(e),
+            Ok(d) => return Ok( Data { data_array: d } ),
+        }; 
+    }
+
+    pub fn read_data(string_data: &str) -> Result<[u8; DATA_LENGTH], StdError>{
+        let mut data_array: [u8; DATA_LENGTH] = [u8::MAX; DATA_LENGTH];
+
+        if string_data.len() != DATA_LENGTH {
+            return Err( StdError::new(ErrorKind::InvalidData, "Invalid Data Length!") );
+        }
+        else {
+            for i in 0..DATA_LENGTH{
+                let data_char = string_data.chars().nth(i);
+                match data_char {
+                    None => return Err( StdError::new(ErrorKind::InvalidData, "Invalid Data Length!") ),
+                    Some(c) => data_array[i] = c as u8 - '0' as u8,
                 }
             }
+            return Ok(data_array);
+
         }
 
-        assert_eq!(false, true);
+    
     }
+
+
 }
