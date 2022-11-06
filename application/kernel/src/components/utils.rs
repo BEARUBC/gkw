@@ -1,9 +1,14 @@
+#[cfg(feature = "simulation")]
 use std::ops::Range;
 
 use anyhow::Result;
+#[cfg(feature = "simulation")]
 use crossbeam::channel::Sender;
+#[cfg(feature = "simulation")]
 use log::error;
+#[cfg(feature = "simulation")]
 use log::info;
+#[cfg(feature = "simulation")]
 use log::warn;
 
 pub fn parse_float(buffer: &[u8]) -> Result<f64> {
@@ -11,6 +16,7 @@ pub fn parse_float(buffer: &[u8]) -> Result<f64> {
     Ok(float)
 }
 
+#[cfg(feature = "simulation")]
 pub fn buffer_check<T>(tx: &Sender<T>, response_capacity: usize, warning_interval: Range<usize>) {
     let len = tx.len();
     match len {

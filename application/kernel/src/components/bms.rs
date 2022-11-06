@@ -1,3 +1,5 @@
+#[cfg(feature = "simulation")]
+use std::ops::Range;
 use std::ops::RangeInclusive;
 
 use anyhow::Result;
@@ -16,6 +18,8 @@ use crate::config;
 #[cfg(feature = "simulation")]
 use crate::config::Components;
 use crate::config::Config;
+#[cfg(feature = "simulation")]
+use crate::components::kernel;
 
 const MAX_BATTERY: f64 = 100.0;
 const HIGH_BATTERY_RANGE_CUTOFF: f64 = 70.0;
@@ -62,6 +66,9 @@ impl Component for Bms {
 
 #[cfg(feature = "simulation")]
 impl ForwardingComponent for Bms {
+    const DESTINATION_BUFFER_CAPACITY: usize = kernel::MESSAGE_CAPACITY;
+    const DESTINATION_BUFFER_CAPACITY_WARNING_INTERVAL: Range<usize> = kernel::MESSAGE_CAPACITY_WARNING_INTERVAL;
+
     type Message = Message;
 
     fn tx(&self) -> &Sender<Self::Message> {

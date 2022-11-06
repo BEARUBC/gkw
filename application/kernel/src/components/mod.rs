@@ -28,18 +28,17 @@ use crate::components::kernel::Kernel;
 use crate::config::Config;
 use crate::wait::Wait;
 
-const MESSAGE_CAPACITY: usize = 32;
-const RESPONSE_CAPACITY: usize = 16;
-const MESSAGE_CAPACITY_WARNING_INTERVAL: Range<usize> = 24..MESSAGE_CAPACITY;
-const RESPONSE_CAPACITY_WARNING_INTERVAL: Range<usize> = 12..RESPONSE_CAPACITY;
 #[cfg(feature = "simulation")]
-const BUFFER_CAPACITY: usize = 32;
+const TCP_BUFFER_CAPACITY: usize = 32;
 
 trait Component {
     fn run(self, _: &Config) -> Result<()>;
 }
 
 trait ForwardingComponent: Component {
+    const DESTINATION_BUFFER_CAPACITY: usize;
+    const DESTINATION_BUFFER_CAPACITY_WARNING_INTERVAL: Range<usize>;
+
     type Message: 'static + Send + Sync;
 
     fn tx(&self) -> &Sender<Self::Message>;
@@ -47,7 +46,7 @@ trait ForwardingComponent: Component {
     fn send(&self, message: Self::Message) -> Result<()> {
         let tx = self.tx();
         #[cfg(feature = "simulation")]
-        utils::buffer_check(tx, MESSAGE_CAPACITY, MESSAGE_CAPACITY_WARNING_INTERVAL);
+        utils::buffer_check(tx, Self::DESTINATION_BUFFER_CAPACITY, Self::DESTINATION_BUFFER_CAPACITY_WARNING_INTERVAL);
         let is_full = tx.is_full();
         match is_full {
             true => {
@@ -107,12 +106,12 @@ trait BackPressuredForwardingComponent: ForwardingComponent {
 trait TcpComponent: 'static + ForwardingComponent + Sized + Send {
     fn tcp_config(_: &Config) -> (&str, &u16);
 
-    fn stream(&self, mut stream: TcpStream, buffer: &mut [u8; BUFFER_CAPACITY]) -> Result<()> {
+    fn stream(&self, mut stream: TcpStream, buffer: &mut [u8; TCP_BUFFER_CAPACITY]) -> Result<()> {
         loop {
             let bytes_read = stream.read(buffer)?;
             match bytes_read {
                 0 => break,
-                _ if bytes_read > BUFFER_CAPACITY => break,
+                _ if bytes_read > TCP_BUFFER_CAPACITY => break,
                 _ => {
                     let last = buffer[bytes_read - 1] as char;
                     let buffer = &buffer[0..(match last {
@@ -132,7 +131,7 @@ trait TcpComponent: 'static + ForwardingComponent + Sized + Send {
         let (host, port) = Self::tcp_config(config);
         let addr = format!("{}:{}", host, port);
         let listener = TcpListener::bind(addr)?;
-        let mut buffer = [0u8; BUFFER_CAPACITY];
+        let mut buffer = [0u8; TCP_BUFFER_CAPACITY];
         spawn(move || {
             listener
                 .incoming()
@@ -146,8 +145,8 @@ trait TcpComponent: 'static + ForwardingComponent + Sized + Send {
 }
 
 pub(super) fn run(config: Config) -> Result<()> {
-    let (kernel_tx, kernel_rx) = bounded(MESSAGE_CAPACITY);
-    let (emg_tx, emg_rx) = bounded(RESPONSE_CAPACITY);
+    let (kernel_tx, kernel_rx) = bounded(kernel::MESSAGE_CAPACITY);
+    let (emg_tx, emg_rx) = bounded(emg::MESSAGE_CAPACITY);
     let kernel = Kernel {
         emg: emg_tx,
         rx: kernel_rx,

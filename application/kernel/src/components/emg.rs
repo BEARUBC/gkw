@@ -1,3 +1,6 @@
+#[cfg(feature = "simulation")]
+use std::ops::Range;
+
 use anyhow::Result;
 use crossbeam::channel::Receiver;
 use crossbeam::channel::Sender;
@@ -18,6 +21,12 @@ use crate::config;
 #[cfg(feature = "simulation")]
 use crate::config::Components;
 use crate::config::Config;
+#[cfg(feature = "simulation")]
+use crate::components::kernel;
+
+pub(super) const MESSAGE_CAPACITY: usize = 16;
+#[cfg(feature = "simulation")]
+pub(super) const MESSAGE_CAPACITY_WARNING_INTERVAL: Range<usize> = 12..MESSAGE_CAPACITY;
 
 pub(super) type VoltageReading = f64;
 
@@ -42,6 +51,9 @@ impl Component for Emg {
 
 #[cfg(feature = "simulation")]
 impl ForwardingComponent for Emg {
+    const DESTINATION_BUFFER_CAPACITY: usize = kernel::MESSAGE_CAPACITY;
+    const DESTINATION_BUFFER_CAPACITY_WARNING_INTERVAL: Range<usize> = kernel::MESSAGE_CAPACITY_WARNING_INTERVAL;
+
     type Message = Message;
 
     fn tx(&self) -> &Sender<Self::Message> {
