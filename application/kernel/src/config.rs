@@ -14,10 +14,10 @@ const CONFIG_PATH: &str = "config/main.yaml";
 const RUST_LOG_KEY: &str = "RUST_LOG";
 
 #[cfg(feature = "simulation")]
-const RUST_LOG_VALUE: &str = "info";
+const RUST_LOG_VALUE: &str = "debug";
 
 #[cfg(not(feature = "simulation"))]
-const RUST_LOG_VALUE: &str = "info";
+const RUST_LOG_VALUE: &str = "error";
 
 #[cfg(not(feature = "simulation"))]
 pub type Config = ();
