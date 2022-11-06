@@ -30,20 +30,3 @@ derive_more = "0.99.17"
 # internal libraries
 ipcp = { version = "0.1.0", path = "../ipcp" }
 # gkw-utils = { version = "0.3.1", path = "../gkw-utils" }
-
-# ASYNC RUNTIME:
-# tokio = { version = "1.0.2", features = ["full"] }
-# actix = "0.10.0"
-# actix-rt = "2.1.0"
-# mio = "0.7"
-# async_framework = { path = "local_lib/async_framework"}
-
-# MICRO-MAESTRO INTERFACE:
-# raestro = "0.1.0"
-
-# JSON SER. AND DESER.:
-
-# PYTHON INTERPRETER BINDINGS:
-# [dependencies.pyo3]
-# version = "0.13.1"
-# features = ["auto-initialize"]
