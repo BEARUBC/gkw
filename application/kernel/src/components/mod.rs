@@ -9,6 +9,7 @@ use std::io::Read;
 use std::net::TcpListener;
 #[cfg(feature = "simulation")]
 use std::net::TcpStream;
+use std::ops::Range;
 #[cfg(feature = "simulation")]
 use std::result;
 #[cfg(feature = "simulation")]
@@ -18,6 +19,8 @@ use anyhow::Result;
 use crossbeam::channel::bounded;
 use crossbeam::channel::Receiver;
 use crossbeam::channel::Sender;
+#[cfg(feature = "simulation")]
+use log::warn;
 
 use crate::components::bms::Bms;
 use crate::components::emg::Emg;
@@ -27,6 +30,8 @@ use crate::wait::Wait;
 
 const MESSAGE_CAPACITY: usize = 32;
 const RESPONSE_CAPACITY: usize = 16;
+const MESSAGE_CAPACITY_WARNING_INTERVAL: Range<usize> = 24..MESSAGE_CAPACITY;
+const RESPONSE_CAPACITY_WARNING_INTERVAL: Range<usize> = 12..RESPONSE_CAPACITY;
 #[cfg(feature = "simulation")]
 const BUFFER_CAPACITY: usize = 32;
 
@@ -40,7 +45,19 @@ trait ForwardingComponent: Component {
     fn tx(&self) -> &Sender<Self::Message>;
 
     fn send(&self, message: Self::Message) -> Result<()> {
-        self.tx().send(message)?;
+        let tx = self.tx();
+        #[cfg(feature = "simulation")]
+        utils::buffer_check(tx, MESSAGE_CAPACITY, MESSAGE_CAPACITY_WARNING_INTERVAL);
+        let is_full = tx.is_full();
+        match is_full {
+            true => {
+                #[cfg(feature = "simulation")]
+                warn!("Buffer full. Dropping message.");
+            },
+            false => {
+                tx.send(message)?;
+            },
+        };
         Ok(())
     }
 }
