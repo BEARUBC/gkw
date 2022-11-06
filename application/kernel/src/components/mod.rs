@@ -36,6 +36,7 @@ trait Component {
 }
 
 trait ForwardingComponent: Component {
+    const DESTINATION_COMPONENT_NAME: &'static str;
     const DESTINATION_BUFFER_CAPACITY: usize;
     const DESTINATION_BUFFER_CAPACITY_WARNING_INTERVAL: Range<usize>;
 
@@ -48,6 +49,7 @@ trait ForwardingComponent: Component {
         #[cfg(feature = "simulation")]
         utils::buffer_check(
             tx,
+            Self::DESTINATION_COMPONENT_NAME,
             Self::DESTINATION_BUFFER_CAPACITY,
             Self::DESTINATION_BUFFER_CAPACITY_WARNING_INTERVAL,
         );

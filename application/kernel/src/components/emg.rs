@@ -56,6 +56,7 @@ impl ForwardingComponent for Emg {
     const DESTINATION_BUFFER_CAPACITY: usize = kernel::MESSAGE_CAPACITY;
     const DESTINATION_BUFFER_CAPACITY_WARNING_INTERVAL: Range<usize> =
         kernel::MESSAGE_CAPACITY_WARNING_INTERVAL;
+    const DESTINATION_COMPONENT_NAME: &'static str = "kernel";
 
     fn tx(&self) -> &Sender<Self::Message> {
         &self.tx

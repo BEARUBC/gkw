@@ -49,6 +49,7 @@ impl Kernel {
     fn handle(&self, message: Message, internal_state: &mut InternalState) -> Result<()> {
         utils::buffer_check(
             &self.emg,
+            "emg",
             emg::MESSAGE_CAPACITY,
             emg::MESSAGE_CAPACITY_WARNING_INTERVAL,
         );
