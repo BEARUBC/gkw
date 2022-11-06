@@ -12,7 +12,7 @@ serde_json = "1.0.79"
 serde_repr = "0.1.7"
 
 # universals identifiers
-uuid = { version = "0.8.2", features = ["serde"] }
+uuid = { version = "1.2.1", features = ["serde"] }
 
 # convenience utils
 derivative = "2.2.0"
@@ -20,4 +20,4 @@ strum = "0.24.0"
 strum_macros = "0.24.0"
 
 # gkw errors + results
-gkw-utils = { version = "0.3.1", path = "../gkw-utils" }
+# gkw-utils = { version = "0.3.1", path = "../gkw-utils" }
