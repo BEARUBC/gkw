@@ -122,11 +122,11 @@ pub(super) enum Response {
     Wait(Wait<bool>),
 }
 
-impl Into<Option<Wait<bool>>> for Response {
-    fn into(self) -> Option<Wait<bool>> {
-        match self {
-            Self::Wait(wait) => Some(wait),
-            Self::Continue => None,
+impl From<Response> for Option<Wait<bool>> {
+    fn from(response: Response) -> Self {
+        match response {
+            Response::Continue => None,
+            Response::Wait(wait) => Some(wait),
         }
     }
 }

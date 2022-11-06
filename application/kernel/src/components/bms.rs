@@ -71,15 +71,15 @@ impl ForwardingComponent for Bms {
 
 #[cfg(feature = "simulation")]
 impl TcpComponent for Bms {
-    fn tcp_config<'a>(
+    fn tcp_config(
         Config {
             components:
                 Components {
                     bms: config::Bms { host, port },
                     ..
                 },
-        }: &'a Config,
-    ) -> (&'a str, &'a u16) {
+        }: &Config,
+    ) -> (&str, &u16) {
         (host, port)
     }
 

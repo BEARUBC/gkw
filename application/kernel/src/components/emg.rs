@@ -63,15 +63,15 @@ impl BackPressuredForwardingComponent for Emg {
 
 #[cfg(feature = "simulation")]
 impl TcpComponent for Emg {
-    fn tcp_config<'a>(
+    fn tcp_config(
         Config {
             components:
                 Components {
                     emg: config::Emg { host, port },
                     ..
                 },
-        }: &'a Config,
-    ) -> (&'a str, &'a u16) {
+        }: &Config,
+    ) -> (&str, &u16) {
         (host, port)
     }
 

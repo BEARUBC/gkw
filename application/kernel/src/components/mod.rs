@@ -64,7 +64,7 @@ trait BackPressuredForwardingComponent: ForwardingComponent {
         };
         let wait = match block {
             true => rx.recv()?.into(),
-            false => rx.try_recv().ok().map(Self::Response::into).flatten(),
+            false => rx.try_recv().ok().and_then(Self::Response::into),
         };
         let did_wait = match wait {
             Some(wait) => {
@@ -88,7 +88,7 @@ trait BackPressuredForwardingComponent: ForwardingComponent {
 
 #[cfg(feature = "simulation")]
 trait TcpComponent: 'static + ForwardingComponent + Sized + Send {
-    fn tcp_config<'a>(_: &'a Config) -> (&'a str, &'a u16);
+    fn tcp_config(_: &Config) -> (&str, &u16);
 
     fn stream(&self, mut stream: TcpStream, buffer: &mut [u8; BUFFER_CAPACITY]) -> Result<()> {
         loop {

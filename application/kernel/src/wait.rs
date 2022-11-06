@@ -56,6 +56,6 @@ impl<T> Deref for Wait<T> {
     type Target = (Mutex<T>, Condvar);
 
     fn deref(&self) -> &Self::Target {
-        &*self.0
+        &self.0
     }
 }

@@ -6,18 +6,18 @@ use config::File;
 use serde::Deserialize;
 
 #[cfg(feature = "simulation")]
-const CONFIG_PATH: &'static str = "config/simulation.yaml";
+const CONFIG_PATH: &str = "config/simulation.yaml";
 
 #[cfg(not(feature = "simulation"))]
-const CONFIG_PATH: &'static str = "config/main.yaml";
+const CONFIG_PATH: &str = "config/main.yaml";
 
-const RUST_LOG_KEY: &'static str = "RUST_LOG";
+const RUST_LOG_KEY: &str = "RUST_LOG";
 
 #[cfg(feature = "simulation")]
-const RUST_LOG_VALUE: &'static str = "info";
+const RUST_LOG_VALUE: &str = "info";
 
 #[cfg(not(feature = "simulation"))]
-const RUST_LOG_VALUE: &'static str = "info";
+const RUST_LOG_VALUE: &str = "info";
 
 #[cfg(not(feature = "simulation"))]
 pub type Config = ();
