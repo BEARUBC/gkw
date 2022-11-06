@@ -20,4 +20,8 @@ strum = "0.24.0"
 strum_macros = "0.24.0"
 
 # gkw errors + results
+<<<<<<< HEAD
 # gkw-utils = { version = "0.3.1", path = "../gkw-utils" }
+=======
+gkw_utils = { version = "0.3.1", path = "../gkw_utils" }
+>>>>>>> 9182b98075a1891172e71b19e20b08f2902b9edf

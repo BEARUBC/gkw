@@ -1,7 +1,9 @@
-# Cargo dependencies + artefacts
+# Cargo dependencies + artefacts:
 target
-Cargo.lock
 
-# Node dependencies + artefacts
-node_modules
-yarn.lock
+# Output:
+logs
+
+# IDE specific settings:
+## VS Code
+.vscode
