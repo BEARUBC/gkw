@@ -1,8 +1,12 @@
+#[cfg(feature = "simulation")]
+use std::ops::Range;
 use std::ops::RangeInclusive;
 
 use anyhow::Result;
 use crossbeam::channel::Sender;
 
+#[cfg(feature = "simulation")]
+use crate::components::kernel;
 use crate::components::kernel::Message;
 #[cfg(feature = "simulation")]
 use crate::components::utils;
@@ -63,6 +67,10 @@ impl Component for Bms {
 #[cfg(feature = "simulation")]
 impl ForwardingComponent for Bms {
     type Message = Message;
+
+    const DESTINATION_BUFFER_CAPACITY: usize = kernel::MESSAGE_CAPACITY;
+    const DESTINATION_BUFFER_CAPACITY_WARNING_INTERVAL: Range<usize> =
+        kernel::MESSAGE_CAPACITY_WARNING_INTERVAL;
 
     fn tx(&self) -> &Sender<Self::Message> {
         &self.tx

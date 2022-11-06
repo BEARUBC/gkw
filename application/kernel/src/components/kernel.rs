@@ -1,3 +1,6 @@
+#[cfg(feature = "simulation")]
+use std::ops::Range;
+
 use anyhow::Result;
 use crossbeam::channel::Receiver;
 use crossbeam::channel::Sender;
@@ -5,16 +8,18 @@ use crossbeam::channel::Sender;
 use log::info;
 
 use crate::components::bms::BatteryReport;
+#[cfg(feature = "simulation")]
+use crate::components::emg;
 use crate::components::emg::VoltageReading;
 #[cfg(feature = "simulation")]
 use crate::components::utils;
 use crate::components::Component;
-#[cfg(feature = "simulation")]
-use crate::components::RESPONSE_CAPACITY;
-#[cfg(feature = "simulation")]
-use crate::components::RESPONSE_CAPACITY_WARNING_INTERVAL;
 use crate::config::Config;
 use crate::wait::Wait;
+
+pub(super) const MESSAGE_CAPACITY: usize = 32;
+#[cfg(feature = "simulation")]
+pub(super) const MESSAGE_CAPACITY_WARNING_INTERVAL: Range<usize> = 24..MESSAGE_CAPACITY;
 
 pub(super) struct Kernel {
     pub(super) emg: Sender<Response>,
@@ -44,8 +49,8 @@ impl Kernel {
     fn handle(&self, message: Message, internal_state: &mut InternalState) -> Result<()> {
         utils::buffer_check(
             &self.emg,
-            RESPONSE_CAPACITY,
-            RESPONSE_CAPACITY_WARNING_INTERVAL,
+            emg::MESSAGE_CAPACITY,
+            emg::MESSAGE_CAPACITY_WARNING_INTERVAL,
         );
         let is_full = self.emg.is_full();
         match message {
