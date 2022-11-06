@@ -1,13 +1,17 @@
 use anyhow::Result;
 use crossbeam::channel::Receiver;
 use crossbeam::channel::Sender;
+#[cfg(feature = "simulation")]
 use log::error;
+#[cfg(feature = "simulation")]
 use log::info;
+#[cfg(feature = "simulation")]
 use log::warn;
 
 use crate::components::bms::BatteryReport;
 use crate::components::emg::VoltageReading;
 use crate::components::Component;
+#[cfg(feature = "simulation")]
 use crate::components::RESPONSE_CAPACITY;
 use crate::config::Config;
 use crate::wait::Wait;

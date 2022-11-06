@@ -17,6 +17,9 @@ const RUST_LOG_KEY: &'static str = "RUST_LOG";
 const RUST_LOG_VALUE: &'static str = "info";
 
 #[cfg(not(feature = "simulation"))]
+const RUST_LOG_VALUE: &'static str = "info";
+
+#[cfg(not(feature = "simulation"))]
 pub type Config = ();
 
 #[cfg(feature = "simulation")]
