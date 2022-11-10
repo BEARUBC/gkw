@@ -1,8 +1,8 @@
-mod components2;
+mod components;
 mod config;
 mod wait;
 
-use crate::components2::run;
+use crate::components::run;
 use crate::config::init;
 
 fn main() -> ! {

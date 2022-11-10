@@ -1,32 +1,17 @@
-#[cfg(feature = "simulation")]
-use std::ops::Range;
-use std::ops::RangeInclusive;
-
 use anyhow::Result;
 use crossbeam::channel::Sender;
 
-#[cfg(feature = "simulation")]
 use crate::components::kernel;
-use crate::components::kernel::Message;
 #[cfg(feature = "simulation")]
-use crate::components::utils;
+use crate::components::utils::parser;
+#[cfg(feature = "simulation")]
+use crate::components::utils::run_tcp;
 use crate::components::Component;
-#[cfg(feature = "simulation")]
-use crate::components::ForwardingComponent;
-#[cfg(feature = "simulation")]
-use crate::components::TcpComponent;
 #[cfg(feature = "simulation")]
 use crate::config;
 #[cfg(feature = "simulation")]
 use crate::config::Components;
 use crate::config::Config;
-
-const MAX_BATTERY: f64 = 100.0;
-const HIGH_BATTERY_RANGE_CUTOFF: f64 = 70.0;
-const MEDIUM_BATTERY_RANGE_CUTOFF: f64 = 20.0;
-const HIGH_BATTERY_RANGE: RangeInclusive<f64> = HIGH_BATTERY_RANGE_CUTOFF..=MAX_BATTERY;
-const MEDIUM_BATTERY_RANGE: RangeInclusive<f64> =
-    MEDIUM_BATTERY_RANGE_CUTOFF..=HIGH_BATTERY_RANGE_CUTOFF;
 
 pub(super) enum BatteryReport {
     High,
@@ -34,27 +19,8 @@ pub(super) enum BatteryReport {
     Low,
 }
 
-impl From<f64> for BatteryReport {
-    fn from(battery_percentage: f64) -> Self {
-        if HIGH_BATTERY_RANGE.contains(&battery_percentage) {
-            BatteryReport::High
-        } else if MEDIUM_BATTERY_RANGE.contains(&battery_percentage) {
-            BatteryReport::Medium
-        } else {
-            BatteryReport::Low
-        }
-    }
-}
-
 pub(super) struct Bms {
-    pub(super) tx: Sender<Message>,
-}
-
-#[cfg(feature = "simulation")]
-impl Component for Bms {
-    fn run(self, config: &Config) -> Result<()> {
-        self.run_tcp(config)
-    }
+    pub(super) tx: Sender<kernel::Message>,
 }
 
 #[cfg(not(feature = "simulation"))]
@@ -65,38 +31,42 @@ impl Component for Bms {
 }
 
 #[cfg(feature = "simulation")]
-impl ForwardingComponent for Bms {
-    type Message = Message;
-
-    const DESTINATION_BUFFER_CAPACITY: usize = kernel::MESSAGE_CAPACITY;
-    const DESTINATION_BUFFER_CAPACITY_WARNING_INTERVAL: Range<usize> =
-        kernel::MESSAGE_CAPACITY_WARNING_INTERVAL;
-    const DESTINATION_COMPONENT_NAME: &'static str = "kernel";
-
-    fn tx(&self) -> &Sender<Self::Message> {
-        &self.tx
-    }
-}
-
-#[cfg(feature = "simulation")]
-impl TcpComponent for Bms {
-    fn tcp_config(
+impl Component for Bms {
+    fn run(
+        self,
         Config {
             components:
                 Components {
-                    bms: config::Bms { host, port },
+                    bms:
+                        config::Bms {
+                            host,
+                            port,
+                            high_battery_cutoff,
+                            medium_battery_cutoff,
+                        },
                     ..
                 },
+            ..
         }: &Config,
-    ) -> (&str, &u16) {
-        (host, port)
-    }
-
-    fn handle(&self, buffer: &[u8]) -> Result<()> {
-        let message = utils::parse_float(buffer)?;
-        let battery_report = message.into();
-        let message = Message::Bms(battery_report);
-        self.send(message)?;
+    ) -> Result<()> {
+        let high_battery_cutoff = *high_battery_cutoff;
+        let medium_battery_cutoff = *medium_battery_cutoff;
+        let parser = parser(
+            move |data| {
+                let battery_report = match data {
+                    _ if (high_battery_cutoff..=100.0).contains(&data) => BatteryReport::High,
+                    _ if (medium_battery_cutoff..=high_battery_cutoff).contains(&data) => {
+                        BatteryReport::Medium
+                    },
+                    _ => BatteryReport::Low,
+                };
+                let message = kernel::Message::Bms(battery_report);
+                self.tx.send(message)?;
+                Ok(())
+            },
+            None,
+        );
+        run_tcp(host, *port, parser)?;
         Ok(())
     }
 }
