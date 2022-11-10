@@ -1,31 +1,36 @@
-#[cfg(feature = "simulation")]
+#[cfg(feature = "tcp_data")]
 use std::io::Read;
-#[cfg(feature = "simulation")]
+#[cfg(feature = "tcp_data")]
 use std::net::TcpListener;
-#[cfg(feature = "simulation")]
-use std::net::TcpStream;
-#[cfg(feature = "simulation")]
+#[cfg(feature = "tcp_data")]
 use std::str::FromStr;
-#[cfg(feature = "simulation")]
+#[cfg(feature = "tcp_data")]
 use std::thread::spawn;
-#[cfg(feature = "simulation")]
+#[cfg(feature = "tcp_data")]
 use std::thread::JoinHandle;
 
-#[cfg(feature = "simulation")]
+#[cfg(feature = "tcp_data")]
 use anyhow::Error;
-#[cfg(feature = "simulation")]
+#[cfg(feature = "tcp_data")]
 use anyhow::Result;
 
-#[cfg(feature = "simulation")]
+#[cfg(feature = "tcp_data")]
 use crate::components::TCP_BUFFER_CAPACITY;
-#[cfg(feature = "simulation")]
+#[cfg(feature = "tcp_data")]
 use crate::wait::Wait;
 
-#[cfg(feature = "simulation")]
-pub fn run_tcp<S, F>(host: S, port: u16, mut parser: F) -> Result<JoinHandle<()>>
+#[cfg(feature = "tcp_data")]
+pub fn run_tcp<S, F, T>(
+    host: S,
+    port: u16,
+    mut parser: F,
+    pause: Option<Wait<bool>>,
+) -> Result<JoinHandle<()>>
 where
     S: AsRef<str>,
-    F: 'static + FnMut(TcpStream) -> Result<()> + Send,
+    F: 'static + FnMut(T) -> Result<()> + Send,
+    T: FromStr,
+    Error: From<T::Err>,
 {
     let host = host.as_ref();
     let addr = format!("{}:{}", host, port);
@@ -34,49 +39,33 @@ where
         listener
             .incoming()
             .filter_map(|stream| {
-                let stream = stream.ok()?;
-                parser(stream).ok()
+                let mut stream = stream.ok()?;
+                let mut buffer = [0u8; TCP_BUFFER_CAPACITY];
+                loop {
+                    let bytes_read = stream.read(&mut buffer).unwrap();
+                    let did_wait = pause
+                        .clone()
+                        .and_then(|pause| pause.wait(false).ok())
+                        .unwrap_or_default();
+                    match (did_wait, bytes_read) {
+                        (true, _) => continue,
+                        (_, 0) => break None,
+                        _ if bytes_read == TCP_BUFFER_CAPACITY => break None,
+                        _ => {
+                            let last = buffer[bytes_read - 1] as char;
+                            let buffer = &buffer[0..(match last {
+                                '\n' => bytes_read - 1,
+                                _ => bytes_read,
+                            })];
+                            String::from_utf8_lossy(buffer)
+                                .parse::<T>()
+                                .ok()
+                                .and_then(|data| parser(data).ok());
+                        },
+                    }
+                }
             })
             .for_each(|()| ());
     });
     Ok(handle)
-}
-
-#[cfg(feature = "simulation")]
-pub fn parser<F, T>(
-    mut handle: F,
-    active: Option<Wait<bool>>,
-) -> impl FnMut(TcpStream) -> Result<()>
-where
-    F: FnMut(T) -> Result<()>,
-    T: FromStr,
-    Error: From<T::Err>,
-{
-    move |mut stream: TcpStream| {
-        let mut buffer = [0u8; TCP_BUFFER_CAPACITY];
-        loop {
-            let bytes_read = stream.read(&mut buffer).unwrap();
-            let did_wait = active
-                .clone()
-                .and_then(|wait| wait.wait(false).ok())
-                .unwrap_or_default();
-            match (did_wait, bytes_read) {
-                (true, _) => continue,
-                (_, 0) => break,
-                _ if bytes_read == TCP_BUFFER_CAPACITY => break,
-                _ => {
-                    let last = buffer[bytes_read - 1] as char;
-                    let buffer = &buffer[0..(match last {
-                        '\n' => bytes_read - 1,
-                        _ => bytes_read,
-                    })];
-                    String::from_utf8_lossy(buffer)
-                        .parse::<T>()
-                        .ok()
-                        .and_then(|data| handle(data).ok());
-                },
-            }
-        }
-        Ok(())
-    }
 }

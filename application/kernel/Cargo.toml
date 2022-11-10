@@ -10,15 +10,6 @@ license = "MIT"
 description = "The main, synchronous, non-blocking IO, event-loop for the systems software for GRASP, owned by UBC Bionics."
 
 [dependencies]
-
-# Purpose:
-# Global (lazily loaded) statics.
-lazy_static = "1.4.0"
-
-# Purpose:
-# ...
-derive_more = "0.99.17"
-
 # Purpose:
 # Error utils and propagation.
 anyhow = { version = "1.0.66", features = ["backtrace"] }
@@ -41,21 +32,5 @@ serde_json = "1.0.79"
 log = "0.4.17"
 pretty_env_logger = "0.4.0"
 
-# Purpose:
-# ...
-# ipcp = { version = "0.1.0", path = "../ipcp" }
-
-# Purpose:
-# ...
-# gkw_utils = { version = "0.3.1", path = "../gkw_utils" }
-
-# Purpose:
-# ...
-# python_integration = { path = "../python_integration" }
-
-# Purpose:
-# ...
-# emg_integration = { path = "../emg_integration" }
-
 [features]
-simulation = []
+tcp_data = []

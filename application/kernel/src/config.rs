@@ -4,50 +4,50 @@ use anyhow::Result;
 use config::File;
 use serde::Deserialize;
 
-#[cfg(feature = "simulation")]
+#[cfg(feature = "tcp_data")]
 const CONFIG_PATH: &str = "config/simulation.yaml";
 
-#[cfg(not(feature = "simulation"))]
+#[cfg(not(feature = "tcp_data"))]
 const CONFIG_PATH: &str = "config/release.yaml";
 
 const RUST_LOG_KEY: &str = "RUST_LOG";
 
-#[cfg(feature = "simulation")]
+#[cfg(feature = "tcp_data")]
 const RUST_LOG_VALUE: &str = "debug";
 
-#[cfg(not(feature = "simulation"))]
+#[cfg(not(feature = "tcp_data"))]
 const RUST_LOG_VALUE: &str = "error";
 
 #[derive(Deserialize)]
 pub struct Config {
-    #[cfg(feature = "simulation")]
+    #[cfg(feature = "tcp_data")]
     pub components: Components,
 }
 
 #[derive(Deserialize)]
 pub struct Components {
-    #[cfg(feature = "simulation")]
+    #[cfg(feature = "tcp_data")]
     pub bms: Bms,
 
-    #[cfg(feature = "simulation")]
+    #[cfg(feature = "tcp_data")]
     pub emg: Emg,
 }
 
 #[derive(Deserialize)]
 pub struct Bms {
-    #[cfg(feature = "simulation")]
+    #[cfg(feature = "tcp_data")]
     pub host: String,
 
-    #[cfg(feature = "simulation")]
+    #[cfg(feature = "tcp_data")]
     pub port: u16,
 }
 
 #[derive(Deserialize)]
 pub struct Emg {
-    #[cfg(feature = "simulation")]
+    #[cfg(feature = "tcp_data")]
     pub host: String,
 
-    #[cfg(feature = "simulation")]
+    #[cfg(feature = "tcp_data")]
     pub port: u16,
 }
 

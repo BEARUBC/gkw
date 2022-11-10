@@ -16,9 +16,23 @@ pub(super) enum Message {
 }
 
 pub(super) struct Kernel {
-    pub(super) emg_data: f64,
-    pub(super) pause: Wait<bool>,
-    pub(super) rx: Receiver<Message>,
+    emg_data: f64,
+    pause: Wait<bool>,
+    pause_cache: bool,
+    rx: Receiver<Message>,
+}
+
+impl Kernel {
+    pub(super) fn new(pause: Wait<bool>, rx: Receiver<Message>) -> anyhow::Result<Self> {
+        let pause_cache = pause.get()?;
+        let kernel = Self {
+            emg_data: 0.0,
+            pause,
+            pause_cache,
+            rx,
+        };
+        Ok(kernel)
+    }
 }
 
 impl Component for Kernel {
@@ -29,7 +43,10 @@ impl Component for Kernel {
                     BatteryReport::High | BatteryReport::Medium => false,
                     BatteryReport::Low => true,
                 };
-                self.pause.set(should_pause).ok();
+                if self.pause_cache != should_pause {
+                    self.pause.set(should_pause).ok();
+                    self.pause_cache = should_pause;
+                };
             },
             Message::Emg(data) => {
                 println!("emg data: {}", data);

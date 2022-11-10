@@ -4,47 +4,26 @@ mod kernel;
 mod utils;
 
 use anyhow::Result;
-#[cfg(feature = "simulation")]
 use crossbeam::channel::bounded;
 
-#[cfg(feature = "simulation")]
 use crate::components::bms::Bms;
-#[cfg(feature = "simulation")]
 use crate::components::emg::Emg;
-#[cfg(feature = "simulation")]
 use crate::components::kernel::Kernel;
 use crate::config::Config;
-#[cfg(feature = "simulation")]
 use crate::wait::Wait;
 
-#[cfg(feature = "simulation")]
+#[cfg(feature = "tcp_data")]
 const TCP_BUFFER_CAPACITY: usize = 256;
 
 trait Component {
     fn run(self, _: &Config) -> Result<()>;
 }
 
-#[cfg(feature = "simulation")]
 pub(super) fn run(config: Config) -> Result<()> {
     let (tx, rx) = bounded(kernel::MESSAGE_CAPACITY);
     let pause = Wait::default();
-    let emg = Emg {
-        tx: tx.clone(),
-        pause: pause.clone(),
-    };
-    let bms = Bms { tx };
-    let kernel = Kernel {
-        emg_data: 0.0,
-        pause,
-        rx,
-    };
-    emg.run(&config)?;
-    bms.run(&config)?;
-    kernel.run(&config)?;
+    Emg::new(tx.clone(), pause.clone()).run(&config)?;
+    Bms::new(tx).run(&config)?;
+    Kernel::new(pause, rx)?.run(&config)?;
     Ok(())
-}
-
-#[cfg(not(feature = "simulation"))]
-pub(super) fn run(_: Config) -> Result<()> {
-    todo!()
 }

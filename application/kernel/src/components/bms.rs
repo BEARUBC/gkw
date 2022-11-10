@@ -1,33 +1,32 @@
+#[cfg(feature = "tcp_data")]
 use std::ops::RangeInclusive;
 
 use anyhow::Result;
 use crossbeam::channel::Sender;
 
 use crate::components::kernel;
-#[cfg(feature = "simulation")]
-use crate::components::utils::parser;
-#[cfg(feature = "simulation")]
+#[cfg(feature = "tcp_data")]
 use crate::components::utils::run_tcp;
 use crate::components::Component;
-#[cfg(feature = "simulation")]
+#[cfg(feature = "tcp_data")]
 use crate::config;
-#[cfg(feature = "simulation")]
+#[cfg(feature = "tcp_data")]
 use crate::config::Components;
 use crate::config::Config;
 
-#[cfg(feature = "simulation")]
+#[cfg(feature = "tcp_data")]
 const MAX_BATTERY: f64 = 100.0;
 
-#[cfg(feature = "simulation")]
+#[cfg(feature = "tcp_data")]
 const HIGH_BATTERY_CUTOFF: f64 = 70.0;
 
-#[cfg(feature = "simulation")]
+#[cfg(feature = "tcp_data")]
 const MEDIUM_BATTERY_CUTOFF: f64 = 20.0;
 
-#[cfg(feature = "simulation")]
+#[cfg(feature = "tcp_data")]
 const HIGH_BATTERY_RANGE: RangeInclusive<f64> = HIGH_BATTERY_CUTOFF..=MAX_BATTERY;
 
-#[cfg(feature = "simulation")]
+#[cfg(feature = "tcp_data")]
 const MEDIUM_BATTERY_RANGE: RangeInclusive<f64> = MEDIUM_BATTERY_CUTOFF..=HIGH_BATTERY_CUTOFF;
 
 pub(super) enum BatteryReport {
@@ -37,17 +36,23 @@ pub(super) enum BatteryReport {
 }
 
 pub(super) struct Bms {
-    pub(super) tx: Sender<kernel::Message>,
+    tx: Sender<kernel::Message>,
 }
 
-#[cfg(not(feature = "simulation"))]
+impl Bms {
+    pub(super) fn new(tx: Sender<kernel::Message>) -> Self {
+        Self { tx }
+    }
+}
+
+#[cfg(not(feature = "tcp_data"))]
 impl Component for Bms {
     fn run(self, _: &Config) -> Result<()> {
         todo!()
     }
 }
 
-#[cfg(feature = "simulation")]
+#[cfg(feature = "tcp_data")]
 impl Component for Bms {
     fn run(
         self,
@@ -60,7 +65,9 @@ impl Component for Bms {
             ..
         }: &Config,
     ) -> Result<()> {
-        let parser = parser(
+        run_tcp(
+            host,
+            *port,
             move |data| {
                 let battery_report = match data {
                     _ if HIGH_BATTERY_RANGE.contains(&data) => BatteryReport::High,
@@ -72,8 +79,7 @@ impl Component for Bms {
                 Ok(())
             },
             None,
-        );
-        run_tcp(host, *port, parser)?;
+        )?;
         Ok(())
     }
 }

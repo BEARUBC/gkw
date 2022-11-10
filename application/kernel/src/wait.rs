@@ -34,10 +34,21 @@ where
 impl<T> Wait<T> {
     pub fn set(&mut self, value: T) -> anyhow::Result<()> {
         let (lock, cond) = &**self;
-        let mut resume = lock.lock().map_err(|_| anyhow!(""))?;
-        *resume = value;
+        let mut t = lock.lock().map_err(error)?;
+        *t = value;
         cond.notify_one();
         Ok(())
+    }
+}
+
+impl<T> Wait<T>
+where
+    T: Copy,
+{
+    pub fn get(&self) -> anyhow::Result<T> {
+        let (lock, _) = &**self;
+        let t = *lock.lock().map_err(error)?;
+        Ok(t)
     }
 }
 
