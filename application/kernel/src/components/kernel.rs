@@ -8,6 +8,8 @@ use crate::components::Component;
 use crate::config::Config;
 use crate::wait::Wait;
 
+pub(super) const MESSAGE_CAPACITY: usize = 16;
+
 pub(super) enum Message {
     Emg(emg::Data),
     Bms(bms::BatteryReport),

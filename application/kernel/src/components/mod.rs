@@ -26,7 +26,7 @@ trait Component {
 
 #[cfg(feature = "simulation")]
 pub(super) fn run(config: Config) -> Result<()> {
-    let (tx, rx) = bounded(config.components.kernel.msg_queue_length);
+    let (tx, rx) = bounded(kernel::MESSAGE_CAPACITY);
     let pause = Wait::default();
     let emg = Emg {
         tx: tx.clone(),

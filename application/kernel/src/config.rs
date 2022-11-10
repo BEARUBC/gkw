@@ -27,18 +27,10 @@ pub struct Config {
 #[derive(Deserialize)]
 pub struct Components {
     #[cfg(feature = "simulation")]
-    pub kernel: Kernel,
-
-    #[cfg(feature = "simulation")]
     pub bms: Bms,
 
     #[cfg(feature = "simulation")]
     pub emg: Emg,
-}
-
-#[derive(Deserialize)]
-pub struct Kernel {
-    pub msg_queue_length: usize,
 }
 
 #[derive(Deserialize)]
@@ -48,12 +40,6 @@ pub struct Bms {
 
     #[cfg(feature = "simulation")]
     pub port: u16,
-
-    #[cfg(feature = "simulation")]
-    pub high_battery_cutoff: f64,
-
-    #[cfg(feature = "simulation")]
-    pub medium_battery_cutoff: f64,
 }
 
 #[derive(Deserialize)]
