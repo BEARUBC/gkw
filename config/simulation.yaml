@@ -1,7 +1,11 @@
 components:
-    emg:
-        host: "localhost"
-        port: 8080
+    kernel:
+        msg_queue_length: 16
     bms:
         host: "localhost"
         port: 8081
+        high_battery_cutoff: 50
+        medium_battery_cutoff: 10
+    emg:
+        host: "localhost"
+        port: 8080

@@ -2,14 +2,13 @@ use std::env::set_var;
 
 use anyhow::Result;
 use config::File;
-#[cfg(feature = "simulation")]
 use serde::Deserialize;
 
 #[cfg(feature = "simulation")]
 const CONFIG_PATH: &str = "config/simulation.yaml";
 
 #[cfg(not(feature = "simulation"))]
-const CONFIG_PATH: &str = "config/main.yaml";
+const CONFIG_PATH: &str = "config/release.yaml";
 
 const RUST_LOG_KEY: &str = "RUST_LOG";
 
@@ -19,33 +18,50 @@ const RUST_LOG_VALUE: &str = "debug";
 #[cfg(not(feature = "simulation"))]
 const RUST_LOG_VALUE: &str = "error";
 
-#[cfg(not(feature = "simulation"))]
-pub type Config = ();
-
-#[cfg(feature = "simulation")]
 #[derive(Deserialize)]
 pub struct Config {
+    #[cfg(feature = "simulation")]
     pub components: Components,
 }
 
-#[cfg(feature = "simulation")]
 #[derive(Deserialize)]
 pub struct Components {
-    pub emg: Emg,
+    #[cfg(feature = "simulation")]
+    pub kernel: Kernel,
+
+    #[cfg(feature = "simulation")]
     pub bms: Bms,
+
+    #[cfg(feature = "simulation")]
+    pub emg: Emg,
 }
 
-#[cfg(feature = "simulation")]
 #[derive(Deserialize)]
-pub struct Emg {
-    pub host: String,
-    pub port: u16,
+pub struct Kernel {
+    pub msg_queue_length: usize,
 }
 
-#[cfg(feature = "simulation")]
 #[derive(Deserialize)]
 pub struct Bms {
+    #[cfg(feature = "simulation")]
     pub host: String,
+
+    #[cfg(feature = "simulation")]
+    pub port: u16,
+
+    #[cfg(feature = "simulation")]
+    pub high_battery_cutoff: f64,
+
+    #[cfg(feature = "simulation")]
+    pub medium_battery_cutoff: f64,
+}
+
+#[derive(Deserialize)]
+pub struct Emg {
+    #[cfg(feature = "simulation")]
+    pub host: String,
+
+    #[cfg(feature = "simulation")]
     pub port: u16,
 }
 

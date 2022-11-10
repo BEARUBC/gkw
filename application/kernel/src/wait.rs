@@ -2,8 +2,15 @@ use std::ops::Deref;
 use std::sync::Arc;
 use std::sync::Condvar;
 use std::sync::Mutex;
+use std::sync::MutexGuard;
+use std::sync::PoisonError;
 
 use anyhow::anyhow;
+use anyhow::Error;
+
+fn error<T>(error: PoisonError<MutexGuard<T>>) -> Error {
+    anyhow!("Unable to acquire lock: {}.", error)
+}
 
 #[derive(Default)]
 pub struct Wait<T>(Arc<(Mutex<T>, Condvar)>);
@@ -12,13 +19,15 @@ impl<T> Wait<T>
 where
     T: PartialEq,
 {
-    pub fn wait(self, value: T) -> anyhow::Result<()> {
+    pub fn wait(self, value: T) -> anyhow::Result<bool> {
         let (lock, cond) = &*self;
-        let mut resume = lock.lock().map_err(|_| anyhow!(""))?;
+        let mut resume = lock.lock().map_err(error)?;
+        let mut did_wait = false;
         while *resume != value {
-            resume = cond.wait(resume).map_err(|_| anyhow!(""))?;
+            resume = cond.wait(resume).map_err(error)?;
+            did_wait = true;
         }
-        Ok(())
+        Ok(did_wait)
     }
 }
 
