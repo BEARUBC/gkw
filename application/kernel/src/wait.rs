@@ -31,19 +31,6 @@ where
     }
 }
 
-#[cfg(not(feature = "simulation"))]
-impl<T> Wait<T>
-where
-    T: 'static + Send,
-{
-    pub fn new(value: T) -> Self {
-        let lock = Mutex::new(value);
-        let cond = Condvar::default();
-        let pair = Arc::new((lock, cond));
-        Self(pair)
-    }
-}
-
 impl<T> Wait<T> {
     pub fn set(&mut self, value: T) -> anyhow::Result<()> {
         let (lock, cond) = &**self;
