@@ -4,10 +4,6 @@ use std::io::Read;
 use std::net::TcpListener;
 #[cfg(feature = "tcp_edge")]
 use std::str::FromStr;
-#[cfg(feature = "tcp_edge")]
-use std::thread::spawn;
-#[cfg(feature = "tcp_edge")]
-use std::thread::JoinHandle;
 
 #[cfg(feature = "tcp_edge")]
 use anyhow::Error;
@@ -21,21 +17,21 @@ use crate::wait::Wait;
 
 #[cfg(feature = "tcp_edge")]
 pub fn run_tcp<S, F, T>(
-    host: S,
+    host: &S,
     port: u16,
     mut parser: F,
     pause: Option<Wait<bool>>,
-) -> Result<JoinHandle<()>>
+) -> Result<impl FnMut()>
 where
     S: AsRef<str>,
-    F: 'static + FnMut(T) -> Result<()> + Send,
+    F: FnMut(T) -> Result<()>,
     T: FromStr,
     Error: From<T::Err>,
 {
     let host = host.as_ref();
     let addr = format!("{}:{}", host, port);
     let listener = TcpListener::bind(addr)?;
-    let handle = spawn(move || {
+    let runner = move || {
         listener
             .incoming()
             .filter_map(|stream| {
@@ -66,6 +62,6 @@ where
                 }
             })
             .for_each(|()| ());
-    });
-    Ok(handle)
+    };
+    Ok(runner)
 }

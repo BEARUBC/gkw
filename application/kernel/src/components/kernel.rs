@@ -1,62 +1,85 @@
 use anyhow::Result;
-use crossbeam::channel::Receiver;
-use crossbeam::channel::Sender;
 
-use crate::components::analytics;
-use crate::components::bms;
-use crate::components::bms::BatteryReport;
-use crate::components::emg;
+use crate::components::utils::run_tcp;
 use crate::components::Component;
+use crate::config;
 use crate::config::Config;
+use crate::config::TcpEdge;
 use crate::wait::Wait;
 
-pub(super) const MESSAGE_CAPACITY: usize = 16;
-
-pub(super) enum Message {
-    Emg(emg::Data),
-    Bms(bms::BatteryReport),
-    Analytics(analytics::GripType),
-}
+const HIGH_BATTERY_CUTOFF: f64 = 70.0;
+const MEDIUM_BATTERY_CUTOFF: f64 = 20.0;
 
 pub(super) struct Kernel {
     pub(super) pause: Wait<bool>,
-    pub(super) analytics_tx: Sender<analytics::Data>,
-    pub(super) rx: Receiver<Message>,
 }
 
+#[derive(PartialEq, Eq)]
+enum BatteryState {
+    High,
+    Medium,
+    Low,
+}
+
+impl Default for BatteryState {
+    fn default() -> Self {
+        Self::High
+    }
+}
+
+impl From<f64> for BatteryState {
+    fn from(battery_level: f64) -> Self {
+        match battery_level {
+            _ if battery_level >= HIGH_BATTERY_CUTOFF => Self::High,
+            _ if battery_level >= MEDIUM_BATTERY_CUTOFF => Self::Medium,
+            _ => Self::Low,
+        }
+    }
+}
+
+impl BatteryState {
+    fn should_pause(self) -> bool {
+        match self {
+            Self::High | Self::Medium => false,
+            Self::Low => true,
+        }
+    }
+}
+
+#[cfg(not(feature = "tcp_edge"))]
 impl Component for Kernel {
     fn run(mut self, _: &Config) -> Result<()> {
-        let mut pause_cache = self.pause.get()?;
-        let mut grip_type_cache = analytics::GripType::default();
-        self.rx
-            .into_iter()
-            .filter_map(move |message| {
-                match message {
-                    Message::Bms(battery_report) => {
-                        let should_pause = match battery_report {
-                            BatteryReport::High | BatteryReport::Medium => false,
-                            BatteryReport::Low => true,
-                        };
-                        if pause_cache != should_pause {
-                            self.pause.set(should_pause).ok()?;
-                            pause_cache = should_pause;
-                        };
-                    },
-                    Message::Emg(data) => {
-                        let message = analytics::Data { emg: data };
-                        self.analytics_tx.send(message).ok()?;
-                    },
-                    Message::Analytics(grip_type) => {
-                        if grip_type_cache != grip_type {
-                            #[cfg(not(release))]
-                            println!("grip type: {:#?}", grip_type);
-                            grip_type_cache = grip_type;
-                        }
-                    },
+        todo!()
+    }
+}
+
+#[cfg(feature = "tcp_edge")]
+impl Component for Kernel {
+    fn run(
+        mut self,
+        Config {
+            tcp_edge:
+                TcpEdge {
+                    bms: config::Bms { host, port },
+                    ..
+                },
+            ..
+        }: &Config,
+    ) -> Result<()> {
+        let mut should_pause_cache = self.pause.get()?;
+        run_tcp(
+            host,
+            *port,
+            move |battery_level: f64| {
+                let should_pause = BatteryState::from(battery_level).should_pause();
+                if should_pause_cache != should_pause {
+                    self.pause.set(should_pause)?;
+                    should_pause_cache = should_pause;
                 };
-                Some(())
-            })
-            .for_each(|()| ());
+                Ok(())
+            },
+            None,
+        )?();
         Ok(())
     }
 }

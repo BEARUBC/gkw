@@ -1,28 +1,21 @@
 #[cfg(feature = "pseudo_analytics")]
 use std::ops::RangeInclusive;
-#[cfg(feature = "pseudo_analytics")]
 use std::thread::spawn;
 
 use anyhow::Result;
-use crossbeam::channel::Receiver;
-use crossbeam::channel::Sender;
 
-use crate::components::emg;
-use crate::components::kernel::Message;
+use crate::components::utils::run_tcp;
 use crate::components::Component;
+use crate::config;
 use crate::config::Config;
-
-pub(super) const MESSAGE_CAPACITY: usize = 256;
+use crate::config::TcpEdge;
+use crate::wait::Wait;
 
 #[cfg(feature = "pseudo_analytics")]
 const HAMMER_DATA_RANGE: RangeInclusive<f64> = 0.0..=10.0;
 
 #[cfg(feature = "pseudo_analytics")]
 const CUP_DATA_RANGE: RangeInclusive<f64> = 10.0..=20.0;
-
-pub(super) struct Data {
-    pub(super) emg: emg::Data,
-}
 
 #[cfg_attr(not(release), derive(Debug))]
 #[derive(PartialEq, Eq)]
@@ -32,7 +25,6 @@ pub(super) enum GripType {
     Flat,
 }
 
-#[cfg(feature = "pseudo_analytics")]
 impl Default for GripType {
     fn default() -> Self {
         Self::Flat
@@ -40,42 +32,50 @@ impl Default for GripType {
 }
 
 #[cfg(feature = "pseudo_analytics")]
-impl From<Data> for GripType {
-    fn from(Data { emg }: Data) -> Self {
-        match emg {
-            _ if HAMMER_DATA_RANGE.contains(&emg) => Self::Hammer,
-            _ if CUP_DATA_RANGE.contains(&emg) => Self::Cup,
+impl From<f64> for GripType {
+    fn from(data: f64) -> Self {
+        match data {
+            _ if HAMMER_DATA_RANGE.contains(&data) => Self::Hammer,
+            _ if CUP_DATA_RANGE.contains(&data) => Self::Cup,
             _ => Self::default(),
         }
     }
 }
 
 pub(super) struct Analytics {
-    pub(super) tx: Sender<Message>,
-    pub(super) rx: Receiver<Data>,
+    pub(super) pause: Wait<bool>,
 }
 
-#[cfg(feature = "pseudo_analytics")]
-impl Component for Analytics {
-    fn run(self, _: &Config) -> Result<()> {
-        spawn(move || {
-            self.rx
-                .into_iter()
-                .filter_map(|data| {
-                    let grip_type = data.into();
-                    let message = Message::Analytics(grip_type);
-                    self.tx.send(message).ok()?;
-                    Some(())
-                })
-                .for_each(|()| ());
-        });
-        Ok(())
-    }
-}
-
-#[cfg(not(feature = "pseudo_analytics"))]
+#[cfg(not(feature = "tcp_edge"))]
 impl Component for Analytics {
     fn run(self, _: &Config) -> Result<()> {
         todo!()
+    }
+}
+
+#[cfg(feature = "tcp_edge")]
+impl Component for Analytics {
+    fn run(
+        self,
+        Config {
+            tcp_edge:
+                TcpEdge {
+                    emg: config::Emg { host, port },
+                    ..
+                },
+            ..
+        }: &Config,
+    ) -> Result<()> {
+        #[cfg(feature = "pseudo_analytics")]
+        let parser = move |data: f64| {
+            let grip_type = GripType::from(data);
+            println!("grip type: {:#?}", grip_type);
+            Ok(())
+        };
+        #[cfg(not(feature = "pseudo_analytics"))]
+        let parser = move |_: f64| Ok(());
+        let runner = run_tcp(host, *port, parser, Some(self.pause))?;
+        spawn(runner);
+        Ok(())
     }
 }
