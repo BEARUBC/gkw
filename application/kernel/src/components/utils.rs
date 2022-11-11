@@ -1,25 +1,25 @@
-#[cfg(feature = "tcp_data")]
+#[cfg(feature = "tcp_edge")]
 use std::io::Read;
-#[cfg(feature = "tcp_data")]
+#[cfg(feature = "tcp_edge")]
 use std::net::TcpListener;
-#[cfg(feature = "tcp_data")]
+#[cfg(feature = "tcp_edge")]
 use std::str::FromStr;
-#[cfg(feature = "tcp_data")]
+#[cfg(feature = "tcp_edge")]
 use std::thread::spawn;
-#[cfg(feature = "tcp_data")]
+#[cfg(feature = "tcp_edge")]
 use std::thread::JoinHandle;
 
-#[cfg(feature = "tcp_data")]
+#[cfg(feature = "tcp_edge")]
 use anyhow::Error;
-#[cfg(feature = "tcp_data")]
+#[cfg(feature = "tcp_edge")]
 use anyhow::Result;
 
-#[cfg(feature = "tcp_data")]
+#[cfg(feature = "tcp_edge")]
 use crate::components::TCP_BUFFER_CAPACITY;
-#[cfg(feature = "tcp_data")]
+#[cfg(feature = "tcp_edge")]
 use crate::wait::Wait;
 
-#[cfg(feature = "tcp_data")]
+#[cfg(feature = "tcp_edge")]
 pub fn run_tcp<S, F, T>(
     host: S,
     port: u16,
@@ -42,7 +42,7 @@ where
                 let mut stream = stream.ok()?;
                 let mut buffer = [0u8; TCP_BUFFER_CAPACITY];
                 loop {
-                    let bytes_read = stream.read(&mut buffer).unwrap();
+                    let bytes_read = stream.read(&mut buffer).ok()?;
                     let did_wait = pause
                         .clone()
                         .and_then(|pause| pause.wait(false).ok())

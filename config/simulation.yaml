@@ -1,4 +1,4 @@
-components:
+tcp_edge:
     bms:
         host: "localhost"
         port: 8081

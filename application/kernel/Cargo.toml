@@ -2,8 +2,8 @@
 name = "kernel"
 version = "0.1.0"
 authors = [
-    "nathan-n-poon <nathannpoon@gmail.com>",
     "raunakab <rabhagat31@gmail.com>",
+    "nathan-n-poon <nathannpoon@gmail.com>",
 ]
 edition = "2021"
 license = "MIT"
@@ -33,4 +33,9 @@ log = "0.4.17"
 pretty_env_logger = "0.4.0"
 
 [features]
-tcp_data = []
+tcp_edge = []
+pseudo_analytics = []
+simulation = [
+    "tcp_edge",
+    "pseudo_analytics",
+]

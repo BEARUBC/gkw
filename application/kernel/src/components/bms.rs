@@ -1,32 +1,32 @@
-#[cfg(feature = "tcp_data")]
+#[cfg(feature = "tcp_edge")]
 use std::ops::RangeInclusive;
 
 use anyhow::Result;
 use crossbeam::channel::Sender;
 
 use crate::components::kernel;
-#[cfg(feature = "tcp_data")]
+#[cfg(feature = "tcp_edge")]
 use crate::components::utils::run_tcp;
 use crate::components::Component;
-#[cfg(feature = "tcp_data")]
+#[cfg(feature = "tcp_edge")]
 use crate::config;
-#[cfg(feature = "tcp_data")]
-use crate::config::Components;
 use crate::config::Config;
+#[cfg(feature = "tcp_edge")]
+use crate::config::TcpEdge;
 
-#[cfg(feature = "tcp_data")]
+#[cfg(feature = "tcp_edge")]
 const MAX_BATTERY: f64 = 100.0;
 
-#[cfg(feature = "tcp_data")]
+#[cfg(feature = "tcp_edge")]
 const HIGH_BATTERY_CUTOFF: f64 = 70.0;
 
-#[cfg(feature = "tcp_data")]
+#[cfg(feature = "tcp_edge")]
 const MEDIUM_BATTERY_CUTOFF: f64 = 20.0;
 
-#[cfg(feature = "tcp_data")]
+#[cfg(feature = "tcp_edge")]
 const HIGH_BATTERY_RANGE: RangeInclusive<f64> = HIGH_BATTERY_CUTOFF..=MAX_BATTERY;
 
-#[cfg(feature = "tcp_data")]
+#[cfg(feature = "tcp_edge")]
 const MEDIUM_BATTERY_RANGE: RangeInclusive<f64> = MEDIUM_BATTERY_CUTOFF..=HIGH_BATTERY_CUTOFF;
 
 pub(super) enum BatteryReport {
@@ -36,29 +36,23 @@ pub(super) enum BatteryReport {
 }
 
 pub(super) struct Bms {
-    tx: Sender<kernel::Message>,
+    pub(super) tx: Sender<kernel::Message>,
 }
 
-impl Bms {
-    pub(super) fn new(tx: Sender<kernel::Message>) -> Self {
-        Self { tx }
-    }
-}
-
-#[cfg(not(feature = "tcp_data"))]
+#[cfg(not(feature = "tcp_edge"))]
 impl Component for Bms {
     fn run(self, _: &Config) -> Result<()> {
         todo!()
     }
 }
 
-#[cfg(feature = "tcp_data")]
+#[cfg(feature = "tcp_edge")]
 impl Component for Bms {
     fn run(
         self,
         Config {
-            components:
-                Components {
+            tcp_edge:
+                TcpEdge {
                     bms: config::Bms { host, port },
                     ..
                 },

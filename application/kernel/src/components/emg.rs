@@ -2,43 +2,37 @@ use anyhow::Result;
 use crossbeam::channel::Sender;
 
 use crate::components::kernel;
-#[cfg(feature = "tcp_data")]
+#[cfg(feature = "tcp_edge")]
 use crate::components::utils::run_tcp;
 use crate::components::Component;
-#[cfg(feature = "tcp_data")]
+#[cfg(feature = "tcp_edge")]
 use crate::config;
-#[cfg(feature = "tcp_data")]
-use crate::config::Components;
 use crate::config::Config;
+#[cfg(feature = "tcp_edge")]
+use crate::config::TcpEdge;
 use crate::wait::Wait;
 
 pub(super) type Data = f64;
 
 pub(super) struct Emg {
-    tx: Sender<kernel::Message>,
-    pause: Wait<bool>,
+    pub(super) tx: Sender<kernel::Message>,
+    pub(super) pause: Wait<bool>,
 }
 
-impl Emg {
-    pub(super) fn new(tx: Sender<kernel::Message>, pause: Wait<bool>) -> Self {
-        Self { tx, pause }
-    }
-}
-
-#[cfg(not(feature = "tcp_data"))]
+#[cfg(not(feature = "tcp_edge"))]
 impl Component for Emg {
     fn run(self, _: &Config) -> Result<()> {
         todo!()
     }
 }
 
-#[cfg(feature = "tcp_data")]
+#[cfg(feature = "tcp_edge")]
 impl Component for Emg {
     fn run(
         self,
         Config {
-            components:
-                Components {
+            tcp_edge:
+                TcpEdge {
                     emg: config::Emg { host, port },
                     ..
                 },
