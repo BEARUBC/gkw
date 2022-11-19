@@ -1,21 +1,13 @@
-#[cfg(feature = "pseudo_analytics")]
-use std::ops::RangeInclusive;
 use std::thread::spawn;
 
 use anyhow::Result;
 
-use crate::components::utils::run_tcp;
+use crate::components::utils::create_tcp_runner;
 use crate::components::Component;
-use crate::config;
+use crate::config::Components;
 use crate::config::Config;
-use crate::config::TcpEdge;
+use crate::config::TcpComponent;
 use crate::wait::Wait;
-
-#[cfg(feature = "pseudo_analytics")]
-const HAMMER_DATA_RANGE: RangeInclusive<f64> = 0.0..=10.0;
-
-#[cfg(feature = "pseudo_analytics")]
-const CUP_DATA_RANGE: RangeInclusive<f64> = 10.0..=20.0;
 
 #[cfg_attr(not(release), derive(Debug))]
 #[derive(PartialEq, Eq)]
@@ -34,10 +26,13 @@ impl Default for GripType {
 #[cfg(feature = "pseudo_analytics")]
 impl From<f64> for GripType {
     fn from(data: f64) -> Self {
+        const MODULO_BASE: u64 = 3;
+        let data = data.floor() as u64;
+        let data = data % MODULO_BASE;
         match data {
-            _ if HAMMER_DATA_RANGE.contains(&data) => Self::Hammer,
-            _ if CUP_DATA_RANGE.contains(&data) => Self::Cup,
-            _ => Self::default(),
+            0 => Self::Hammer,
+            1 => Self::Cup,
+            _ => Self::Flat,
         }
     }
 }
@@ -58,24 +53,34 @@ impl Component for Analytics {
     fn run(
         self,
         Config {
-            tcp_edge:
-                TcpEdge {
-                    emg: config::Emg { host, port },
-                    ..
-                },
+            components: Components { emg, fsr, .. },
             ..
         }: &Config,
     ) -> Result<()> {
-        #[cfg(feature = "pseudo_analytics")]
-        let parser = move |data: f64| {
-            let grip_type = GripType::from(data);
-            println!("grip type: {:#?}", grip_type);
-            Ok(())
+        {
+            let TcpComponent { host, port } = emg;
+            let mut grip_type_cache = GripType::default();
+            #[cfg(feature = "pseudo_analytics")]
+            let parser = move |data: f64| {
+                let grip_type = GripType::from(data);
+                if grip_type_cache != grip_type {
+                    #[cfg(not(release))]
+                    println!("grip type: {:#?}", grip_type);
+                    grip_type_cache = grip_type;
+                };
+                Ok(())
+            };
+            #[cfg(not(feature = "pseudo_analytics"))]
+            let parser = |_: f64| Ok(());
+            let runner = create_tcp_runner(host, *port, parser, Some(self.pause.clone()))?;
+            spawn(runner);
         };
-        #[cfg(not(feature = "pseudo_analytics"))]
-        let parser = move |_: f64| Ok(());
-        let runner = run_tcp(host, *port, parser, Some(self.pause))?;
-        spawn(runner);
+        {
+            let TcpComponent { host, port } = fsr;
+            let parser = |_: f64| Ok(());
+            let runner = create_tcp_runner(host, *port, parser, Some(self.pause))?;
+            spawn(runner);
+        };
         Ok(())
     }
 }

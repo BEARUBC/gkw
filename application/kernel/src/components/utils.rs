@@ -16,7 +16,7 @@ use crate::components::TCP_BUFFER_CAPACITY;
 use crate::wait::Wait;
 
 #[cfg(feature = "tcp_edge")]
-pub fn run_tcp<S, F, T>(
+pub fn create_tcp_runner<S, F, T>(
     host: &S,
     port: u16,
     mut parser: F,

@@ -1,10 +1,10 @@
 use anyhow::Result;
 
-use crate::components::utils::run_tcp;
+use crate::components::utils::create_tcp_runner;
 use crate::components::Component;
-use crate::config;
+use crate::config::Components;
 use crate::config::Config;
-use crate::config::TcpEdge;
+use crate::config::TcpComponent;
 use crate::wait::Wait;
 
 const HIGH_BATTERY_CUTOFF: f64 = 70.0;
@@ -58,16 +58,16 @@ impl Component for Kernel {
     fn run(
         mut self,
         Config {
-            tcp_edge:
-                TcpEdge {
-                    bms: config::Bms { host, port },
+            components:
+                Components {
+                    bms: TcpComponent { host, port },
                     ..
                 },
             ..
         }: &Config,
     ) -> Result<()> {
         let mut should_pause_cache = self.pause.get()?;
-        run_tcp(
+        create_tcp_runner(
             host,
             *port,
             move |battery_level: f64| {

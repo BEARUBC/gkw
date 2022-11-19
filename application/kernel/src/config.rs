@@ -18,33 +18,25 @@ const RUST_LOG_VALUE: &str = "error";
 #[derive(Deserialize)]
 pub struct Config {
     #[cfg(feature = "tcp_edge")]
-    pub tcp_edge: TcpEdge,
+    pub components: Components,
 }
 
 #[derive(Deserialize)]
-pub struct TcpEdge {
+pub struct Components {
     #[cfg(feature = "tcp_edge")]
-    pub bms: Bms,
+    pub bms: TcpComponent,
 
     #[cfg(feature = "tcp_edge")]
-    pub emg: Emg,
+    pub emg: TcpComponent,
+
+    #[cfg(feature = "tcp_edge")]
+    pub fsr: TcpComponent,
 }
 
+#[cfg(feature = "tcp_edge")]
 #[derive(Deserialize)]
-pub struct Bms {
-    #[cfg(feature = "tcp_edge")]
+pub struct TcpComponent {
     pub host: String,
-
-    #[cfg(feature = "tcp_edge")]
-    pub port: u16,
-}
-
-#[derive(Deserialize)]
-pub struct Emg {
-    #[cfg(feature = "tcp_edge")]
-    pub host: String,
-
-    #[cfg(feature = "tcp_edge")]
     pub port: u16,
 }
 
