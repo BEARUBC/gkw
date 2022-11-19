@@ -28,9 +28,14 @@ serde = { version = "1.0.147", features = ["derive"] }
 serde_json = "1.0.79"
 
 # Purpose:
-# Logging utilities
+# Logging utilities.
 log = "0.4.17"
 pretty_env_logger = "0.4.0"
+
+# Purpose:
+# Motor control utilities.
+[target.'cfg(target_arch = "armv7-unknown-linux-gnueabihf")'.dependencies]
+raestro = "0.3.0"
 
 [features]
 tcp_edge = []

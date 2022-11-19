@@ -336,6 +336,7 @@ dependencies = [
  "crossbeam",
  "log",
  "pretty_env_logger",
+ "raestro",
  "serde",
  "serde_json",
 ]
@@ -517,6 +518,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "raestro"
+version = "0.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8c32f0c9b2ae9bcf69ff031f5489ba3ffe1c326ca88abadf14b04ed20f74e726"
+dependencies = [
+ "rppal",
+]
+
+[[package]]
 name = "regex"
 version = "1.5.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -542,6 +552,16 @@ dependencies = [
  "base64",
  "bitflags",
  "serde",
+]
+
+[[package]]
+name = "rppal"
+version = "0.11.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "137dbba1fb867daa27cda4c3cd6a11bca5bb5a1551f034cf9319b994846ddbe1"
+dependencies = [
+ "lazy_static",
+ "libc",
 ]
 
 [[package]]

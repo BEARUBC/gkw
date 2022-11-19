@@ -1,11 +1,15 @@
+#[cfg(feature = "tcp_edge")]
 use std::thread::spawn;
 
 use anyhow::Result;
 
+#[cfg(feature = "tcp_edge")]
 use crate::components::utils::create_tcp_runner;
 use crate::components::Component;
+#[cfg(feature = "tcp_edge")]
 use crate::config::Components;
 use crate::config::Config;
+#[cfg(feature = "tcp_edge")]
 use crate::config::TcpComponent;
 use crate::wait::Wait;
 
