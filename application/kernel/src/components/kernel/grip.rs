@@ -1,19 +1,19 @@
 #[cfg_attr(not(release), derive(Debug))]
 #[derive(PartialEq, Eq)]
-pub(super) enum GripType {
+pub(super) enum Grip {
     Hammer,
     Cup,
     Flat,
 }
 
-impl Default for GripType {
+impl Default for Grip {
     fn default() -> Self {
         Self::Flat
     }
 }
 
 #[cfg(feature = "pseudo_analytics")]
-impl From<f64> for GripType {
+impl From<f64> for Grip {
     fn from(data: f64) -> Self {
         const MODULO_BASE: u64 = 3;
         let data = data.floor() as u64;
