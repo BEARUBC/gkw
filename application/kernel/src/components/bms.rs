@@ -10,12 +10,10 @@ use crate::config::Config;
 use crate::config::TcpComponent;
 use crate::wait::Wait;
 
-#[cfg(feature = "tcp_edge")]
-use crate::components::utils::create_tcp_runner;
 const HIGH_BATTERY_CUTOFF: f64 = 70.0;
 const MEDIUM_BATTERY_CUTOFF: f64 = 20.0;
 
-pub(super) struct Kernel {
+pub(super) struct Bms {
     pub(super) pause: Wait<bool>,
 }
 
@@ -52,14 +50,14 @@ impl BatteryState {
 }
 
 #[cfg(not(feature = "tcp_edge"))]
-impl Component for Kernel {
+impl Component for Bms {
     fn run(self, _: &Config) -> Result<()> {
         todo!()
     }
 }
 
 #[cfg(feature = "tcp_edge")]
-impl Component for Kernel {
+impl Component for Bms {
     fn run(
         mut self,
         Config {

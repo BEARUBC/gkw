@@ -1,10 +1,10 @@
-mod analytics;
+mod bms;
 mod kernel;
 mod utils;
 
 use anyhow::Result;
 
-use crate::components::analytics::Analytics;
+use crate::components::bms::Bms;
 use crate::components::kernel::Kernel;
 use crate::config::Config;
 use crate::wait::Wait;
@@ -18,10 +18,10 @@ trait Component {
 
 pub(super) fn run(config: Config) -> Result<()> {
     let pause = Wait::default();
-    Analytics {
+    Kernel {
         pause: pause.clone(),
     }
     .run(&config)?;
-    Kernel { pause }.run(&config)?;
+    Bms { pause }.run(&config)?;
     Ok(())
 }
