@@ -1,6 +1,7 @@
 use anyhow::Result;
 
-use crate::components::kernel::State;
+#[derive(Default)]
+pub(super) struct State;
 
 #[cfg(feature = "pseudo_analytics")]
 pub(super) fn parser(_: &mut State, _: f64) -> Result<()> {
@@ -8,6 +9,6 @@ pub(super) fn parser(_: &mut State, _: f64) -> Result<()> {
 }
 
 #[cfg(not(feature = "pseudo_analytics"))]
-pub(super) fn parser(state: &mut State, _: f64) -> Result<()> {
+pub(super) fn parser(_: &mut State, _: f64) -> Result<()> {
     todo!()
 }

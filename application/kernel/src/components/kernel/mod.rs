@@ -1,12 +1,12 @@
 mod grip;
-mod parser;
+mod fsr;
+mod emg;
 
 #[cfg(feature = "tcp_edge")]
 use std::thread::spawn;
 
 use anyhow::Result;
 
-use crate::components::kernel::grip::Grip;
 #[cfg(feature = "tcp_edge")]
 use crate::components::utils::create_tcp_runner;
 use crate::components::Component;
@@ -16,11 +16,6 @@ use crate::config::Config;
 #[cfg(feature = "tcp_edge")]
 use crate::config::TcpComponent;
 use crate::wait::Wait;
-
-#[derive(Default)]
-struct State {
-    grip: Grip,
-}
 
 pub(super) struct Kernel {
     pub(super) pause: Wait<bool>,
@@ -42,16 +37,17 @@ impl Component for Kernel {
             ..
         }: &Config,
     ) -> Result<()> {
-        let mut state = State::default();
         {
             let TcpComponent { host, port } = emg;
-            let parser = move |data| parser::parser(&mut state, data);
+            let mut state = emg::State::default();
+            let parser = move |data| emg::parser(&mut state, data);
             let runner = create_tcp_runner(host, *port, parser, Some(self.pause.clone()))?;
             spawn(runner);
         };
         {
             let TcpComponent { host, port } = fsr;
-            let parser = |_: f64| Ok(());
+            let mut state = fsr::State::default();
+            let parser = move |data: f64| fsr::parser(&mut state, data);
             let runner = create_tcp_runner(host, *port, parser, Some(self.pause))?;
             spawn(runner);
         };
