@@ -1,6 +1,6 @@
-mod grip;
-mod fsr;
 mod emg;
+mod fsr;
+mod grip;
 
 #[cfg(feature = "tcp_edge")]
 use std::thread::spawn;
