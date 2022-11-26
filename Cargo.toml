@@ -6,5 +6,6 @@ members = [
     "application/ipcp",
     "application/python_integration",
     "application/emg_integration",
-    "application/messages"
+    "application/messages",
+    "application/watchdog"
 ]
