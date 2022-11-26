@@ -37,20 +37,26 @@ impl Component for Kernel {
             ..
         }: &Config,
     ) -> Result<()> {
-        {
-            let TcpComponent { host, port } = emg;
-            let mut state = emg::State::default();
-            let parser = move |data| emg::parser(&mut state, data);
-            let runner = create_tcp_runner(host, *port, parser, Some(self.pause.clone()))?;
-            spawn(runner);
-        };
-        {
-            let TcpComponent { host, port } = fsr;
-            let mut state = fsr::State::default();
-            let parser = move |data: f64| fsr::parser(&mut state, data);
-            let runner = create_tcp_runner(host, *port, parser, Some(self.pause))?;
-            spawn(runner);
-        };
+        self.launch_emg(emg)?;
+        self.launch_fsr(fsr)?;
+        Ok(())
+    }
+}
+
+impl Kernel {
+    fn launch_emg(&self, TcpComponent { host, port }: &TcpComponent) -> Result<()> {
+        let pause = self.pause.clone();
+        let mut state = emg::State::default();
+        let parser = move |data| emg::parser(&mut state, data);
+        let runner = create_tcp_runner(host, *port, parser, Some(pause))?;
+        spawn(runner);
+        Ok(())
+    }
+
+    fn launch_fsr(&self, TcpComponent { host, port }: &TcpComponent) -> Result<()> {
+        let pause = self.pause.clone();
+        let runner = create_tcp_runner(host, *port, fsr::parser, Some(pause))?;
+        spawn(runner);
         Ok(())
     }
 }
