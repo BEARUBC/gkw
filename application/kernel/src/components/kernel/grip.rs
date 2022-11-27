@@ -6,6 +6,16 @@ pub enum Grip {
     Flat,
 }
 
+impl From<Grip> for [u16; 3usize] {
+    fn from(grip: Grip) -> [u16; 3usize] {
+        match grip {
+            Grip::Hammer => [300, 150, 100],
+            Grip::Cup => [150, 300, 100],
+            Grip::Flat => [50, 100, 300],
+        }
+    }
+}
+
 impl Default for Grip {
     fn default() -> Self {
         Self::Flat

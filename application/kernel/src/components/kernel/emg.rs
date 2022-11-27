@@ -1,6 +1,6 @@
 use anyhow::Result;
-use raestro::maestro::Maestro;
 use raestro::maestro::constants::Channels;
+use raestro::maestro::Maestro;
 
 use crate::components::kernel::grip::Grip;
 
@@ -23,24 +23,13 @@ pub(super) fn parser(maestro: &mut Maestro, state: &mut State, data: f64) -> Res
                 Channels::Channel4,
                 Channels::Channel5,
             ];
-            match grip {
-                Grip::Cup => {
-                    maestro.set_target(channels[0], 300u16).unwrap();
-                },
-                Grip::Hammer => {
-                    maestro.set_target(channels[0], 150u16).unwrap();
-                },
-                Grip::Flat => {
-                    maestro.set_target(channels[0], 0u16).unwrap();
-                },
+            let positions: [u16; 3usize] = grip.into();
+            for channel in 0..3 {
+                maestro.set_target(channels[channel], positions[channel])?;
             }
-            todo!()
+            Ok(())
         },
     }
-    // if state.grip == grip {
-    //     return Ok(());
-    // }
-    // Ok(())
 }
 
 #[cfg(not(feature = "pseudo_analytics"))]
