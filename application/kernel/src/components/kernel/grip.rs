@@ -1,18 +1,14 @@
-use raestro::prelude::Channels;
-
-#[cfg_attr(not(release), derive(Debug))]
 #[derive(PartialEq, Eq)]
-
-
+#[cfg_attr(not(release), derive(Debug))]
 pub enum Grip {
-    HAMMER,
-    CUP,
-    FLAT
+    Hammer,
+    Cup,
+    Flat,
 }
 
 impl Default for Grip {
     fn default() -> Self {
-        Self::FLAT
+        Self::Flat
     }
 }
 
@@ -23,9 +19,9 @@ impl From<f64> for Grip {
         let data = data.floor() as u64;
         let data = data % MODULO_BASE;
         match data {
-            0 => Self::HAMMER,
-            1 => Self::CUP,
-            _ => Self::FLAT,
+            0 => Self::Hammer,
+            1 => Self::Cup,
+            _ => Self::Flat,
         }
     }
 }

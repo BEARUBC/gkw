@@ -1,60 +1,46 @@
-
 use anyhow::Result;
-use raestro::Maestro;
+use raestro::maestro::Maestro;
+use raestro::maestro::constants::Channels;
+
 use crate::components::kernel::grip::Grip;
+
+#[derive(Default)]
 pub struct State {
-    current_grip: Grip,
+    grip: Grip,
 }
-
-impl State {
-    pub fn new() -> Self {
-        return Self{
-            current_grip: Grip::default()
-        };
-    }
-}
-
-impl Default for State {
-    fn default() -> Self {
-        return State::new();
-    }
-}
-
 
 #[cfg(feature = "pseudo_analytics")]
-pub(super) fn parser(m: &mut Maestro, state: &mut State, data: f64) -> Result<()> {
-    use raestro::prelude::Channels;
-
-    let next_grip = Grip::from(data);
-
-    if(state.current_grip == next_grip) {
-        return Ok(());
+pub(super) fn parser(maestro: &mut Maestro, state: &mut State, data: f64) -> Result<()> {
+    let grip = data.into();
+    match state.grip == grip {
+        true => Ok(()),
+        false => {
+            let channels = [
+                Channels::Channel0,
+                Channels::Channel1,
+                Channels::Channel2,
+                Channels::Channel3,
+                Channels::Channel4,
+                Channels::Channel5,
+            ];
+            match grip {
+                Grip::Cup => {
+                    maestro.set_target(channels[0], 300u16).unwrap();
+                },
+                Grip::Hammer => {
+                    maestro.set_target(channels[0], 150u16).unwrap();
+                },
+                Grip::Flat => {
+                    maestro.set_target(channels[0], 0u16).unwrap();
+                },
+            }
+            todo!()
+        },
     }
-
-    let channels = [
-        Channels::C_0,
-        Channels::C_1,
-        Channels::C_2,
-        Channels::C_3,
-        Channels::C_4,
-        Channels::C_5
-    ];
-
-    match next_grip {
-        Grip::CUP => {
-            m.set_target(channels[0], 300u16).unwrap();
-        }
-
-        Grip::HAMMER => {
-            m.set_target(channels[0], 150u16).unwrap();
-        }
-
-        Grip::FLAT => {
-            m.set_target(channels[0], 0u16).unwrap();
-        }
-    }
-
-    Ok(())
+    // if state.grip == grip {
+    //     return Ok(());
+    // }
+    // Ok(())
 }
 
 #[cfg(not(feature = "pseudo_analytics"))]
