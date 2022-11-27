@@ -1,5 +1,5 @@
 use anyhow::Result;
-use raestro::maestro::constants::Channels;
+use raestro::maestro::constants::Channel;
 use raestro::maestro::Maestro;
 
 use crate::components::kernel::grip::Grip;
@@ -15,18 +15,12 @@ pub(super) fn parser(maestro: &mut Maestro, state: &mut State, data: f64) -> Res
     match state.grip == grip {
         true => Ok(()),
         false => {
-            let channels = [
-                Channels::Channel0,
-                Channels::Channel1,
-                Channels::Channel2,
-                Channels::Channel3,
-                Channels::Channel4,
-                Channels::Channel5,
-            ];
-            let positions: [u16; 3usize] = grip.into();
-            for channel in 0..3 {
-                maestro.set_target(channels[channel], positions[channel])?;
-            }
+            let channels = [Channel::Channel0, Channel::Channel1, Channel::Channel2];
+            let targets: [u16; 3usize] = grip.into();
+            channels
+                .into_iter()
+                .zip(targets)
+                .try_for_each(|(channel, target)| maestro.set_target(channel, target))?;
             Ok(())
         },
     }

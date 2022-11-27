@@ -35,7 +35,7 @@ pretty_env_logger = "0.4.0"
 [target.'cfg(target_arch = "arm")'.dependencies]
 # Purpose:
 # Motor control utilities.
-raestro = "0.4.0"
+raestro = "0.4.1"
 
 [features]
 tcp_edge = []

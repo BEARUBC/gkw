@@ -538,9 +538,9 @@ dependencies = [
 
 [[package]]
 name = "raestro"
-version = "0.4.0"
+version = "0.4.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4b379131c19e3d54f508f02283d03425d00caf65861b7ca5276e7661467314b2"
+checksum = "f7406d4273d4739e5099dd14c0f81b8e92075ae3f120b342d957959dff1a138f"
 dependencies = [
  "derive_more",
  "rppal",
