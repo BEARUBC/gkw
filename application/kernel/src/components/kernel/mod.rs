@@ -6,6 +6,7 @@ mod grip;
 use std::thread::spawn;
 
 use anyhow::Result;
+use raestro::Maestro;
 
 #[cfg(feature = "tcp_edge")]
 use crate::components::utils::create_tcp_runner;
@@ -47,7 +48,9 @@ impl Kernel {
     fn launch_emg(&self, TcpComponent { host, port }: &TcpComponent) -> Result<()> {
         let pause = self.pause.clone();
         let mut state = emg::State::default();
-        let parser = move |data| emg::parser(&mut state, data);
+        let mut maestro = Maestro::new();
+
+        let parser = move |data| emg::parser(&mut maestro, &mut state, data);
         let runner = create_tcp_runner(host, *port, parser, Some(pause))?;
         spawn(runner);
         Ok(())
