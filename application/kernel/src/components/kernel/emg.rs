@@ -1,6 +1,6 @@
-
 use anyhow::Result;
 use raestro::Maestro;
+
 use crate::components::kernel::grip::Grip;
 pub struct State {
     current_grip: Grip,
@@ -8,15 +8,15 @@ pub struct State {
 
 impl State {
     pub fn new() -> Self {
-        return Self{
-            current_grip: Grip::default()
-        };
+        Self {
+            current_grip: Grip::default(),
+        }
     }
 }
 
 impl Default for State {
     fn default() -> Self {
-        return State::new();
+        State::new()
     }
 }
 
@@ -27,7 +27,7 @@ pub(super) fn parser(m: &mut Maestro, state: &mut State, data: f64) -> Result<()
 
     let next_grip = Grip::from(data);
 
-    if(state.current_grip == next_grip) {
+    if state.current_grip == next_grip {
         return Ok(());
     }
 
@@ -37,21 +37,13 @@ pub(super) fn parser(m: &mut Maestro, state: &mut State, data: f64) -> Result<()
         Channels::C_2,
         Channels::C_3,
         Channels::C_4,
-        Channels::C_5
+        Channels::C_5,
     ];
 
-    match next_grip {
-        Grip::CUP => {
-            m.set_target(channels[0], 300u16).unwrap();
-        }
+    let positions: [u16; 3usize] = next_grip.into();
 
-        Grip::HAMMER => {
-            m.set_target(channels[0], 150u16).unwrap();
-        }
-
-        Grip::FLAT => {
-            m.set_target(channels[0], 0u16).unwrap();
-        }
+    for i in 0..3 {
+        m.set_target(channels[i], positions[i]).unwrap();
     }
 
     Ok(())

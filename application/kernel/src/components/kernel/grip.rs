@@ -7,7 +7,17 @@ use raestro::prelude::Channels;
 pub enum Grip {
     HAMMER,
     CUP,
-    FLAT
+    FLAT,
+}
+
+impl From<Grip> for [u16; 3usize] {
+    fn from(g: Grip) -> [u16; 3usize] {
+        match g {
+            Grip::HAMMER => return [300, 150, 100],
+            Grip::CUP => return [150, 300, 100],
+            Grip::FLAT => return [50, 100, 300],
+        }
+    }
 }
 
 impl Default for Grip {
