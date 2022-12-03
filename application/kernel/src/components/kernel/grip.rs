@@ -1,4 +1,4 @@
-#[derive(PartialEq, Eq)]
+#[derive(PartialEq, Eq, Clone)]
 #[cfg_attr(not(release), derive(Debug))]
 pub enum Grip {
     Hammer,

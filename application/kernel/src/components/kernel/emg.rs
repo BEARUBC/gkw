@@ -16,11 +16,12 @@ pub(super) fn handler(maestro: &mut Maestro, state: &mut State, data: f64) -> Re
         true => Ok(()),
         false => {
             let channels = [Channel::Channel0, Channel::Channel1, Channel::Channel2];
-            let targets: [u16; 3usize] = grip.into();
+            let targets: [u16; 3usize] = grip.clone().into();
             channels
                 .into_iter()
                 .zip(targets)
                 .try_for_each(|(channel, target)| maestro.set_target(channel, target))?;
+            state.grip = grip;
             Ok(())
         },
     }
