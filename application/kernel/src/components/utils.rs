@@ -19,7 +19,7 @@ use crate::wait::Wait;
 pub fn create_tcp_runner<S, F, T>(
     host: &S,
     port: u16,
-    mut parser: F,
+    mut handler: F,
     pause: Option<Wait<bool>>,
 ) -> Result<impl FnMut()>
 where
@@ -56,7 +56,7 @@ where
                             String::from_utf8_lossy(buffer)
                                 .parse::<T>()
                                 .ok()
-                                .and_then(|data| parser(data).ok());
+                                .and_then(|data| handler(data).ok());
                         },
                     }
                 }

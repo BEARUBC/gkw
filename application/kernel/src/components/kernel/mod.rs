@@ -58,8 +58,8 @@ impl Kernel {
             .baudrate(Baudrate::Baudrate11520)
             .block_duration(Duration::from_micros(100))
             .try_into()?;
-        let parser = move |data| emg::parser(&mut maestro, &mut state, data);
-        let runner = create_tcp_runner(host, *port, parser, Some(pause))?;
+        let handler = move |data| emg::handler(&mut maestro, &mut state, data);
+        let runner = create_tcp_runner(host, *port, handler, Some(pause))?;
         spawn(runner);
         Ok(())
     }

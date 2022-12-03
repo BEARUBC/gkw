@@ -10,7 +10,7 @@ pub struct State {
 }
 
 #[cfg(feature = "pseudo_analytics")]
-pub(super) fn parser(maestro: &mut Maestro, state: &mut State, data: f64) -> Result<()> {
+pub(super) fn handler(maestro: &mut Maestro, state: &mut State, data: f64) -> Result<()> {
     let grip = data.into();
     match state.grip == grip {
         true => Ok(()),
