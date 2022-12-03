@@ -1,14 +1,15 @@
 mod lib;
-use std::{time, thread};
-
+use std::{time, thread, env};
 
 fn main(){
-    let emg_integration = lib::EMG_INTEGRATION::new("application/emg_integration/python/test.py", 10);
+    println!("{:?}", env::current_dir());
+    //let emg_integration = lib::EMG_INTEGRATION::new("C:/Users/Ray Ho/Documents/UBC BIONICS/gkw/application/emg_integration/python/test.py", 100);
+    let emg_integration = lib::EMG_INTEGRATION::new("../emg_integration/python/data_to_stdout_txt.py", 10);
     match emg_integration {
         Err(e) => println!("{:?}", e),
         Ok(emg_integration) => {
 
-            let ten_millis = time::Duration::from_millis(100);
+            let ten_millis = time::Duration::from_millis(500);
 
             thread::sleep(ten_millis);
             let x = emg_integration.get_data_queue(9);

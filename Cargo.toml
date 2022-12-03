@@ -2,4 +2,5 @@
 
 members = [
     "application/kernel",
+    "application/emg_integration"
 ]

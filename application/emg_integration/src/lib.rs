@@ -1,3 +1,4 @@
+use std::time::Duration;
 use std::{thread, time};
 use std::thread::JoinHandle;
 use std::process::{Command, Stdio, Child};
@@ -11,7 +12,7 @@ const  DATA_LENGTH: usize = 10;
 
 pub struct EMG_INTEGRATION {
     maxRequestSize: u16,
-    data: Arc<Mutex<VecDeque<Data>>>,
+    data: Arc<Mutex<VecDeque<f32>>>,
     read_thread: JoinHandle<()>,
     child: Child
 }
@@ -48,20 +49,27 @@ impl EMG_INTEGRATION{
 
                         buf_reader.read_line(&mut data_str).unwrap();
                         data_str.pop();
+                        data_str.pop();
+                        //println!("{:?}", data_str);
 
-                        let data = Data::new(&data_str);
+                        let data = data_str.parse::<f32>();
 
                         match data {
                             Err(e) => (),
                             Ok(d) => {
+                                //println!("GOT SHIT:  {:?}", d);
                                 data_clone.lock().unwrap().push_back( d );
                     
                                 if data_clone.lock().unwrap().len() > maxRequestSize.into() {
                                     data_clone.lock().unwrap().pop_front();
                                 }
+
+        
                             }
                             
                         }
+
+                        thread::sleep(Duration::new(0, 6000000));
         
                     }
                 }),
@@ -69,14 +77,14 @@ impl EMG_INTEGRATION{
         );            
     }
 
-    pub fn get_data_queue(&self, data_num: u32) -> Result<Vec<Data>, StdError> {
-        let mut ret_data: Vec<Data> = Vec::new();
+    pub fn get_data_queue(&self, data_num: u32) -> Result<Vec<f32>, StdError> {
+        let mut ret_data: Vec<f32> = Vec::new();
 
         if data_num < 0 || data_num > self.maxRequestSize.into() {
             return Err(StdError::new(ErrorKind::Other, "data_num must be greater than or equal to 0, less than requestSize"));
         }
 
-        let mut read_data = self.data.lock().unwrap().clone();
+        let mut read_data = self.data.lock().unwrap();
 
         for _ in 0..std::cmp::min(data_num, read_data.len() as u32) {
             let data = read_data.pop_front();
