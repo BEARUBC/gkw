@@ -12,9 +12,8 @@ pub struct State {
 #[cfg(feature = "pseudo_analytics")]
 pub(super) fn handler(maestro: &mut Maestro, state: &mut State, data: f64) -> Result<()> {
     let grip = data.into();
-    match state.grip == grip {
-        true => Ok(()),
-        false => {
+    (state.grip == grip).then(|| ()).map_or_else(
+        || {
             let channels = [Channel::Channel0, Channel::Channel1, Channel::Channel2];
             let targets: [u16; 3usize] = grip.clone().into();
             channels
@@ -24,7 +23,8 @@ pub(super) fn handler(maestro: &mut Maestro, state: &mut State, data: f64) -> Re
             state.grip = grip;
             Ok(())
         },
-    }
+        |()| Ok(()),
+    )
 }
 
 #[cfg(not(feature = "pseudo_analytics"))]
