@@ -1,4 +1,4 @@
-#[derive(PartialEq, Eq, Clone)]
+#[derive(PartialEq, Eq, Copy, Clone)]
 #[cfg_attr(not(release), derive(Debug))]
 pub enum Grip {
     Hammer,
@@ -9,9 +9,9 @@ pub enum Grip {
 impl From<Grip> for [u16; 3usize] {
     fn from(grip: Grip) -> [u16; 3usize] {
         match grip {
-            Grip::Hammer => [300, 150, 100],
-            Grip::Cup => [150, 300, 100],
-            Grip::Flat => [50, 100, 300],
+            Grip::Hammer => [4000, 4000, 4000],
+            Grip::Cup => [5000, 5000, 5000],
+            Grip::Flat => [6000, 6000, 6000],
         }
     }
 }
