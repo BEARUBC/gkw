@@ -8,10 +8,9 @@ use serde::{Serialize, Deserialize};
 use serde_json::value::Value;
 pub use serde_json::json;
 use std::sync::{Arc, Mutex};
-use gkw_utils::Result as gkwResult;
-use gkw_utils::Error as gkwError;
-use gkw_utils::ErrorCode as code;
-use messages::Custom_log;
+// use messages::Custom_log;
+use anyhow::Result;
+use anyhow::anyhow;
 
 #[derive(Serialize, Deserialize, Debug)] 
 pub struct Request {
@@ -41,40 +40,24 @@ impl Analytics {
     //Parameters: child_process - name of the child process
     //Returns: Analytics struct 
 
-    pub fn new(python_process: &str) -> gkwResult<Analytics>{
-
-        let python_log_res = Custom_log::new();
-        let mut python_log = if let Ok(python_log) = python_log_res{
-            python_log
-        } else {
-            panic!("Failed to start log");
-        };
-        python_log.write_log(b"starting log");
+    pub fn new(python_process: &str) -> Result<Analytics>{
+        // let python_log_res = Custom_log::new();
+        // let mut python_log = if let Ok(python_log) = python_log_res{
+        //     python_log
+        // } else {
+        //     panic!("Failed to start log");
+        // };
+        // python_log.write_log(b"starting log");
         // start child process
-        let mut child_process = match Command::new("python3")
+        let mut child_process = Command::new("py")
                 .args([python_process])
                 .stdin(Stdio::piped())
                 .stdout(Stdio::piped())
-                .spawn() {
-            Ok(child_process) => child_process,
-            Err(e) => {
-                return Err(gkwError::new(code::other, Some(format!("Failed to start child process. Error: {}", e))));
-            }
-        };
+                .spawn()?;
 
         //get stdin and stdout and verify it works
-        let stdin = match child_process.stdin.take() {
-            Some(stdin) => stdin,
-            None => {
-                return Err(gkwError::new(code::other, Some("Failed to get stdin")));
-            }
-        };
-        let stdout = match child_process.stdout.take() {
-            Some(stdin) => stdin,
-            None => {
-                return Err(gkwError::new(code::other, Some("Failed to get stdout")));
-            }
-        };
+        let stdin = child_process.stdin.take().ok_or_else(|| anyhow!("Failed to get stdin"))?;
+        let stdout = child_process.stdout.take().ok_or_else(|| anyhow!("Failed to get stdout"))?;
 
         //create a map and a map clone for the data
         let storage = Arc::new(Mutex::new(HashMap::new()));
@@ -119,7 +102,7 @@ impl Analytics {
             }
         });
 
-        python_log.write_log(b"Generated Analytics Struct");
+        // python_log.write_log(b"Generated Analytics Struct");
         return Ok(
             Analytics {
             child_process: child_process,
@@ -135,7 +118,7 @@ impl Analytics {
     //Parameters: func - string that specifies the function
     //            parameters - map that holds each parameter name and value
     //Returns: String version of the response
-    pub fn make_request(&mut self, func: String, parameters: Value) -> gkwResult<Value> {
+    pub fn make_request(&mut self, func: String, parameters: Value) -> Result<Value> {
         // make the request object
         let my_uuid = Uuid::new_v4();
         let request_packet = Request{
@@ -144,48 +127,24 @@ impl Analytics {
             params: parameters
         };
 
-        let json_string = match serde_json::to_string(&request_packet) {
-            Ok(json_string) => json_string + "\n",
-            Err(e) => {
-                // Error case, return error
-                return Err(gkwError::new(code::other, Some(format!("Unable to stringify request. Error: {}", e))));
-            }
-        };
+        let json_string = serde_json::to_string(&request_packet)? + "\n";
 
         // make space in map
         {
-            let mut locked_map = match self.response_holder.lock() {
-                Ok(locked_map) => locked_map,
-                Err(e) => {
-                    return Err(gkwError::new(code::other, Some(format!("Unable to make space in map. Error: {}", e))));
-                }
-            };
+            let mut locked_map = self.response_holder.lock().map_err(|e| anyhow!("Unable to make space in map. Error: {}", e))?;
             locked_map.insert(my_uuid, None);
         }
 
         println!("Sending {}", json_string);
         // send string over
-        let result = self.stdin.write_all(json_string.as_bytes());
-        if let Err(e) = result {
-            return Err(gkwError::new(code::other, Some(format!("Failed to write to child's stdin. Error: {}", e))));
-        }
+        let result = self.stdin.write_all(json_string.as_bytes())?;
         println!("Sent Data");
 
         // wait for child process to finish processing
         loop{
-            let locked_map = match self.response_holder.lock() {
-                Ok(locked_map) => locked_map,
-                Err(e) => {
-                    return Err(gkwError::new(code::other, Some(format!("Cannot lock map. Error: {}", e))));
-                }
-            };
+            let locked_map = self.response_holder.lock().map_err(|e| anyhow!("Cannot lock map. Error: {}", e))?;
             
-            let val = match locked_map.get(&my_uuid) {
-                Some(val) => val,
-                None => {
-                    return Err(gkwError::new(code::other, Some("Failed to get value in map")));
-                }
-            };
+            let val = locked_map.get(&my_uuid).ok_or_else(|| anyhow!("Failed to get value in map"))?;
             if let Some(res) = val{
                 return Ok(res.data.clone());
             }
