@@ -7,3 +7,5 @@ logs
 # IDE specific settings:
 ## VS Code
 .vscode
+
+application/vis/venv/*
