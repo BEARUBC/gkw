@@ -48,8 +48,8 @@ while True:
         # Each value will be a 12 or 16 bit signed integer value depending on the
         # ADC (ADS1015 = 12-bit, ADS1115 = 16-bit).
     # Print the ADC values.
-    temp = '{0:>6}'.format(*values)
+    voltage = '{0:>6}'.format(*values)
     # print('{0:>6}'.format(*values))
-    sys.stdout.write(temp + '\n')
+    sys.stdout.write(voltage + '\n')
     # Pause for half a second.
     time.sleep(0.1)
