@@ -1,5 +1,5 @@
-rows = 3
-cols = 3
+rows = 20
+cols = 20
 
 
 while True:
@@ -8,7 +8,7 @@ while True:
         for j in range(rows):
             mstr += '['
             for k in range(cols):
-                mstr += str((k+i) % (2 * rows))
+                mstr += str((k+i+j) % (cols * rows))
                 if k != cols-1:
                     mstr += ','
             mstr += ']'

@@ -13,6 +13,7 @@ num_rows = 3
 num_cols = 3
 width = 50
 height = 50
+tolerance = 0.01
 
 root.geometry(str(num_rows*width)+"x"+str(num_cols*height)+"+"+str(0)+"+"+str(0))
 
@@ -42,7 +43,9 @@ def getMax(mat):
                 max = mat[i][j]
     return max
 
+last_mat = None
 def update():
+    global last_mat
     mtext = sys.stdin.readline()
 
     print('\n\n\n', mtext, '\n\n\n')
@@ -50,13 +53,18 @@ def update():
     print('\n\n\n', mat, '\n\n\n')
     max = getMax(mat)
 
-    for row in range(num_rows):
-        for col in range(num_cols):
-            canvas.create_rectangle(row * width, col * height, row * width + width, col * height + height,
-                                    fill=prop_to_hex(mat[row][col]/max))
+    for row in range(len(mat)):
+        for col in range(len(mat[0])):
+            val = mat[row][col]/max
+            if last_mat != None:
+                if abs(val - last_mat[row][col]) > tolerance:
+                    canvas.create_rectangle(row * width, col * height, row * width + width, col * height + height,
+                                    fill=prop_to_hex(val))
+            mat[row][col] = val
     canvas.pack(fill=BOTH, expand=1)
 
     root.after(500, update)
+    last_mat = mat
 
 
 
