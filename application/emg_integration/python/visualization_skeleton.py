@@ -1,24 +1,34 @@
 import datetime as dt
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
-import time
-
+import sys
+# Create figure for plotting
 fig = plt.figure()
 ax = fig.add_subplot(1, 1, 1)
 xs = []
 ys = []
-x = 1
+values = []
 
+# Grabs data from EMG stdout 
+
+# This function is called periodically from FuncAnimation
 def animate(i, xs, ys):
+
+    for line in sys.stdin:
+        if line.replace("\n","") != "":
+            values.append(float(line.replace("\n", "")))
+
     # Read voltage from EMG device
 
     # Add x and y to lists
     xs.append(dt.datetime.now().strftime('%H:%M:%S.%f'))
-    global x
-    x = x / 2
-    i = x
-    print(x)
-    ys.append(i)
+    
+    if i == len(values):
+        sys.exit("No more data")
+        
+    ys.append(values[i])
+    i = i + 1
+        
 
     # Limit x and y lists to 20 items
     xs = xs[-20:]
@@ -35,6 +45,5 @@ def animate(i, xs, ys):
     plt.ylabel('Voltage')
 
 # Set up plot to call animate() function periodically
-ani = animation.FuncAnimation(fig, animate, fargs=(xs, ys), interval=200)
+ani = animation.FuncAnimation(fig, animate, fargs=(xs, ys), interval=10)
 plt.show()
-

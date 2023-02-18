@@ -36,10 +36,10 @@ GAIN = 1
 
 while True:
     # Read all the ADC channel values in a list.
-    values = [0]*4
-    for i in range(4):
+    values = [0]
+    
         # Read the specified ADC channel using the previously set gain value.
-        values[i] = adc.read_adc(i, gain=GAIN)
+    values[0] = adc.read_adc(0, gain=GAIN)
         # Note you can also pass in an optional data_rate parameter that controls
         # the ADC conversion time (in samples/second). Each chip has a different
         # set of allowed data rate values, see datasheet Table 9 config register
@@ -48,8 +48,7 @@ while True:
         # Each value will be a 12 or 16 bit signed integer value depending on the
         # ADC (ADS1015 = 12-bit, ADS1115 = 16-bit).
     # Print the ADC values.
-    voltage = '{0:>6}'.format(*values)
     # print('{0:>6}'.format(*values))
-    sys.stdout.write(voltage + '\n')
+    sys.stdout.write(values[0] + '\n')
     # Pause for half a second.
     time.sleep(0.1)
