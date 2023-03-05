@@ -4,5 +4,6 @@ members = [
     "application/kernel",
     "application/emg_integration",
     "application/python_integration",
-    "application/messages"
+    "application/messages",
+    "main_loop"
 ]

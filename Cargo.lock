@@ -525,6 +525,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "main_loop"
+version = "0.1.0"
+dependencies = [
+ "python_integration",
+]
+
+[[package]]
 name = "memchr"
 version = "2.4.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
