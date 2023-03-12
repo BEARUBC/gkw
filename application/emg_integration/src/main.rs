@@ -4,7 +4,7 @@ use std::{time, thread, env};
 fn main(){
     println!("{:?}", env::current_dir());
     //let emg_integration = lib::EMG_INTEGRATION::new("C:/Users/Ray Ho/Documents/UBC BIONICS/gkw/application/emg_integration/python/test.py", 100);
-    let emg_integration = lib::EMG_INTEGRATION::new("../python/test.py", 10);
+    let emg_integration = lib::EMG_INTEGRATION::new("../python/emg_testing.py", 10);
     match emg_integration {
         Err(e) => println!("{:?}", e),
         Ok(emg_integration) => {
