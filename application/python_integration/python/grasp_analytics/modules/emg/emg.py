@@ -17,7 +17,7 @@ def eprint(*args, **kwargs):
 
 class EMG(Module):
     # Two EMG channels, 0: bicep, 1: tricep
-    num_channels = 2
+    num_channels = 1
     data = np.array([])
 
     def __init__(self, sensitivity=10):
@@ -49,7 +49,7 @@ class EMG(Module):
         return {"contractions": out_contractions}
 
     def add_to_cache(self, val: np.array):
-        self.data = np.concatenate(self.data, val, axis=0)
+        self.data = np.concatenate((self.data, val), axis=1)
         self.data = self.data[-self.sensor_cache_length:, :]
 
     def apply_model_to_df(self, data_df):
@@ -72,7 +72,7 @@ class EMG(Module):
         for i in range(len(self.theta)):
             data_idx = -len(self.theta) + i
             # Bicep - tricep to get desired contraction level.
-            data_point_diff = self.data[data_idx, 0] - self.data[data_idx, 1]
+            data_point_diff = self.data[0, data_idx]
             y += self.theta[-i - 1] * data_point_diff
 
         y /= sum(self.theta)
@@ -101,7 +101,7 @@ class EMG(Module):
                     self.org,
                     {
                         "measurement": "emg contractions",
-                        "tags": [],
+                        "tags": {},
                         "fields": {"contractions": measurement},
                         "time": time,
                     },
