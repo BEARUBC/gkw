@@ -49,7 +49,7 @@ impl Analytics {
         // };
         // python_log.write_log(b"starting log");
         // start child process
-        let mut child_process = Command::new("py")
+        let mut child_process = Command::new("python")
                 .args([python_process])
                 .stdin(Stdio::piped())
                 .stdout(Stdio::piped())
@@ -162,6 +162,14 @@ impl Analytics {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn test_emg() {
+        let mut python_process = Analytics::new("./python/wrapper.py").expect("Failed to start wrapper");
+        let res = python_process
+            .make_request("m_emg".to_string(), Value::String("{\"emg_buffer\": [1]}".to_string())).expect("Failed to make request");
+        // assert_eq!(json!("HELLO"), res);
+    }
 
     #[test]
     fn test_capitalize() {

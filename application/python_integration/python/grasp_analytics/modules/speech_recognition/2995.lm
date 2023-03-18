@@ -1,0 +1,77 @@
+Language model created by QuickLM on Sat May 25 16:18:44 EDT 2019
+Copyright (c) 1996-2010 Carnegie Mellon University and Alexander I. Rudnicky
+
+The model is in standard ARPA format, designed by Doug Paul while he was at MITRE.
+
+The code that was used to produce this language model is available in Open Source.
+Please visit http://www.speech.cs.cmu.edu/tools/ for more information
+
+The (fixed) discount mass is 0.5. The backoffs are computed using the ratio method.
+This model based on a corpus of 14 sentences and 11 words
+
+\data\
+ngram 1=11
+ngram 2=23
+ngram 3=20
+
+\1-grams:
+-0.8361 </s> -0.3010
+-0.8361 <s> -0.2326
+-1.6812 BALL -0.1996
+-1.6812 CUP -0.1996
+-1.2041 CYCLE -0.2326
+-1.9823 EMERGENCY -0.2326
+-1.6812 FIST -0.1996
+-1.6812 FLAT -0.1996
+-1.6812 HAMMER -0.1996
+-1.6812 PINCH -0.1996
+-1.9823 STOP -0.2326
+
+\2-grams:
+-1.1461 <s> BALL 0.0000
+-1.1461 <s> CUP 0.0000
+-1.4472 <s> EMERGENCY 0.0000
+-1.1461 <s> FIST 0.0000
+-1.1461 <s> FLAT 0.0000
+-1.1461 <s> HAMMER 0.0000
+-1.1461 <s> PINCH 0.0000
+-1.4472 <s> STOP 0.0000
+-0.6021 BALL </s> -0.3010
+-0.6021 BALL CYCLE 0.0000
+-0.6021 CUP </s> -0.3010
+-0.6021 CUP CYCLE 0.0000
+-0.3010 CYCLE </s> -0.3010
+-0.3010 EMERGENCY </s> -0.3010
+-0.6021 FIST </s> -0.3010
+-0.6021 FIST CYCLE 0.0000
+-0.6021 FLAT </s> -0.3010
+-0.6021 FLAT CYCLE 0.0000
+-0.6021 HAMMER </s> -0.3010
+-0.6021 HAMMER CYCLE 0.0000
+-0.6021 PINCH </s> -0.3010
+-0.6021 PINCH CYCLE 0.0000
+-0.3010 STOP </s> -0.3010
+
+\3-grams:
+-0.6021 <s> BALL </s>
+-0.6021 <s> BALL CYCLE
+-0.6021 <s> CUP </s>
+-0.6021 <s> CUP CYCLE
+-0.3010 <s> EMERGENCY </s>
+-0.6021 <s> FIST </s>
+-0.6021 <s> FIST CYCLE
+-0.6021 <s> FLAT </s>
+-0.6021 <s> FLAT CYCLE
+-0.6021 <s> HAMMER </s>
+-0.6021 <s> HAMMER CYCLE
+-0.6021 <s> PINCH </s>
+-0.6021 <s> PINCH CYCLE
+-0.3010 <s> STOP </s>
+-0.3010 BALL CYCLE </s>
+-0.3010 CUP CYCLE </s>
+-0.3010 FIST CYCLE </s>
+-0.3010 FLAT CYCLE </s>
+-0.3010 HAMMER CYCLE </s>
+-0.3010 PINCH CYCLE </s>
+
+\end\
