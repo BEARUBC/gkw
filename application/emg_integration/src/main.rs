@@ -1,8 +1,26 @@
 mod lib;
 use std::{time, thread, env};
 use std::time::{Duration, Instant};
+use std::fs::OpenOptions;
+use serde_derive::{Deserialize, Serialize};
+use std::io::{prelude::*, Seek, SeekFrom};
+
+
+#[derive(Deserialize, Serialize, Debug)]
+struct Data {
+    data: Vec<f32>,
+    timez: u128,
+}
 
 fn main(){
+    let mut file = OpenOptions::new()
+    .read(true)
+    .append(true)
+    .create(true)
+    .open("foo.txt")
+    .expect("cannot open file");
+  
+
     let start = Instant::now(); 
     println!("{:?}", env::current_dir());
     //let emg_integration = lib::EMG_INTEGRATION::new("C:/Users/Ray Ho/Documents/UBC BIONICS/gkw/application/emg_integration/python/test.py", 100);
@@ -18,7 +36,19 @@ fn main(){
             match x {
                 Err(e) => println!("{:?}", e),
                 Ok(x) => {
-                    println!("got data is: {:?}. Time is {}", x, start.elapsed().as_millis());
+                    let end = start.elapsed().as_millis();
+                    println!("got data is: {:?}. Time is {}", x, end);
+
+                    let d1 = Data{
+                    data: x,
+                    timez: start.elapsed().as_millis(),
+                    };
+                    
+                    std::fs::write(
+                        "foo.txt",
+                        serde_json::to_string_pretty(&d1).unwrap(),
+                    ).expect("Write failed");
+
                 }
             }
 
@@ -27,7 +57,18 @@ fn main(){
             match x {
                 Err(e) => println!("{:?}", e),
                 Ok(x) => {
-                    println!("got data is: {:?}. Time is {}", x, start.elapsed().as_millis());                }
+                    let end = start.elapsed().as_millis();
+                    println!("got data is: {:?}. Time is {}", x, end);
+
+                    let d2 = Data{
+                    data: x,
+                    timez: start.elapsed().as_millis(),
+                    };
+
+                    std::fs::write(
+                        "foo.txt",
+                        serde_json::to_string_pretty(&d2).unwrap(),
+                    ).expect("Write failed");              }
             }
 
             thread::sleep(ten_millis);
@@ -35,7 +76,18 @@ fn main(){
             match x {
                 Err(e) => println!("{:?}", e),
                 Ok(x) => {
-                    println!("got data is: {:?}. Time is {}", x, start.elapsed().as_millis());                }
+                    let end = start.elapsed().as_millis();
+                    println!("got data is: {:?}. Time is {}", x, end);
+
+                    let d3 = Data{
+                    data: x,
+                    timez: start.elapsed().as_millis(),
+                    };
+
+                    std::fs::write(
+                        "foo.txt",
+                        serde_json::to_string_pretty(&d3).unwrap(),
+                    ).expect("Write failed");         }
             }
         }
     }
