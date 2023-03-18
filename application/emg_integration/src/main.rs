@@ -1,7 +1,9 @@
 mod lib;
 use std::{time, thread, env};
+use std::time::{Duration, Instant};
 
 fn main(){
+    let start = Instant::now(); 
     println!("{:?}", env::current_dir());
     //let emg_integration = lib::EMG_INTEGRATION::new("C:/Users/Ray Ho/Documents/UBC BIONICS/gkw/application/emg_integration/python/test.py", 100);
     let emg_integration = lib::EMG_INTEGRATION::new("../python/emg_testing.py", 10);
@@ -16,7 +18,7 @@ fn main(){
             match x {
                 Err(e) => println!("{:?}", e),
                 Ok(x) => {
-                    println!("got data is: {:?}", x);
+                    println!("got data is: {:?}. Time is {}", x, start.elapsed().as_millis());
                 }
             }
 
@@ -25,8 +27,7 @@ fn main(){
             match x {
                 Err(e) => println!("{:?}", e),
                 Ok(x) => {
-                    println!("got data is: {:?}", x);
-                }
+                    println!("got data is: {:?}. Time is {}", x, start.elapsed().as_millis());                }
             }
 
             thread::sleep(ten_millis);
@@ -34,10 +35,10 @@ fn main(){
             match x {
                 Err(e) => println!("{:?}", e),
                 Ok(x) => {
-                    println!("got data is: {:?}", x);
-                }
+                    println!("got data is: {:?}. Time is {}", x, start.elapsed().as_millis());                }
             }
         }
     }
     println!("DONE");
+
 }
