@@ -3,7 +3,6 @@ use std::{time, thread, env};
 use std::time::{Duration, Instant};
 use std::fs::OpenOptions;
 use serde_derive::{Deserialize, Serialize};
-use std::io::{prelude::*, Seek, SeekFrom};
 
 
 #[derive(Deserialize, Serialize, Debug)]
@@ -13,12 +12,12 @@ struct Data {
 }
 
 fn main(){
-    let mut file = OpenOptions::new()
-    .read(true)
-    .append(true)
-    .create(true)
-    .open("foo.txt")
-    .expect("cannot open file");
+    // let mut file = OpenOptions::new()
+    // .read(true)
+    // .append(true)
+    // .create(true)
+    // .open("foo.txt")
+    // .expect("cannot open file");
   
 
     let start = Instant::now(); 
