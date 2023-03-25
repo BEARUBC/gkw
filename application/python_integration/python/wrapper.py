@@ -41,7 +41,6 @@ def main():
         else:
             J_obj=q.get()
             process=json.loads(J_obj)
-            eprint("AAAAAA ", process["params"], " AAAAAA", flush=True)
             response_packet = {
                 'request_id': process['request_id'],
                 'valid_bit': 1,

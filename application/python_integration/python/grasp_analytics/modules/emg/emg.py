@@ -36,15 +36,13 @@ class EMG(Module):
 
         new_data = data["emg_buffer"]
 
-        eprint(new_data)
-
         out_contractions = []
         time = 0
         for data_point in new_data:
             time += 1
             curr_contraction = self.next_value(data_point)
             out_contractions.append(curr_contraction)
-            self.influx_write(curr_contraction, time)
+            # self.influx_write(curr_contraction, time)
 
         return {"contractions": out_contractions}
 

@@ -167,8 +167,14 @@ mod tests {
     fn test_emg() {
         let mut python_process = Analytics::new("./python/wrapper.py").expect("Failed to start wrapper");
         let res = python_process
-            .make_request("m_emg".to_string(), Value::String("{\"emg_buffer\": [[[1]]]}".to_string())).expect("Failed to make request");
-        // assert_eq!(json!("HELLO"), res);
+            .make_request("m_emg".to_string(), Value::String("{\"emg_buffer\": [[[0]]]}".to_string())).expect("Failed to make request");
+        let data = r#"
+        {
+            "contractions": [0.0]
+        }"#;
+        // Parse the string of data into serde_json::Value.
+        let v: Value = serde_json::from_str(data).unwrap();
+        assert_eq!(v, res);
     }
 
     #[test]
