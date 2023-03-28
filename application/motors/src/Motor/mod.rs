@@ -17,7 +17,7 @@ pub struct Motor {
     //maestro: Maestro,
     targetPosition: Arc<Mutex<f64>>,
     increment: u16,
-    channels: [Channel; 3usize],
+    channels: [Channel; 1usize],
     runThread: JoinHandle<()>
 }
 
@@ -30,7 +30,8 @@ impl Motor {
             .try_into()
             .expect("Failed to build a `maestro` instance.");
         
-        let channels = [Channel::Channel0, Channel::Channel1, Channel::Channel2];
+        // let channels = [Channel::Channel0, Channel::Channel1, Channel::Channel2];
+        let channels = [Channel::Channel0];
 
         let targetArc: Arc<Mutex<f64>> = Arc::new(Mutex::new(0.5 as f64));
 
@@ -44,9 +45,10 @@ impl Motor {
                 runThread: thread::spawn(move || {
                     loop {
                         let grip: Grip = (*(targetClone.lock().unwrap())).into();
-                        let targets: [u16; 3usize] = grip.clone().into();
+                        // let targets: [u16; 3usize] = grip.clone().into();
+                        let targets: [u16; 1usize] = grip.clone().into();
 
-                        for i in 0..3 {
+                        for i in 0..1 { //0..3
                             let channel = channels[i];
                             let currentPosition = maestro.get_position(channel).unwrap();
                             let targetPosition = targets[i];
@@ -97,3 +99,6 @@ impl Motor {
     //     });
     // }
 }
+
+
+
