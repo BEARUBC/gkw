@@ -1,0 +1,8 @@
+visualisation script for sanity testing FSR
+
+to test the visualisation itself, run:
+python3 custodiet.py | python3 custodes.py
+
+May have to pip install/ apt get tk
+depends on platform (: https://stackoverflow.com/questions/25905540/importerror-no-module-named-tkinter
+it works on my machine (:
