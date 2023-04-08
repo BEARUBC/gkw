@@ -6,6 +6,7 @@ import sys
 import os
 from capitalize import Capitalize
 from add_ten import Add_Ten
+from roboclaw_example import this
 # from grasp_analytics.modules.emg import emg
 
 # from grasp_py.src.grasp_analytics.module import Module
@@ -43,7 +44,8 @@ def main():
     m_emg=init()
     capitalize=Capitalize()
     add_ten=Add_Ten()
-    print(m_emg)
+    motor_test = this()
+    # print(m_emg)
     # haptic_feedback=HapticFeedback()
 
     r_Thread = Thread(target=checkStdin, daemon=True)
