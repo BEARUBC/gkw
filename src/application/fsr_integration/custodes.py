@@ -36,13 +36,13 @@ def prop_to_hex(prop):
     return '#{:02x}{:02x}{:02x}'.format(int(x / r), int(x / g), int(x / b))
 
 
-def get_max(mat):
-    max = 0
-    for i in range(len(mat)):
-        for j in range(len(mat[0])):
-            if mat[i][j] > max:
-                max = mat[i][j]
-    return max
+# def get_max(mat):
+#     max = 0
+#     for i in range(len(mat)):
+#         for j in range(len(mat[0])):
+#             if mat[i][j] > max:
+#                 max = mat[i][j]
+#     return max
 
 
 for row in range(num_rows):
@@ -61,7 +61,6 @@ def update():
     mtext = sys.stdin.readline()
 
     mat = json.loads(mtext)
-    max = get_max(mat)
 
     if not init:
         init = True
@@ -69,7 +68,7 @@ def update():
 
     for row in range(len(mat)):
         for col in range(len(mat[0])):
-            val = mat[row][col] / max
+            val = mat[row][col] / 255
             if abs(val - last_mat[row][col]) > tolerance:
                 canvas.create_rectangle(row * width, col * height, row * width + width, col * height + height,
                                         fill=prop_to_hex(val))

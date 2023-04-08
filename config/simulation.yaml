@@ -1,7 +1,0 @@
-components:
-    emg:
-        host: "localhost"
-        port: 8080
-    bms:
-        host: "localhost"
-        port: 8081

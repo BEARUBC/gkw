@@ -1,8 +1,16 @@
-[workspace]
+[package]
+name = "main"
+version = "0.1.0"
+edition = "2021"
 
-members = [
-    "application/kernel",
-    "application/emg_integration",
-    "application/python_integration",
-    "application/messages"
-]
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+serde_json = "1.0.95"
+project-root = "0.2.2"
+emg_integration = { path = "src/application/emg_integration" }
+messages = { path = "src/application/messages" }
+motors = { path = "src/application/motors" }
+python_integration = { path = "src/application/python_integration" }
+
+
