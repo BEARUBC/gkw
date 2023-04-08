@@ -30,7 +30,7 @@ fn main() {
     // let emg_integration = emg_integration::Emg::new("python/data_to_stdout_txt.py", 10)
     //     .expect("Failed to start emg reader script");
      let mut roboclaw_test =
-            Analytics::new("python/wrapper.py", ".\python").expect("Failed to start wrapper");
+            Analytics::new("python/wrapper.py", "src/").expect("Failed to start wrapper");
         let rest = roboclaw_test
             .make_request(
                 "motor_test".to_string(),
@@ -38,7 +38,14 @@ fn main() {
             )
             .expect("Failed to make request");
 
-   
+            // let robo_opt = &rest.get("data").unwrap()[0].as_str();
+            //         let mut robo_val = "ERR";
+            //         match robo_opt {
+            //             Some(robo_opt_) => robo_val = *robo_opt_,
+            //             None => motor_safety(0),
+            //         }
+            
+                    println!("{}\n", rest.to_string());
 //    let mut python_process =
 //             Analytics::new("python/wrapper.py", "../../").expect("Failed to start wrapper");
 //         let res = python_process
@@ -107,7 +114,7 @@ fn main() {
 //         motor_controller.changeGrip(1.1);
 
 //         println!("DONE")
-    }
+    //}
 
     let ten_millis = time::Duration::from_millis(10);
 

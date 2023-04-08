@@ -846,7 +846,7 @@ class Roboclaw:
 		return (0,0,0)
 
 	def SpeedAccelM1M2_2(self,address,accel1,speed1,accel2,speed2):
-		return self._write4S44S4(address,self.Cmd.MIXEDSPEED2ACCEL,accel,speed1,accel2,speed2)
+		return self._write4S44S4(address,self.Cmd.MIXEDSPEED2ACCEL,accel1,speed1,accel2,speed2)
 
 	def SpeedAccelDistanceM1M2_2(self,address,accel1,speed1,distance1,accel2,speed2,distance2,buffer):
 		return self._write4S444S441(address,self.Cmd.MIXEDSPEED2ACCELDIST,accel1,speed1,distance1,accel2,speed2,distance2,buffer)
@@ -1073,5 +1073,6 @@ class Roboclaw:
 					break
 		return False	
 		
-def Open(self):
-    self._port = serial.Serial(port=self.comport, baudrate=self.rate, timeout=1, interCharTimeout=self.timeout)
+	def Open(self):
+		self._port = serial.Serial(port=self.comport, baudrate=self.rate, timeout=1, interCharTimeout=self.timeout)
+
