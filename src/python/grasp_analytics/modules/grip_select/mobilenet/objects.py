@@ -62,3 +62,6 @@ OBJECT_GRIP_MAP = {
     "toothbrush": GripType.POWER,
     "hair brush": GripType.POWER,
 }
+
+if __name__ == "__main__":
+    print(OBJECT_GRIP_MAP)
