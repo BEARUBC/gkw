@@ -19,7 +19,7 @@ mcp = MCP.MCP3008(spi, cs)
 # create an analog input channel on pin 0
 
 chan = AnalogIn(mcp, MCP.P0)
-f = open("matlab.txt", 'w')
+f = open("matlab2.txt", 'w')
 
 while True:
     print('Raw ADC Value: ', chan.value)
