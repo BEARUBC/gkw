@@ -27,8 +27,9 @@ fn set_grip_type(gripType: Grip) {
 }
 
 fn main() {
-    // let emg_integration = emg_integration::Emg::new("python/data_to_stdout_txt.py", 10)
-    //     .expect("Failed to start emg reader script");
+    let emg_integration = emg_integration::Emg::new("python/emg.py", 10).expect("Failed to start emg reader script");
+
+    let emg_integration = emg_integration::Emg::new("python/emg.py", 10).expect("Failed to start emg reader script");
 
     let mut python_process =
         Analytics::new("python/wrapper.py", "").expect("Failed to start wrapper");
@@ -36,13 +37,14 @@ fn main() {
     let mut motor_controller = motors::Motor::new(1).expect("Failed to create motor");
 
     for _n in 1..=4 {
-        // let emg_data = emg_integration.get_data_queue(EMG_DATA_LEN).unwrap();
-        // let emg_req_json = json!({ "emg_buffer": format!("{:?}", emg_data) });
+        let emg_data = emg_integration.get_data_queue(EMG_DATA_LEN).unwrap();
+        let emg_req_json = json!({ "emg_buffer": format!("{:?}", emg_data) });
+
 
         let emg_json = python_process
             .make_request(
                 "m_emg".to_string(),
-                Value::String("{\"emg_buffer\": [[[0,1]]]}".to_string()),
+                Value::String(emg_req_json.to_string()),
             )
             .expect("Failed to make request");
         let emg_opt = &emg_json.get("contractions").unwrap()[0].as_f64();
